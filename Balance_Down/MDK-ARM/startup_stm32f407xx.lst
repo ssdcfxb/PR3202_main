@@ -850,10 +850,12 @@ ARM Macro Assembler    Page 14
 
 
 m32f407xx.o -I..\Core\Inc -I.\RTE\_Balance_Down -ID:\AppData\Local\Arm\Packs\AR
-M\CMSIS\5.9.0\CMSIS\Core\Include -ID:\AppData\Local\Arm\Packs\Keil\STM32F4xx_DF
-P\2.16.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include --predefine="__UVISION_VERSI
-ON SETA 537" --predefine="_RTE_ SETA 1" --predefine="STM32F407xx SETA 1" --pred
-efine="_RTE_ SETA 1" --list=startup_stm32f407xx.lst startup_stm32f407xx.s
+M\CMSIS\5.9.0\CMSIS\Core\Include -ID:\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\C
+MSIS\DSP\Include -ID:\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\DSP\Private
+Include -ID:\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.16.0\Drivers\CMSIS\De
+vice\ST\STM32F4xx\Include --predefine="__UVISION_VERSION SETA 537" --predefine=
+"_RTE_ SETA 1" --predefine="STM32F407xx SETA 1" --predefine="_RTE_ SETA 1" --li
+st=startup_stm32f407xx.lst startup_stm32f407xx.s
 
 
 

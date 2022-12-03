@@ -22,12 +22,14 @@
 #include "can.h"
 #include "dma.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "driver.h"
+#include "device.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,7 +101,10 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_SPI2_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+	DEVICE_Init();
+	DRIVER_Init();
 
   /* USER CODE END 2 */
 
@@ -167,7 +172,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+uint8_t rev[12], rev1;
 /* USER CODE END 4 */
 
 /**
@@ -181,6 +186,29 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+	static uint16_t i = 0;
+	if (htim->Instance == TIM4)
+	{
+		//500us
+		if (i++ == 60000)
+		{
+			i = 0;
+		}
+		
+		uint8_t addr = 0x00 | 0x80;
+		
+		Get_IMU_Data();
+		
+		
+		BMI_CS_LOW();
+		HAL_SPI_Transmit(&hspi2, &addr,  1, 1000);
+		HAL_SPI_Transmit(&hspi2, &addr,  1, 1000);
+//		HAL_SPI_Receive(&hspi2, &rev1, 1, 1000);
+//		HAL_SPI_TransmitReceive_IT(&hspi2, &addr, &rev, 1);
+		HAL_SPI_Receive_IT(&hspi2, rev, 12);
+//		HAL_SPI_Receive_IT(&hspi2, &rev, 1);
+		BMI_CS_HIG();
+	}
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM2) {

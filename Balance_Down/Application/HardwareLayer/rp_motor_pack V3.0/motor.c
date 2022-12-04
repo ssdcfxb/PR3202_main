@@ -741,26 +741,26 @@ void get_kt_9025_info(struct motor_class_t *motor, uint8_t *rxBuf)
 		state_info->temperature = rxBuf[1];
 		state_info->current = rxBuf[3];
 		state_info->current <<= 8;
-		state_info->current = rxBuf[2];
+		state_info->current |= rxBuf[2];
 		base_info->speed = rxBuf[5];
 		base_info->speed <<= 8;
-		base_info->speed = rxBuf[4];
+		base_info->speed |= rxBuf[4];
 		state_info->encoder = rxBuf[7];
 		state_info->encoder <<= 8;
-		state_info->encoder = rxBuf[6];
+		state_info->encoder |= rxBuf[6];
 		break;
 		
 		case STATE3_ID:
 		state_info->temperature = rxBuf[1];
 		state_info->current_A = rxBuf[3];
 		state_info->current_A <<= 8;
-		state_info->current_A = rxBuf[2];
+		state_info->current_A |= rxBuf[2];
 		state_info->current_B = rxBuf[5];
 		state_info->current_B <<= 8;
-		state_info->current_B = rxBuf[4];
+		state_info->current_B |= rxBuf[4];
 		state_info->current_C = rxBuf[7];
 		state_info->current_C <<= 8;
-		state_info->current_C = rxBuf[6];
+		state_info->current_C |= rxBuf[6];
 		break;
 	}
 	

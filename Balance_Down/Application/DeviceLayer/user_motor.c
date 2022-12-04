@@ -9,8 +9,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "user_motor.h"
-
-
+#include "string.h"
+#include "drv_can.h"
+extern CAN_HandleTypeDef hcan1;
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -18,6 +19,8 @@
 /*
 * 使用电机前必须配置好电机的类型、id号、驱动方式
 */
+motor_9025_info_t motor_9025_info;
+
 motor_t motor[MOTOR_LIST] =
 {
 	[FRIC_R] = {
@@ -45,6 +48,18 @@ motor_t motor[MOTOR_LIST] =
 		
 		.init = motor_class_init,
 	},
+	
+	[LEG] = {
+		
+		.id.drive_type = M_CAN1,
+		.id.motor_type = KT9025,
+		.id.rx_id = 0x141,
+		.id.tx_id = 0x141,
+		
+		.kt9025_info = &motor_9025_info,
+		
+		.init = motor_class_init,
+	}
 };
 
 
@@ -85,5 +100,18 @@ void motor_all_init(void)
 	motor[DIAL].pid_init(&motor[DIAL].pid.position,dial_position_pid_param);
 	
 	
+	
 }
+
+void kt9025_send(motor_t *motor, uint8_t cmd)
+{
+	uint8_t data[8];
+	
+	memset(data, 0, 8);
+	data[0] = cmd;
+	
+	CAN_SendData(&hcan1,motor->id.tx_id,data);
+	
+}
+
 

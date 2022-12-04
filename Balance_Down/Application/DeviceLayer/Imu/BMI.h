@@ -1,12 +1,14 @@
 #ifndef __BMI_H
 #define __BMI_H
 
+/* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
 #include "bmi2.h"
 #include "bmi270.h"
 #include "common.h"
 #include "arm_math.h"
 
+/* Exported macro ------------------------------------------------------------*/
 #define ACCD_X_LSB 0x0c
 #define ACCD_X_MSB 0x0d
 #define ACCD_Y_LSB 0x0e
@@ -21,6 +23,7 @@
 #define GYR_Z_MSB 0x17
 
 
+/* Exported types ------------------------------------------------------------*/
 typedef struct bmi_struct {
 
 	struct bmi2_dev *dev;
@@ -34,16 +37,18 @@ typedef struct bmi_struct {
 
 } bmi_t;
 
+extern SPI_HandleTypeDef hspi2;
 
+
+/* Exported functions --------------------------------------------------------*/
 int8_t bmi_init(struct bmi2_dev *bmi2_dev,uint8_t intf);
-
 void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz);
 uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
                            float *pitch_,float *roll_,float *yaw_,\
 													 float *ggx,float *ggy,float *ggz,\
 													 float *aax,float *aay,float *aaz);
 													 
-extern SPI_HandleTypeDef hspi2;
+
 
 
 

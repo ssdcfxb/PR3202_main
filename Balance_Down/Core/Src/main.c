@@ -198,6 +198,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		imu_sensor.update(&imu_sensor);
 		t2 = micros();
 		tf = t2 - t1;
+		
+		kt9025_send(&motor[LEG], STATE2_ID);
+		
 	}
 
   /* USER CODE END Callback 0 */

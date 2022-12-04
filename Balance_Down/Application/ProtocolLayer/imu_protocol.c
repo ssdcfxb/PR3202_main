@@ -3,8 +3,6 @@
 
 #include "imu_protocol.h"
 
-//#include "BMI.h"
-
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -12,14 +10,15 @@
 ave_filter_t imu_pitch_dif_speed_ave_filter;
 ave_filter_t imu_roll_dif_speed_ave_filter;
 ave_filter_t imu_yaw_dif_speed_ave_filter;
-/* Exported variables --------------------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-/* Exported functions --------------------------------------------------------*/
+
 short gyrox, gyroy, gyroz;
 short accx, accy, accz;
 float gyrox_, gyroy_, gyroz_;
 float accx_, accy_, accz_;
 float pitch_, roll_, yaw_;
+/* Exported variables --------------------------------------------------------*/
+/* Private functions ---------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 void imu_update(imu_sensor_t *imu_sen)
 {
   imu_info_t *imu_info = imu_sen->info;

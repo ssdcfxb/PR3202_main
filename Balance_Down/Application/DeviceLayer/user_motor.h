@@ -20,6 +20,7 @@ typedef enum
 	FRIC_R = 0,
 	FRIC_L,
 	DIAL,
+	LEG,
 	
 	MOTOR_LIST,
 }motor_list_e;
@@ -28,7 +29,7 @@ extern motor_t motor[MOTOR_LIST];
 
 /* Exported functions --------------------------------------------------------*/
 void motor_all_init(void);
-
+void kt9025_send(motor_t *motor, uint8_t cmd);
 
 #endif
 

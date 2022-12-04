@@ -1,11 +1,17 @@
+/* Includes ------------------------------------------------------------------*/
 #include "imu_sensor.h"
 #include "drv_gpio.h"
 
+/* Private macro -------------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 void imu_init(imu_sensor_t *self);
 void imu_heart_beat(work_state_t *heart);
 extern void imu_update(imu_sensor_t *self);
-
+/* Private typedef -----------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
 struct bmi2_dev bmi270;
+
+uint8_t rs;
 
 bmi_t bmi_client = {
 
@@ -19,6 +25,7 @@ imu_info_t imu_info =
 	.init_flag = 0,
 };
 
+/* Exported variables --------------------------------------------------------*/
 imu_sensor_t imu_sensor = {
 
 	.bmi = &bmi_client,
@@ -33,8 +40,8 @@ imu_sensor_t imu_sensor = {
   .heart_beat = &imu_heart_beat,
 };
 
-uint8_t rs;
-
+/* Private functions ---------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 void imu_init(struct imu_struct *self)
 {
 	int8_t rslt;

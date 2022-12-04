@@ -1,10 +1,14 @@
 #ifndef __IMU_H
 #define __IMU_H
 
+/* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
 #include "BMI.h"
 #include "drv_tick.h"
 
+/* Exported constants --------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
 typedef enum {
 	IMU_NONE_ERR,
   IMU_TYPE_ERR,
@@ -12,7 +16,6 @@ typedef enum {
   IMU_INIT_ERR,
   IMU_DATA_ERR,
 } imu_err_e;
-
 
 typedef enum{
 	DR_SPI1,
@@ -30,7 +33,6 @@ typedef struct drive_str{
 	int8_t (*read)(struct drive_str *self, uint8_t *Rxbuff, uint16_t len);
 	int8_t (*sendread)(struct drive_str *self, uint8_t *Txbuff, uint8_t *Rxbuff, uint16_t len);
 }driver_t;
-
 
 typedef struct work_state_struct {
 	dev_work_state_t dev_state;
@@ -79,8 +81,6 @@ typedef struct imu_info_struct {
 
 } imu_info_t;
 
-
-
 typedef struct imu_struct {
 	
   bmi_t       *bmi;	
@@ -95,11 +95,13 @@ typedef struct imu_struct {
 	dev_id_t		   id;	
 } imu_sensor_t;
 
+extern imu_sensor_t imu_sensor;
+
+/* Exported functions --------------------------------------------------------*/
 void Get_IMU_Data(void);
 void TIM4_Init_Handle(uint16_t timeout);
 void BMI_DATA(void);
 
-extern imu_sensor_t imu_sensor;
 
 #endif
 

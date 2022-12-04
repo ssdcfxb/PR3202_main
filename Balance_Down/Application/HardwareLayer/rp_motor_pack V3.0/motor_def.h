@@ -33,6 +33,9 @@ typedef enum
 	MOTOR_CLOSE_ID						 = 0x81,
 	MOTOR_RUN_ID							 = 0x88,
 	
+	TORQUE_OL_ID               = 0xA0,
+	TORQUE_CL_ID               = 0xA1,
+	
 }motor_kt9025_command_t;
 
 

@@ -275,7 +275,7 @@ float gx_, gy_, gz_;
 float q0_, q1_, q2_, q3_;
 float q0temp_,q1temp_,q2temp_,q3temp_;
 float a_sum;
-float sintemp, sintemp_, tantemp, tantemp_;
+float sintemp, sintemp_, costemp, costemp_;
 /**
   * @brief  不带_的为涉及加速度计的，带_的为不涉及加速度计的，用于差分计算速度
   * @param  
@@ -361,8 +361,8 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 //	*pitch = -asin( 2 * q1 * q3 -2 * q0* q2)*57.295773f;
 //  asin(x) = atan(x/sqrt(1-x*x))
 	sintemp = 2 * q1 * q3 -2 * q0* q2;
-	arm_sqrt_f32(1 - sintemp * sintemp, &tantemp);
-	arm_atan2_f32(sintemp, tantemp, pitch);
+	arm_sqrt_f32(1 - sintemp * sintemp, &costemp);
+	arm_atan2_f32(sintemp, costemp, pitch);
 	*pitch *= -57.295773f;
 	
 //	*yaw =  atan2(2*(q1*q2 + q0*q3),q0*q0 +q1*q1-q2*q2 -q3*q3)*57.295773f;
@@ -394,8 +394,8 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 //	*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
 //  asin(x) = atan(x/sqrt(1-x*x))
 	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
-	arm_sqrt_f32(1 - sintemp_ * sintemp_, &tantemp_);
-	arm_atan2_f32(sintemp_, tantemp_, pitch_);
+	arm_sqrt_f32(1 - sintemp_ * sintemp_, &costemp_);
+	arm_atan2_f32(sintemp_, costemp_, pitch_);
 	*pitch_ *= -57.295773f;
 	
 //	*yaw_ =  atan2(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_)*57.295773f;

@@ -114,6 +114,8 @@ void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
 		case 0x203:
 			motor[DIAL].rx(&motor[DIAL],rxBuf,8);
 			break;
+		case 0x141:
+			motor[LEG].rx(&motor[LEG],rxBuf,8);
 	}
 
 }

@@ -88,11 +88,11 @@ typedef struct imu_info_struct {
 typedef struct imu_struct {
 	
   bmi_t       *bmi;	
-	imu_info_t	info;
+	imu_info_t	*info;
 	driver_t	  driver;
 	
 	void				(*init)(struct imu_struct *self);
-	void				(*update)(struct imu_struct *self, uint8_t *rxBuf);
+	void				(*update)(struct imu_struct *self);
 	void				(*heart_beat)(struct work_state_struct *self);
 	
 	work_state_t  work_state;

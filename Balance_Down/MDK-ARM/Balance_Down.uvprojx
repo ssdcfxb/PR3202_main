@@ -389,6 +389,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\AlgorithmLayer\rp_math.c</FilePath>
             </File>
+            <File>
+              <FileName>ave_filter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\AlgorithmLayer\ave_filter.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

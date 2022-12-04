@@ -1,6 +1,6 @@
 #include "BMI.h"
 
-
+#include "rp_math.h"
 
 /**\
  * Copyright (c) 2021 Bosch Sensortec GmbH. All rights reserved.
@@ -222,6 +222,37 @@ float inVSqrt(float x)
 	return y;
 }
 
+void MPU_Read_all(uint8_t reg,uint8_t *buff,uint8_t len)
+{
+	BMI_CS_LOW();
+	reg |= 0x80;
+	HAL_SPI_Transmit(&hspi2, &reg,  1, 1000);
+	HAL_SPI_Receive(&hspi2, buff, len+1, 1000);
+	BMI_CS_HIG();
+}
+
+void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz)
+{
+	uint8_t data[13];
+	int16_t buff[6];
+	MPU_Read_all(ACCD_X_LSB, data, 13);
+	
+	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
+	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);
+	buff[2] = (int16_t)data[5] | ( (int16_t)data[6] << 8);
+	
+	buff[3] = (int16_t)data[7] | ( (int16_t)data[8] << 8);
+	buff[4] = (int16_t)data[9] | ( (int16_t)data[10] << 8);
+	buff[5] = (int16_t)data[11] | ( (int16_t)data[12] << 8);
+	
+	*aax = buff[0];
+	*aay = buff[1];
+	*aaz = buff[2];
+	*ggx = buff[3];
+	*ggy = buff[4];
+	*ggz = buff[5];	
+}
+
 extern struct bmi2_dev bmi270;
 
 /**
@@ -235,7 +266,7 @@ extern struct bmi2_dev bmi270;
 */
 float Kp = 0.5f;//4
 float norm;
-float halfT = 0.0005f;
+float halfT = 0.00025f;
 float vx, vy, vz;
 float ex, ey, ez;
 float gx,gy,gz,ax,ay,az;
@@ -246,6 +277,7 @@ float gx_, gy_, gz_;
 float q0_, q1_, q2_, q3_;
 float q0temp_,q1temp_,q2temp_,q3temp_;
 float a_sum;
+float sintemp, sintemp_, tantemp, tantemp_;
 /**
   * @brief  不带_的为涉及加速度计的，带_的为不涉及加速度计的，用于差分计算速度
   * @param  
@@ -328,7 +360,11 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	arm_atan2_f32(2 * q2 * q3 + 2 * q0 * q1, q0 * q0 - q1 * q1 -  q2 * q2 + q3 * q3, roll);
 	*roll *= 57.295773f;
 	
-	*pitch = -asin( 2 * q1 * q3 -2 * q0* q2)*57.295773f;
+//	*pitch = -asin( 2 * q1 * q3 -2 * q0* q2)*57.295773f;
+	sintemp = 2 * q1 * q3 -2 * q0* q2;
+	arm_sqrt_f32(1 - sintemp * sintemp, &tantemp);
+	arm_atan2_f32(sintemp, tantemp, pitch);
+	*pitch *= -57.295773f;
 	
 //	*yaw =  atan2(2*(q1*q2 + q0*q3),q0*q0 +q1*q1-q2*q2 -q3*q3)*57.295773f;
 	arm_atan2_f32(2 * (q1*q2 + q0*q3), q0*q0 +q1*q1-q2*q2 -q3*q3, yaw);
@@ -356,11 +392,16 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	arm_atan2_f32(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_, roll_);
 	*roll_ *= 57.295773f;
 	
-	*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
+//	*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
+	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
+	arm_sqrt_f32(1 - sintemp_ * sintemp_, &tantemp_);
+	arm_atan2_f32(sintemp_, tantemp_, pitch_);
+	*pitch_ *= -57.295773f;
 	
 //	*yaw_ =  atan2(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_)*57.295773f;
 	arm_atan2_f32(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_, yaw_);
 	*yaw_  *= 57.295773f;
+	
 	/* 速度解算end */
 	
 	return 0;

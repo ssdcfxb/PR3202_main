@@ -172,7 +172,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-uint8_t rev[12], rev1;
+uint32_t t1, t2, tf;
 /* USER CODE END 4 */
 
 /**
@@ -194,20 +194,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			i = 0;
 		}
-		
-		uint8_t addr = 0x00 | 0x80;
-		
-		Get_IMU_Data();
-		
-		
-		BMI_CS_LOW();
-		HAL_SPI_Transmit(&hspi2, &addr,  1, 1000);
-		HAL_SPI_Transmit(&hspi2, &addr,  1, 1000);
-//		HAL_SPI_Receive(&hspi2, &rev1, 1, 1000);
-//		HAL_SPI_TransmitReceive_IT(&hspi2, &addr, &rev, 1);
-		HAL_SPI_Receive_IT(&hspi2, rev, 12);
-//		HAL_SPI_Receive_IT(&hspi2, &rev, 1);
-		BMI_CS_HIG();
+		t1 = micros();
+		imu_sensor.update(&imu_sensor);
+		t2 = micros();
+		tf = t2 - t1;
 	}
 
   /* USER CODE END Callback 0 */

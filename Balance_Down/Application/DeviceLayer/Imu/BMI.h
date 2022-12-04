@@ -7,7 +7,20 @@
 #include "common.h"
 #include "arm_math.h"
 
-//typedef BMI2_INTF_RETURN_TYPE (*bmi2_read_fptr_t)(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
+#define ACCD_X_LSB 0x0c
+#define ACCD_X_MSB 0x0d
+#define ACCD_Y_LSB 0x0e
+#define ACCD_Y_MSB 0x0f
+#define ACCD_Z_LSB 0x10
+#define ACCD_Z_MSB 0x11
+#define GYR_X_LSB 0x12
+#define GYR_X_MSB 0x13
+#define GYR_Y_LSB 0x14
+#define GYR_Y_MSB 0x15
+#define GYR_Z_LSB 0x16
+#define GYR_Z_MSB 0x17
+
+
 typedef struct bmi_struct {
 
 	struct bmi2_dev *dev;
@@ -24,8 +37,13 @@ typedef struct bmi_struct {
 
 int8_t bmi_init(struct bmi2_dev *bmi2_dev,uint8_t intf);
 
-
-
+void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz);
+uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
+                           float *pitch_,float *roll_,float *yaw_,\
+													 float *ggx,float *ggy,float *ggz,\
+													 float *aax,float *aay,float *aaz);
+													 
+extern SPI_HandleTypeDef hspi2;
 
 
 

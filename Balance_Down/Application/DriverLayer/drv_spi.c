@@ -1,8 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "drv_spi.h"
 
-extern SPI_HandleTypeDef hspi2;
-
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -18,9 +16,9 @@ void SPI2_Init(void)
 }
 
 
-extern uint8_t rev[12];
-void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-	SPI2_rxDataHandler(rev);
-}
+//extern uint8_t rev[12];
+//void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+//{
+//	SPI2_rxDataHandler(rev);
+//}
 

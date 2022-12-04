@@ -3,11 +3,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "imu_protocol.h"
 #include "imu_sensor.h"
 
 #include "main.h"
 /* Exported types ------------------------------------------------------------*/
+extern SPI_HandleTypeDef hspi2;
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/

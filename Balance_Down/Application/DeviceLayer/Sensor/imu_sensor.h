@@ -44,17 +44,13 @@ typedef struct work_state_struct {
 
 
 typedef struct{
-	float acc_x;
-	float acc_y;
-	float acc_z;
+	short acc_x;
+	short acc_y;
+	short acc_z;
 	
-	float gyro_x;
-	float gyro_y;
-	float gyro_z;	
-	
-//	float rate_yaw_offset;
-//	float rate_pitch_offset;	
-//	float rate_roll_offset;
+	short gyro_x;
+	short gyro_y;
+	short gyro_z;	
 
 }	raw_info_t;
 

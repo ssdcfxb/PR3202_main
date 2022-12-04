@@ -27,7 +27,12 @@ void imu_update(imu_sensor_t *imu_sen)
 	/* 获取陀螺仪数据 */
   BMI_Get_RawData(&gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
 	
-	
+	imu_info->raw_info.acc_x = accx;
+	imu_info->raw_info.acc_y = accy;
+	imu_info->raw_info.acc_z = accz;
+	imu_info->raw_info.gyro_x = gyrox;
+	imu_info->raw_info.gyro_y = gyroy;
+	imu_info->raw_info.gyro_z = gyroz;
 	
 	/* 原始数据低通滤波 */
 	gyrox_ = lowpass(gyrox_, gyrox, 0.3);

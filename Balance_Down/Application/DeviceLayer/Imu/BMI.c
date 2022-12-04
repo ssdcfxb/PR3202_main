@@ -1,7 +1,5 @@
 #include "BMI.h"
 
-#include "rp_math.h"
-
 /**\
  * Copyright (c) 2021 Bosch Sensortec GmbH. All rights reserved.
  *
@@ -361,6 +359,7 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	*roll *= 57.295773f;
 	
 //	*pitch = -asin( 2 * q1 * q3 -2 * q0* q2)*57.295773f;
+//  asin(x) = atan(x/sqrt(1-x*x))
 	sintemp = 2 * q1 * q3 -2 * q0* q2;
 	arm_sqrt_f32(1 - sintemp * sintemp, &tantemp);
 	arm_atan2_f32(sintemp, tantemp, pitch);
@@ -393,6 +392,7 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	*roll_ *= 57.295773f;
 	
 //	*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
+//  asin(x) = atan(x/sqrt(1-x*x))
 	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
 	arm_sqrt_f32(1 - sintemp_ * sintemp_, &tantemp_);
 	arm_atan2_f32(sintemp_, tantemp_, pitch_);

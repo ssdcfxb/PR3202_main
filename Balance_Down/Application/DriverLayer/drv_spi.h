@@ -11,7 +11,6 @@ extern SPI_HandleTypeDef hspi2;
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
-//void DRV_UART_IRQHandler(UART_HandleTypeDef *huart);
 void SPI2_Init(void);
 
 #endif

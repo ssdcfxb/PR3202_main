@@ -199,7 +199,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		t2 = micros();
 		tf = t2 - t1;
 		
-		kt9025_send(&motor[LEG], STATE2_ID);
+		kt9025_cmd_send(&motor[LEG_L], STATE2_ID);
 		
 	}
 

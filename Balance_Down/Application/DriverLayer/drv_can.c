@@ -105,17 +105,10 @@ void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
 {
 	switch(canId)
 	{
-		case 0x201:
-			motor[FRIC_R].rx(&motor[FRIC_R],rxBuf,8);
-			break;
-		case 0x202:
-			motor[FRIC_L].rx(&motor[FRIC_L],rxBuf,8);
-			break;
-		case 0x203:
-			motor[DIAL].rx(&motor[DIAL],rxBuf,8);
-			break;
 		case 0x141:
-			motor[LEG].rx(&motor[LEG],rxBuf,8);
+			motor[LEG_L].rx(&motor[LEG_L],rxBuf,8);
+		case 0x142:
+			motor[LEG_R].rx(&motor[LEG_R],rxBuf,8);
 	}
 
 }

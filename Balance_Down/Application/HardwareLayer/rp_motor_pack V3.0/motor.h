@@ -30,16 +30,16 @@ typedef struct motor_class_t
 	uint8_t (*rx)(struct motor_class_t *motor, uint8_t *buff,uint8_t len);
 	
 	/*以下为控制函数*/
-	float (*c_posit)(struct motor_class_t *motor,float target);
-	float (*c_angle)(struct motor_class_t *motor,float target);	
-	float (*c_speed)(struct motor_class_t *motor,float target);	
-	float (*c_pid2)(motor_pid_t *out, motor_pid_t *inn, float meas1, float meas2, float tar, char err_cal_mode);	
-	float (*c_pid1)(motor_pid_t *out, float meas1, float tar);	
+	float (*ctr_posit)(struct motor_class_t *motor,float target);
+	float (*ctr_angle)(struct motor_class_t *motor,float target);	
+	float (*ctr_speed)(struct motor_class_t *motor,float target);	
+	float (*ctr_pid2)(motor_pid_t *out, motor_pid_t *inn, float meas1, float meas2, float tar, char err_cal_mode);	
+	float (*ctr_pid1)(motor_pid_t *out, float meas1, float tar);	
 	
-	void  (*c_judge_dir)(struct motor_class_t *motor,uint16_t range);	
-  void  (*c_offset)(struct motor_class_t *motor, uint16_t range);	
+	void  (*ctr_judge_dir)(struct motor_class_t *motor,uint16_t range);	
+  void  (*ctr_offset)(struct motor_class_t *motor, uint16_t range);	
 	
-  uint8_t (*c_stuck_flag)(struct motor_class_t *motor, float torque_limit);	
+  uint8_t (*ctr_stuck_flag)(struct motor_class_t *motor, float torque_limit);	
 	
 }motor_t;
 

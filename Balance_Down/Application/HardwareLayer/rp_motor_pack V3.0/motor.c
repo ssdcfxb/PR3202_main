@@ -140,16 +140,16 @@ void motor_class_init(struct motor_class_t *motor)
 	motor->pid_init     = motor_class_pid_init;
 	motor->heartbeat    = motor_class_heartbeat;	
 	
-	motor->c_stuck_flag = motor_class_stucking_flag;
-	motor->c_offset     = motor_offset;
-	motor->c_judge_dir  = motor_judge_dir;
+	motor->ctr_stuck_flag = motor_class_stucking_flag;
+	motor->ctr_offset     = motor_offset;
+	motor->ctr_judge_dir  = motor_judge_dir;
 	
-	motor->c_speed = motor_pid_speed;
-	motor->c_angle = motor_pid_angle;
-	motor->c_posit = motor_pid_position;	
+	motor->ctr_speed = motor_pid_speed;
+	motor->ctr_angle = motor_pid_angle;
+	motor->ctr_posit = motor_pid_position;	
 	
-	motor->c_pid1 = motor_pid_single;
-	motor->c_pid2 = motor_pid_double;		
+	motor->ctr_pid1 = motor_pid_single;
+	motor->ctr_pid2 = motor_pid_double;		
 	
 	motor->state.init_flag = M_INIT;
 }

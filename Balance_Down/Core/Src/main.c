@@ -106,6 +106,7 @@ int main(void)
 	DRIVER_Init();
 	DEVICE_Init();
 	TIM4_Init();
+	CAN_Filter_Init();
 
   /* USER CODE END 2 */
 

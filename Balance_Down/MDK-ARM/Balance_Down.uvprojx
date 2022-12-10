@@ -10,7 +10,7 @@
       <TargetName>Balance_Down</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -540,24 +540,24 @@
           <GroupName>hardware</GroupName>
           <Files>
             <File>
-              <FileName>motor_def.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\motor_def.h</FilePath>
-            </File>
-            <File>
               <FileName>RM_motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\RM_motor.c</FilePath>
             </File>
             <File>
-              <FileName>RM_motor.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\RM_motor.h</FilePath>
-            </File>
-            <File>
               <FileName>KT_motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\KT_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor_def.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\motor_def.h</FilePath>
+            </File>
+            <File>
+              <FileName>RM_motor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\RM_motor.h</FilePath>
             </File>
             <File>
               <FileName>KT_motor.h</FileName>
@@ -907,5 +907,14 @@
     </components>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>Balance_Down</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

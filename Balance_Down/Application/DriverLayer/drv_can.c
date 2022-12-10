@@ -1,22 +1,9 @@
 #include "drv_can.h"
-#include "user_motor.h"
 
-extern CAN_HandleTypeDef hcan1;
-extern CAN_HandleTypeDef hcan2;
 
-uint8_t can1_tx_buf[16];
-uint8_t can2_tx_buf[16];
-can_rx_info_t CAN_RxInfo;
 void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 
-/*
-	接收数据帧定义 帧头+数据
-*/
-typedef struct {
-	CAN_RxHeaderTypeDef header;
-	uint8_t				data[8];
-} CAN_RxFrameTypeDef;
 
 /*
 	can1 can2实例
@@ -54,25 +41,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   }
 }
 
-/*
-	can使用8位发送，需要将16位转为8位
-*/
-void CAN1_Send_With_int16_to_uint8(uint32_t stdId, int16_t *dat)
-{
-	uint8_t data[8];
-	
-	data[0] = (uint8_t)((int16_t)dat[0] >> 8);
-	data[1] = (uint8_t)((int16_t)dat[0]);
-	data[2] = (uint8_t)((int16_t)dat[1] >> 8);
-	data[3] = (uint8_t)((int16_t)dat[1]);
-	data[4] = (uint8_t)((int16_t)dat[2] >> 8);
-	data[5] = (uint8_t)((int16_t)dat[2]);
-	data[6] = (uint8_t)((int16_t)dat[3] >> 8);
-	data[7] = (uint8_t)((int16_t)dat[3]);			
-	
-	CAN_SendData(&hcan1,stdId,data);
-	
-}
 
 
 HAL_StatusTypeDef CAN_SendData(CAN_HandleTypeDef *hcan, uint32_t stdId, uint8_t *dat)
@@ -98,26 +66,59 @@ HAL_StatusTypeDef CAN_SendData(CAN_HandleTypeDef *hcan, uint32_t stdId, uint8_t 
 	return HAL_OK;
 }
 
-
-
-//外部单独文件使用 用于can的总中断接收入口
-void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
+/*
+	can将大小为4的整型数组转变为大小为8的无符号数组
+*/
+void CAN1_Send_With_int16_to_uint8(uint32_t stdId, int16_t *dat)
 {
-	switch(canId)
-	{
-		case 0x141:
-			motor[LEG_L].rx(&motor[LEG_L],rxBuf,8);
-		case 0x142:
-			motor[LEG_R].rx(&motor[LEG_R],rxBuf,8);
-	}
-
+	uint8_t data[8];
+	
+	data[0] = (uint8_t)((int16_t)dat[0] >> 8);
+	data[1] = (uint8_t)((int16_t)dat[0]);
+	data[2] = (uint8_t)((int16_t)dat[1] >> 8);
+	data[3] = (uint8_t)((int16_t)dat[1]);
+	data[4] = (uint8_t)((int16_t)dat[2] >> 8);
+	data[5] = (uint8_t)((int16_t)dat[2]);
+	data[6] = (uint8_t)((int16_t)dat[3] >> 8);
+	data[7] = (uint8_t)((int16_t)dat[3]);			
+	
+	CAN_SendData(&hcan1,stdId,data);
+	
 }
 
-void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
+/*
+	can将大小为4的整型数组转变为大小为8的无符号数组
+*/
+void CAN2_Send_With_int16_to_uint8(uint32_t stdId, int16_t *dat)
 {
+	uint8_t data[8];
+	
+	data[0] = (uint8_t)((int16_t)dat[0] >> 8);
+	data[1] = (uint8_t)((int16_t)dat[0]);
+	data[2] = (uint8_t)((int16_t)dat[1] >> 8);
+	data[3] = (uint8_t)((int16_t)dat[1]);
+	data[4] = (uint8_t)((int16_t)dat[2] >> 8);
+	data[5] = (uint8_t)((int16_t)dat[2]);
+	data[6] = (uint8_t)((int16_t)dat[3] >> 8);
+	data[7] = (uint8_t)((int16_t)dat[3]);			
+	
+	CAN_SendData(&hcan2,stdId,data);
+	
+}
 
+/* rxData Handler [Weak] functions -------------------------------------------*/
+/**
+ *  @brief  [__WEAK] 需要在Protocol Layer中实现具体的 CAN1 处理协议
+ */
+__WEAK void CAN1_rxDataHandler(uint32_t rxId, uint8_t *rxBuf)
+{
+}
 
-
+/**
+ *  @brief  [__WEAK] 需要在Protocol Layer中实现具体的 CAN2 处理协议
+ */
+__WEAK void CAN2_rxDataHandler(uint32_t rxId, uint8_t *rxBuf)
+{
 }
 
 

@@ -120,8 +120,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+			
     /* USER CODE END WHILE */
-
+		
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -174,6 +175,7 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 uint32_t t1, t2, tf;
+
 /* USER CODE END 4 */
 
 /**
@@ -200,7 +202,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		t2 = micros();
 		tf = t2 - t1;
 		
-		kt9025_cmd_send(&motor[LEG_L], STATE2_ID);
+		
 		
 	}
 

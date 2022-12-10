@@ -10,7 +10,7 @@
       <TargetName>Balance_Down</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -394,6 +394,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\AlgorithmLayer\ave_filter.c</FilePath>
             </File>
+            <File>
+              <FileName>algo.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\AlgorithmLayer\algo.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -443,6 +448,23 @@
         </Group>
         <Group>
           <GroupName>module</GroupName>
+          <Files>
+            <File>
+              <FileName>chassic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ModuleLayer\chassic.c</FilePath>
+            </File>
+            <File>
+              <FileName>chassic.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\ModuleLayer\chassic.h</FilePath>
+            </File>
+            <File>
+              <FileName>module.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\ModuleLayer\module.h</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>protocol</GroupName>
@@ -456,6 +478,11 @@
               <FileName>imu_protocol.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ProtocolLayer\imu_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>can_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ProtocolLayer\can_protocol.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -513,14 +540,29 @@
           <GroupName>hardware</GroupName>
           <Files>
             <File>
-              <FileName>motor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\motor.c</FilePath>
+              <FileName>motor_def.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\motor_def.h</FilePath>
             </File>
             <File>
-              <FileName>motor.h</FileName>
+              <FileName>RM_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\RM_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>RM_motor.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\motor.h</FilePath>
+              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\RM_motor.h</FilePath>
+            </File>
+            <File>
+              <FileName>KT_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\KT_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>KT_motor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\HardwareLayer\rp_motor_pack V3.0\KT_motor.h</FilePath>
             </File>
           </Files>
         </Group>

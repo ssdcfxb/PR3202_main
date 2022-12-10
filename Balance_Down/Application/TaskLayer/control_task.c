@@ -4,6 +4,9 @@ void StartControlTask(void const * argument)
 {
   for(;;)
   {
+		//chassic.ctrl();
+		
+		chassic.stop();
 		
     osDelay(1);
   }

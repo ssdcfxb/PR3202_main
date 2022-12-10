@@ -102,9 +102,11 @@ int main(void)
   MX_USART3_UART_Init();
   MX_SPI2_Init();
   MX_TIM4_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 	DRIVER_Init();
 	DEVICE_Init();
+	CAN_Filter_Init();
 	TIM4_Init();
 
   /* USER CODE END 2 */

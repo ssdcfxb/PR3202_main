@@ -23,6 +23,6 @@ void DRIVER_Init(void)
 	USART3_Init();
 	USART4_Init();
 	USART5_Init();
-	CAN_Filter_Init();
 	SPI2_Init();
+	SPI1_Init();
 }

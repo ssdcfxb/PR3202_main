@@ -11,7 +11,7 @@
 #define __USER_MOTOR_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "motor.h"
+#include "KT_motor.h"
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
@@ -21,14 +21,16 @@ typedef enum
 	LEG_R,
 	
 	MOTOR_LIST,
-}motor_list_e;
+	
+}KT_motor_list_e;
 
-extern motor_t motor[MOTOR_LIST];
+extern KT_motor_t KT_motor[MOTOR_LIST];
 
-/* Exported functions --------------------------------------------------------*/
-void motor_all_init(void);
-void kt9025_cmd_send(motor_t *motor, uint8_t cmd);
-void kt9025_data_send(motor_t *motor, int16_t *dat);
+
+
+///* Exported functions --------------------------------------------------------*/
+void KT_motor_all_init(void);
+
 
 #endif
 

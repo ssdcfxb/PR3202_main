@@ -17,6 +17,13 @@
 
 /* Exported macro ------------------------------------------------------------*/
 #define ANGLE_TO_RAD 0.01745f
+
+typedef enum jugde_logical_e    //逻辑判断
+{
+	Flase = 0,
+	True  = 1,
+		
+}jugde_logical_e;
 /* Exported types ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 /* 位操作函数 */
@@ -27,6 +34,10 @@
 #define constrain(x, min, max)	((x>max)?max:(x<min?min:x))
 #define abs(x) 					((x)>0? (x):(-(x)))
 #define one(x)					((x)>0? (1):(-1))
+#define within_or_not(x, min, max)     (x>max)?Flase:((x<min)?Flase:True)  //在规定范围外返回0
+
+
+
 /* 斜坡函数 */
 int16_t RampInt(int16_t final, int16_t now, int16_t ramp);
 float RampFloat(float final, float now, float ramp);

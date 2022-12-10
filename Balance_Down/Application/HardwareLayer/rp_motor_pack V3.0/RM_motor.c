@@ -1,3 +1,4 @@
+#include "RM_motor.h"
 /*
 *	RP MOTOR_BAG
 *	2022.11.6 
@@ -9,7 +10,7 @@
 *kt系列电机：使用kt系列电机前需要先实例化motor_9025_info_t，再与motor内的指针联系，其余步骤无异
 */
 
-#include "motor.h"
+
 
 
 
@@ -17,7 +18,7 @@
 /**
  *	@brief	电机发送信息
  */
-uint8_t can_tx_buff(struct motor_class_t *motor, int16_t *buff,uint8_t len)
+uint8_t can_tx_buff(struct RM_motor_class_t *motor, int16_t *buff,uint8_t len)
 {
 	uint8_t res;
 	
@@ -32,7 +33,7 @@ uint8_t can_tx_buff(struct motor_class_t *motor, int16_t *buff,uint8_t len)
 /**
  *	@brief	电机接收信息
  */
-uint8_t can_rx_buff(struct motor_class_t *motor, uint8_t *buff,uint8_t len)
+uint8_t can_rx_buff(struct RM_motor_class_t *motor, uint8_t *buff,uint8_t len)
 {
 	uint8_t res;
 	
@@ -52,7 +53,7 @@ uint8_t can_rx_buff(struct motor_class_t *motor, uint8_t *buff,uint8_t len)
 	}
 	else if(motor->id.motor_type > 3 && motor->id.motor_type <= 5)
 	{
-		get_kt_9025_info(motor,buff);
+//		get_kt_9025_info(motor,buff);
 	}
 	
 	return res;
@@ -78,7 +79,7 @@ uint8_t can_rx_buff(struct motor_class_t *motor, uint8_t *buff,uint8_t len)
 /**
  *	@brief	电机pid初始化
  */
-void motor_class_pid_init(struct motor_pid *pid, float *buff)
+void motor_class_pid_init(struct RM_motor_pid_t *pid, float *buff)
 {
 	if(pid == NULL || buff == NULL)
 	{
@@ -110,17 +111,13 @@ void motor_class_pid_init(struct motor_pid *pid, float *buff)
 /**
  *	@brief	电机初始化
  */
-void motor_class_init(struct motor_class_t *motor)
+void motor_class_init(struct RM_motor_class_t *motor)
 {
 	if(motor == NULL)
 	{
 		return;
 	}
 
-	if(motor->id.motor_type == KT9025 && motor->kt9025_info == NULL)
-	{
-		return;
-	}
 	
 	motor->state.work_state = M_OFFLINE;
 	
@@ -157,7 +154,7 @@ void motor_class_init(struct motor_class_t *motor)
 /**
  *	@brief	电机心跳
  */
-void motor_class_heartbeat(struct motor_class_t *motor)
+void motor_class_heartbeat(struct RM_motor_class_t *motor)
 {
 	if(motor == NULL)
 	{
@@ -186,7 +183,7 @@ void motor_class_heartbeat(struct motor_class_t *motor)
 /**
 *	@brief	堵转判断：仅是必要条件，并不是一定堵住 torque_limit:扭矩阈值 return:1为是 0为否
  */
-uint8_t motor_class_stucking_flag(struct motor_class_t *motor, float torque_limit)
+uint8_t motor_class_stucking_flag(struct RM_motor_class_t *motor, float torque_limit)
 {
 	uint8_t res = 0;
 	
@@ -242,7 +239,7 @@ float motor_half_cycle(float angle,float max)
 /**
  *	@brief	计算电机方向  limit:电机数据范围
  */
-void motor_judge_dir(struct motor_class_t *motor,uint16_t range)
+void motor_judge_dir(struct RM_motor_class_t *motor,uint16_t range)
 {
 	int16_t angle = 0;
 	
@@ -264,9 +261,9 @@ void motor_judge_dir(struct motor_class_t *motor,uint16_t range)
  *	@brief	对电机角度做偏置 类如yaw轴电机朝向，原始朝前为1777，修改后朝前为0 
  *            limit:电机数据范围
  */
-void motor_offset(struct motor_class_t *motor, uint16_t range)
+void motor_offset(struct RM_motor_class_t *motor, uint16_t range)
 {
-	motor_rx_info_t *info = &motor->rx_info;
+	RM_motor_rx_info_t *info = &motor->rx_info;
 	
 	int16_t angle = 0;
 	
@@ -292,9 +289,9 @@ void motor_offset(struct motor_class_t *motor, uint16_t range)
 /**
  *	@brief	获取误差 tar - mea
  */
-float motor_pid_err(motor_pid_t *pid,float measure)
+float motor_pid_err(RM_motor_pid_t *pid,float measure)
 {
-	motor_pid_info_t *pid_info = &pid->info;
+	RM_motor_pid_info_t *pid_info = &pid->info;
 	
 	if(pid->info.init_flag == M_DEINIT)
 	{
@@ -310,7 +307,7 @@ float motor_pid_err(motor_pid_t *pid,float measure)
 /**
  *	@brief	pid计算 不包含err计算
  */
-float motor_pid_cal(motor_pid_t *pid)
+float motor_pid_cal(RM_motor_pid_t *pid)
 {
 	
 	if(pid->info.init_flag == M_DEINIT)
@@ -318,8 +315,8 @@ float motor_pid_cal(motor_pid_t *pid)
 		return 0;
 	}
 	
-	motor_pid_info_t *pid_info = &pid->info;
-	motor_pid_set_t  *pid_set = &pid->set;	
+	RM_motor_pid_info_t *pid_info = &pid->info;
+	RM_motor_pid_set_t  *pid_set = &pid->set;	
 	
 	//保存误差值(需要在外面自行计算误差)
 	//pid->err = err;
@@ -352,7 +349,7 @@ float motor_pid_cal(motor_pid_t *pid)
  *
  *  @return 返回计算结果
  */
-float motor_pid_ctrl(motor_pid_t *out, motor_pid_t *inn, float meas1, float meas2, char err_cal_mode)
+float motor_pid_ctrl(RM_motor_pid_t *out, RM_motor_pid_t *inn, float meas1, float meas2, char err_cal_mode)
 {
 	if(out == NULL)return 0;
 	
@@ -411,7 +408,7 @@ float motor_pid_ctrl(motor_pid_t *out, motor_pid_t *inn, float meas1, float meas
  *	@brief	双环pid控制 
  *  @return 返回计算结果
  */
-float motor_pid_double(motor_pid_t *out, motor_pid_t *inn, float meas1, float meas2, float tar, char err_cal_mode)
+float motor_pid_double(RM_motor_pid_t *out, RM_motor_pid_t *inn, float meas1, float meas2, float tar, char err_cal_mode)
 {
 
 	out->info.target = tar;
@@ -425,7 +422,7 @@ float motor_pid_double(motor_pid_t *out, motor_pid_t *inn, float meas1, float me
  *	@brief	单pid控制 
  *  @return 返回计算结果
  */
-float motor_pid_single(motor_pid_t *out, float meas1, float tar)
+float motor_pid_single(RM_motor_pid_t *out, float meas1, float tar)
 {
 
 	out->info.target = tar;
@@ -438,7 +435,7 @@ float motor_pid_single(motor_pid_t *out, float meas1, float tar)
  *	@brief	位置pid控制 
  *  @return 返回计算结果
  */
-float motor_pid_position(struct motor_class_t *motor,float target)
+float motor_pid_position(struct RM_motor_class_t *motor,float target)
 {
 	
 	if(motor->state.init_flag == M_DEINIT)
@@ -464,7 +461,7 @@ float motor_pid_position(struct motor_class_t *motor,float target)
  *	@brief	角度pid控制 
  *  @return 返回计算结果
  */
-float motor_pid_angle(struct motor_class_t *motor,float target)
+float motor_pid_angle(struct RM_motor_class_t *motor,float target)
 {
 	
 	if(motor->state.init_flag == M_DEINIT)
@@ -489,7 +486,7 @@ float motor_pid_angle(struct motor_class_t *motor,float target)
  *	@brief	速度pid控制 
  *  @return 返回计算结果
  */
-float motor_pid_speed(struct motor_class_t *motor,float target)
+float motor_pid_speed(struct RM_motor_class_t *motor,float target)
 {
 	
 	if(motor->state.init_flag == M_DEINIT)
@@ -571,7 +568,7 @@ static uint8_t CAN_GetMotorTemperature(uint8_t *rxData)
  *	@brief	大疆电机can驱动信息
  *  @return 
  */
-void get_rm_can_drvie(struct motor_class_t *motor)
+void get_rm_can_drvie(struct RM_motor_class_t *motor)
 {
 	if(motor == NULL)
 	{
@@ -615,11 +612,11 @@ void get_rm_can_drvie(struct motor_class_t *motor)
  *	@brief	can接收信息处理
  *  @return
  */
-void get_rm_info(struct motor_class_t *motor, uint8_t *rxBuf)
+void get_rm_info(struct RM_motor_class_t *motor, uint8_t *rxBuf)
 {
 	int16_t err;
 
-	motor_rx_info_t *motor_info = &motor->rx_info;
+	RM_motor_rx_info_t *motor_info = &motor->rx_info;
 	
 	motor_info->angle   = CAN_GetMotorAngle(rxBuf);	
 	motor_info->speed   = CAN_GetMotorSpeed(rxBuf);
@@ -652,118 +649,3 @@ void get_rm_info(struct motor_class_t *motor, uint8_t *rxBuf)
 	
 	motor->state.offline_cnt = 0;
 }
-
-/*-----------------------------------------------------------------
-*KT电机接收
------------------------------------------------------------------*/
-
-/**
- *	@brief	can接收信息处理
- *  @return
- */
-void get_kt_9025_info(struct motor_class_t *motor, uint8_t *rxBuf)
-{
-	uint8_t ID = rxBuf[0];
-	
-	motor_9025_info_t *base_info = motor->kt9025_info;
-	motor_9025_state_info_t *state_info = &motor->kt9025_info->state_info;
-	motor_9025_pid_rx_info_t *pid_rx_info = &motor->kt9025_info->pid_info.rx;
-	
-	switch (ID)
-	{
-		case PID_RX_ID:
-		pid_rx_info->angleKp = rxBuf[2];
-		pid_rx_info->angleKi = rxBuf[3];
-		pid_rx_info->speedKp = rxBuf[4];
-		pid_rx_info->speedKi = rxBuf[5];
-		pid_rx_info->iqKp	   = rxBuf[6];
-		pid_rx_info->iqKi	   = rxBuf[7];
-		break;
-		
-		case ACCEL_RX_ID:
-		base_info->accel  = rxBuf[7];
-		base_info->accel <<= 8;
-		base_info->accel |= rxBuf[6];
-		base_info->accel <<= 8;
-		base_info->accel |= rxBuf[5];
-		base_info->accel <<= 8;
-		base_info->accel |= rxBuf[4];
-		base_info->accel <<= 8;
-		break;
-		
-		case ENCODER_RX_ID:
-		state_info->encoder = rxBuf[3];
-		state_info->encoder <<= 8;
-		state_info->encoder |= rxBuf[2];
-		state_info->encoderRaw = rxBuf[5];
-		state_info->encoderRaw <<= 8;
-		state_info->encoderRaw |= rxBuf[4];
-		state_info->encoderOffset = rxBuf[7];
-		state_info->encoderOffset <<= 8;
-		state_info->encoderOffset |= rxBuf[6];
-		break;
-		
-		case MOTOR_ANGLE_ID:
-		base_info->motorAngle  = rxBuf[7];
-		base_info->motorAngle <<= 8;
-		base_info->motorAngle |= rxBuf[6];
-		base_info->motorAngle <<= 8;
-		base_info->motorAngle |= rxBuf[5];
-		base_info->motorAngle <<= 8;
-		base_info->motorAngle |= rxBuf[4];
-		base_info->motorAngle <<= 8;
-		base_info->motorAngle |= rxBuf[3];
-		base_info->motorAngle <<= 8;
-		base_info->motorAngle |= rxBuf[2];
-		base_info->motorAngle <<= 8;
-		base_info->motorAngle |= rxBuf[1];
-		break;
-		
-		case CIRCLE_ANGLE_ID:
-		base_info->circleAngle  = rxBuf[7];
-		base_info->circleAngle <<= 8;
-		base_info->circleAngle |= rxBuf[6];
-		base_info->circleAngle <<= 8;
-		base_info->circleAngle |= rxBuf[5];
-		base_info->circleAngle <<= 8;
-		base_info->circleAngle |= rxBuf[4];
-		break;
-		
-		case STATE1_ID:
-		state_info->temperature = rxBuf[1]; 
-		state_info->voltage = rxBuf[4];
-		state_info->voltage <<= 8;
-		state_info->voltage |= rxBuf[3];
-		state_info->errorState = rxBuf[7];
-		break;
-		
-		case STATE2_ID:
-		state_info->temperature = rxBuf[1];
-		state_info->current = rxBuf[3];
-		state_info->current <<= 8;
-		state_info->current |= rxBuf[2];
-		base_info->speed = rxBuf[5];
-		base_info->speed <<= 8;
-		base_info->speed |= rxBuf[4];
-		state_info->encoder = rxBuf[7];
-		state_info->encoder <<= 8;
-		state_info->encoder |= rxBuf[6];
-		break;
-		
-		case STATE3_ID:
-		state_info->temperature = rxBuf[1];
-		state_info->current_A = rxBuf[3];
-		state_info->current_A <<= 8;
-		state_info->current_A |= rxBuf[2];
-		state_info->current_B = rxBuf[5];
-		state_info->current_B <<= 8;
-		state_info->current_B |= rxBuf[4];
-		state_info->current_C = rxBuf[7];
-		state_info->current_C <<= 8;
-		state_info->current_C |= rxBuf[6];
-		break;
-	}
-	
-	motor->state.offline_cnt = 0;
-}
-

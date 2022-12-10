@@ -11,7 +11,7 @@ extern void imu_update(imu_sensor_t *self);
 /* Private variables ---------------------------------------------------------*/
 struct bmi2_dev bmi270;
 
-uint8_t rs;
+int8_t rs;
 
 bmi_t bmi_client = {
 

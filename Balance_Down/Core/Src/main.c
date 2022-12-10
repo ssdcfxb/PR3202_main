@@ -103,8 +103,9 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-	DEVICE_Init();
 	DRIVER_Init();
+	DEVICE_Init();
+	TIM4_Init();
 
   /* USER CODE END 2 */
 

@@ -25,5 +25,4 @@ void DRIVER_Init(void)
 	USART5_Init();
 	CAN_Filter_Init();
 	SPI2_Init();
-	TIM4_Init();
 }

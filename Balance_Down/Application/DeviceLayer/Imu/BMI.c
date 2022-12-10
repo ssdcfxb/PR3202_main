@@ -262,7 +262,7 @@ extern struct bmi2_dev bmi270;
     @halfT
         解算周期的一半，比如1ms解算1次则halfT为0.0005f
 */
-float Kp = 0.5f;//4
+float Kp = -3.5f;//4
 float norm;
 float halfT = 0.00025f;
 float vx, vy, vz;

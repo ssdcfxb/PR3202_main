@@ -30,7 +30,7 @@ imu_sensor_t imu_sensor = {
 
 	.bmi = &bmi_client,
 	.info = &imu_info,
-	.driver.tpye = DR_SPI2,
+	.driver.tpye = DR_SPI1,
 	.work_state.dev_state = DEV_OFFLINE,
 	.id = DEV_ID_IMU,	
 	.work_state.offline_max_cnt = 50,	
@@ -55,6 +55,14 @@ void imu_init(struct imu_struct *self)
 	if(self->driver.tpye == DR_SPI1 || self->driver.tpye == DR_SPI2 || self->driver.tpye == DR_SPI3){
 
 		self->bmi->drive_type = BMI2_SPI_INTF;
+		if(self->driver.tpye == DR_SPI2)
+		{
+			self->bmi->device_aces = BMI2_INT_ACES;
+		}
+		else if(self->driver.tpye == DR_SPI1)
+		{
+			self->bmi->device_aces = BMI2_EXT_ACES;
+		}
 
 	}
 	else if(self->driver.tpye == DRV_IIC){
@@ -63,13 +71,13 @@ void imu_init(struct imu_struct *self)
 		
 	}
 	
-	rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type);
+	rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
 	rs = rslt;
 
 	while(rslt)
 	{
         self->work_state.err_code = IMU_INIT_ERR;
-        rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type);
+        rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
 		rs = rslt;
 	}	
 

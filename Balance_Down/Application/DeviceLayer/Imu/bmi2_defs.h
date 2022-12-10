@@ -1413,6 +1413,12 @@ enum bmi2_intf {
     BMI2_I3C_INTF
 };
 
+/*!  @name Enum to define BMI2 sensor accesses */
+enum bmi2_aces {
+    BMI2_INT_ACES = 0,
+    BMI2_EXT_ACES,
+};
+
 /*!  @name Enum to define BMI2 sensor configuration errors for accelerometer
  *   and gyroscope
  */

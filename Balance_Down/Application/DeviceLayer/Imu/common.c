@@ -209,7 +209,7 @@ BMI2_INTF_RETURN_TYPE ex_bmi2_spi_write(uint8_t reg_addr, const uint8_t *reg_dat
  *  @brief Function to select the interface between SPI and I2C.
  *  Also to initialize coines platform
  */
-int8_t bmi2_interface_init(struct bmi2_dev *bmi, uint8_t intf)
+int8_t bmi2_interface_init(struct bmi2_dev *bmi, uint8_t intf, uint8_t aces)
 {
     int8_t rslt = BMI2_OK;
 
@@ -238,8 +238,16 @@ int8_t bmi2_interface_init(struct bmi2_dev *bmi, uint8_t intf)
 
             /* To initialize the user SPI function */
             bmi->intf = BMI2_SPI_INTF;
-            bmi->read = bmi2_spi_read;
-            bmi->write = bmi2_spi_write;
+						if (aces == BMI2_INT_ACES)
+						{
+							bmi->read = bmi2_spi_read;
+							bmi->write = bmi2_spi_write;
+						}
+						else if (aces == BMI2_EXT_ACES)
+						{
+							bmi->read = ex_bmi2_spi_read;
+							bmi->write = ex_bmi2_spi_write;
+						}
         }
 
         /* Assign device address to interface pointer */

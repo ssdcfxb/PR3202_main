@@ -128,12 +128,13 @@ void bmi2_delay_us(uint32_t period, void *intf_ptr);
  *
  *  @param[in] bma  : Structure instance of bmi2_dev
  *  @param[in] intf : Interface selection parameter
+ *  @param[in] aces : Accesses selection parameter
  *
  *  @return Status of execution
  *  @retval 0 -> Success
  *  @retval < 0 -> Failure Info
  */
-int8_t bmi2_interface_init(struct bmi2_dev *bma, uint8_t intf);
+int8_t bmi2_interface_init(struct bmi2_dev *bma, uint8_t intf, uint8_t aces);
 
 /*!
  *  @brief Prints the execution status of the APIs.

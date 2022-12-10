@@ -62,7 +62,7 @@ void KT_motor_class_init(KT_motor_t *motor)
 	motor->KT_motor_info.state_info.offline_cnt_max   = OFFLINE_LINE_CNT_MAX;		
 	motor->KT_motor_info.state_info.offline_cnt       = 0;
 	motor->KT_motor_info.state_info.work_state        = M_OFFLINE;	
-	motor->KT_motor_info.state_info.selfprotect_flag  = Flase;
+	motor->KT_motor_info.state_info.selfprotect_flag  = M_PROTECT_OFF;
 	
 	motor->heartbeat  = KT_motor_class_heartbeat;
 	motor->pid_init   = kt_motor_class_pid_init;
@@ -667,18 +667,6 @@ void get_kt_motor_info(KT_motor_t *motor, uint8_t *rxBuf)
 			break;
 	}
 
-	/*获取错误标志位的第0位和第3位*/
-	char errorState_ZERO_bit, errorState_THREE_bit = 0;
-	
-	errorState_ZERO_bit  = rx_info->errorState & 0x00;
-	errorState_THREE_bit =  rx_info->errorState & 0x08;
-	
-	
-	if( errorState_ZERO_bit == 0 && errorState_THREE_bit == 0 ){
-		state_info->selfprotect_flag = Flase;
-	}
-	else
-		state_info->selfprotect_flag = True;
 	
 }
 

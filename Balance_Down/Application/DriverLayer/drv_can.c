@@ -66,7 +66,45 @@ HAL_StatusTypeDef CAN_SendData(CAN_HandleTypeDef *hcan, uint32_t stdId, uint8_t 
 	return HAL_OK;
 }
 
+/*
+	can将大小为4的整型数组转变为大小为8的无符号数组
+*/
+void CAN1_Send_With_int16_to_uint8(uint32_t stdId, int16_t *dat)
+{
+	uint8_t data[8];
+	
+	data[0] = (uint8_t)((int16_t)dat[0] >> 8);
+	data[1] = (uint8_t)((int16_t)dat[0]);
+	data[2] = (uint8_t)((int16_t)dat[1] >> 8);
+	data[3] = (uint8_t)((int16_t)dat[1]);
+	data[4] = (uint8_t)((int16_t)dat[2] >> 8);
+	data[5] = (uint8_t)((int16_t)dat[2]);
+	data[6] = (uint8_t)((int16_t)dat[3] >> 8);
+	data[7] = (uint8_t)((int16_t)dat[3]);			
+	
+	CAN_SendData(&hcan1,stdId,data);
+	
+}
 
+/*
+	can将大小为4的整型数组转变为大小为8的无符号数组
+*/
+void CAN2_Send_With_int16_to_uint8(uint32_t stdId, int16_t *dat)
+{
+	uint8_t data[8];
+	
+	data[0] = (uint8_t)((int16_t)dat[0] >> 8);
+	data[1] = (uint8_t)((int16_t)dat[0]);
+	data[2] = (uint8_t)((int16_t)dat[1] >> 8);
+	data[3] = (uint8_t)((int16_t)dat[1]);
+	data[4] = (uint8_t)((int16_t)dat[2] >> 8);
+	data[5] = (uint8_t)((int16_t)dat[2]);
+	data[6] = (uint8_t)((int16_t)dat[3] >> 8);
+	data[7] = (uint8_t)((int16_t)dat[3]);			
+	
+	CAN_SendData(&hcan2,stdId,data);
+	
+}
 
 /* rxData Handler [Weak] functions -------------------------------------------*/
 /**

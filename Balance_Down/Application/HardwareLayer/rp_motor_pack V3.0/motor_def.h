@@ -163,6 +163,14 @@ typedef enum motor_state_e
 	
 }motor_state_e;
 
+typedef enum motor_protect_e
+{
+	
+	M_PROTECT_ON = 0,
+	M_PROTECT_OFF ,	
+	
+}motor_protect_e;
+
 typedef enum motor_init_e
 {
 
@@ -465,7 +473,7 @@ typedef struct KT_motor_state_info_t
 
 	motor_state_e    work_state;	
 	
-	char             selfprotect_flag;
+	motor_protect_e  selfprotect_flag;
 }KT_motor_state_info_t;
 
 typedef struct KT_motor_info_t

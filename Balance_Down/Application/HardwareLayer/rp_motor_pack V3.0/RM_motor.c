@@ -11,102 +11,25 @@
 */
 
 
+/* Exported variables --------------------------------------------------------*/
+void motor_class_init(struct RM_motor_class_t *motor);
+void motor_class_heartbeat(struct RM_motor_class_t *motor);
+void motor_class_pid_init(struct RM_motor_pid_t *pid, float *buff);
+void can_tx_buff(struct RM_motor_class_t *motor, int16_t *buff,uint8_t len);
+void can_rx_buff(struct RM_motor_class_t *motor, uint8_t *buff);
+float motor_pid_single(RM_motor_pid_t *out, float meas1, float tar);
+float motor_pid_angle(struct RM_motor_class_t *motor,float target);
+float motor_pid_speed(struct RM_motor_class_t *motor,float target);
+float motor_pid_double(RM_motor_pid_t *out, RM_motor_pid_t *inn, float meas1, float meas2, float tar, char err_cal_mode);
+float motor_pid_single(RM_motor_pid_t *out, float meas1, float tar);
+void  motor_judge_dir(struct RM_motor_class_t *motor,uint16_t range);
+void  motor_offset(struct RM_motor_class_t *motor, uint16_t range);
+uint8_t motor_class_stucking_flag(struct RM_motor_class_t *motor, float torque_limit);
+/* Private functions ---------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 
 
 
-
-/**
- *	@brief	电机发送信息
- */
-uint8_t can_tx_buff(struct RM_motor_class_t *motor, int16_t *buff,uint8_t len)
-{
-	uint8_t res;
-	
-	if(motor->id.motor_type > 0 && motor->id.motor_type <= 3)
-	{
-		
-	}
-	
-	return res;
-}
-
-/**
- *	@brief	电机接收信息
- */
-uint8_t can_rx_buff(struct RM_motor_class_t *motor, uint8_t *buff,uint8_t len)
-{
-	uint8_t res;
-	
-	if(motor == NULL || buff == NULL)
-	{
-		return 0;
-	}
-	
-	if(motor->state.init_flag == M_DEINIT)
-	{
-		return 0;	
-	}
-	
-	if(motor->id.motor_type > 0 && motor->id.motor_type <= 3)
-	{
-		get_rm_info(motor,buff);
-	}
-	else if(motor->id.motor_type > 3 && motor->id.motor_type <= 5)
-	{
-//		get_kt_9025_info(motor,buff);
-	}
-	
-	return res;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- *	@brief	电机pid初始化
- */
-void motor_class_pid_init(struct RM_motor_pid_t *pid, float *buff)
-{
-	if(pid == NULL || buff == NULL)
-	{
-		return;
-	}
-	
-	pid->info.target   = 0;
-	pid->info.measure  = 0;	
-	pid->info.err      = 0;	
-	pid->info.last_err = 0;
-	pid->info.integral = 0;
-	pid->info.pout     = 0;
-	pid->info.iout     = 0;
-	pid->info.dout     = 0;	
-	pid->info.out      = 0;		
-	
-	pid->set.kp           = buff[0];
-	pid->set.ki           = buff[1];	
-	pid->set.kd           = buff[2];
-	pid->set.blind_err    = buff[3];
-	pid->set.integral_max = buff[4];
-	pid->set.iout_max     = buff[5];	
-	pid->set.out_max      = buff[6];
-	
-	pid->info.init_flag = M_INIT;
-	
-}	
 
 /**
  *	@brief	电机初始化
@@ -118,11 +41,11 @@ void motor_class_init(struct RM_motor_class_t *motor)
 		return;
 	}
 
-	
+	motor->state.init_flag = M_INIT;	
 	motor->state.work_state = M_OFFLINE;
-	
+
 	motor->state.offline_cnt = 0;
-	motor->state.offline_cnt_max = 100;	
+	motor->state.offline_cnt_max = OFFLINE_LINE_CNT_MAX;	
 	
 
 	if(motor->id.drive_type == M_CAN1 || motor->id.drive_type == M_CAN2)
@@ -134,21 +57,24 @@ void motor_class_init(struct RM_motor_class_t *motor)
 
 	}	
 	
-	motor->pid_init     = motor_class_pid_init;
 	motor->heartbeat    = motor_class_heartbeat;	
+	motor->pid_init     = motor_class_pid_init;
+	
+	
+	motor->tx           = can_tx_buff;
+	motor->rx           = can_rx_buff;
+	
+	motor->ctr_posit    = motor_pid_position;	
+	motor->ctr_angle    = motor_pid_angle;
+	motor->ctr_speed    = motor_pid_speed;
+	motor->ctr_pid2     = motor_pid_double;		
+	motor->ctr_pid1     = motor_pid_single;
+	
+	motor->ctr_judge_dir  = motor_judge_dir;
+	motor->ctr_offset     = motor_offset;
 	
 	motor->ctr_stuck_flag = motor_class_stucking_flag;
-	motor->ctr_offset     = motor_offset;
-	motor->ctr_judge_dir  = motor_judge_dir;
 	
-	motor->ctr_speed = motor_pid_speed;
-	motor->ctr_angle = motor_pid_angle;
-	motor->ctr_posit = motor_pid_position;	
-	
-	motor->ctr_pid1 = motor_pid_single;
-	motor->ctr_pid2 = motor_pid_double;		
-	
-	motor->state.init_flag = M_INIT;
 }
 
 /**
@@ -179,6 +105,99 @@ void motor_class_heartbeat(struct RM_motor_class_t *motor)
 			motor->state.work_state = M_ONLINE;
 	}
 }
+
+/**
+ *	@brief	电机pid初始化
+ */
+void motor_class_pid_init(struct RM_motor_pid_t *pid, float *buff)
+{
+	if(pid == NULL || buff == NULL)
+	{
+		return;
+	}
+	
+	pid->info.init_flag = M_INIT;
+	
+	pid->info.target   = 0;
+	pid->info.measure  = 0;	
+	pid->info.err      = 0;	
+	pid->info.last_err = 0;
+	pid->info.integral = 0;
+	pid->info.pout     = 0;
+	pid->info.iout     = 0;
+	pid->info.dout     = 0;	
+	pid->info.out      = 0;		
+	
+	pid->set.kp           = buff[0];
+	pid->set.ki           = buff[1];	
+	pid->set.kd           = buff[2];
+	pid->set.blind_err    = buff[3];
+	pid->set.integral_max = buff[4];
+	pid->set.iout_max     = buff[5];	
+	pid->set.out_max      = buff[6];
+	
+}	
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ *	@brief	电机发送信息
+ */
+void can_tx_buff(struct RM_motor_class_t *motor, int16_t *buff,uint8_t len)
+{
+	if(motor == NULL || buff == NULL)
+	{
+		return;
+	}
+	
+	if(motor->id.motor_type > 0 && motor->id.motor_type <= 3)
+	{
+		
+	}
+	
+	
+}
+
+/**
+ *	@brief	电机接收信息
+ */
+void can_rx_buff(struct RM_motor_class_t *motor, uint8_t *buff)
+{
+	
+	
+	if(motor == NULL || buff == NULL)
+	{
+		return;
+	}
+	
+	if(motor->state.init_flag == M_DEINIT)
+	{
+		return;	
+	}
+	
+	if(motor->id.motor_type > 0 && motor->id.motor_type <= 3)
+	{
+		get_rm_info(motor,buff);
+	}
+	else if(motor->id.motor_type > 3 && motor->id.motor_type <= 5)
+	{
+//		get_kt_9025_info(motor,buff);
+	}
+	
+}
+
+
+
+
 
 /**
 *	@brief	堵转判断：仅是必要条件，并不是一定堵住 torque_limit:扭矩阈值 return:1为是 0为否

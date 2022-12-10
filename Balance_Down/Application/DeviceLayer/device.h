@@ -15,7 +15,8 @@ typedef struct dev_list_struct
 {
 	imu_sensor_t    *imu_sen;
 	rc_sensor_t 		*rc_sen;
-	KT_motor_t      *user_motor;
+	KT_motor_t      *kt_motor;
+	RM_motor_t      *rm_motor;
 	
 } dev_list_t;
 

@@ -17,6 +17,10 @@
 #define CHASSIS_CAN_ID_LEG_R   KT9025_CAN_ID_142
 
 
+/*动量电机*/
+#define MOMENTUM_CAN_ID_L      GM6020_CAN_ID_205 
+#define MOMENTUM_CAN_ID_R 		 GM6020_CAN_ID_206
+
 void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 

@@ -25,8 +25,8 @@ typedef struct RM_motor_class_t
 	void (*heartbeat)(struct RM_motor_class_t *motor);
   void (*pid_init)(RM_motor_pid_t *pid, float *buff);	
 	
-	uint8_t (*tx)(struct RM_motor_class_t *motor, int16_t *buff,uint8_t len);
-	uint8_t (*rx)(struct RM_motor_class_t *motor, uint8_t *buff,uint8_t len);
+	void (*tx)(struct RM_motor_class_t *motor, int16_t *buff,uint8_t len);
+	void (*rx)(struct RM_motor_class_t *motor, uint8_t *buff);
 	
 	/*以下为控制函数*/
 	float (*ctr_posit)(struct RM_motor_class_t *motor,float target);

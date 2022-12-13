@@ -16,7 +16,6 @@ void SPI2_Init(void)
 	HAL_Delay(1);
 }
 
-//uint8_t data,temp;
 void SPI1_Init(void)
 {
 	HAL_SPI_Init(&hspi1);

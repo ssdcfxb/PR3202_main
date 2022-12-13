@@ -66,7 +66,7 @@ static float lsb_to_dps(int16_t val, float dps, uint8_t bit_width);
 	 * For SPI : BMI2_SPI_INTF
 
 */
-int8_t bmi_init(struct bmi2_dev *bmi2_dev,uint8_t intf)
+int8_t bmi_init(struct bmi2_dev *bmi2_dev,uint8_t intf, uint8_t aces)
 {
     /* Status of api are returned to this variable. */
     int8_t rslt;
@@ -78,7 +78,7 @@ int8_t bmi_init(struct bmi2_dev *bmi2_dev,uint8_t intf)
      * For I2C : BMI2_I2C_INTF
      * For SPI : BMI2_SPI_INTF
      */
-    rslt = bmi2_interface_init(bmi2_dev, intf);
+    rslt = bmi2_interface_init(bmi2_dev, intf, aces);
 
     /* Initialize bmi270. */
     rslt = bmi270_init(bmi2_dev);
@@ -220,6 +220,15 @@ float inVSqrt(float x)
 	return y;
 }
 
+void EX_MPU_Read_all(uint8_t reg,uint8_t *buff,uint8_t len)
+{
+	EX_BMI_CS_LOW();
+	reg |= 0x80;
+	HAL_SPI_Transmit(&hspi1, &reg,  1, 1000);
+	HAL_SPI_Receive(&hspi1, buff, len+1, 1000);
+	EX_BMI_CS_HIG();
+}
+
 void MPU_Read_all(uint8_t reg,uint8_t *buff,uint8_t len)
 {
 	BMI_CS_LOW();
@@ -234,6 +243,28 @@ void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int
 	uint8_t data[13];
 	int16_t buff[6];
 	MPU_Read_all(ACCD_X_LSB, data, 13);
+	
+	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
+	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);
+	buff[2] = (int16_t)data[5] | ( (int16_t)data[6] << 8);
+	
+	buff[3] = (int16_t)data[7] | ( (int16_t)data[8] << 8);
+	buff[4] = (int16_t)data[9] | ( (int16_t)data[10] << 8);
+	buff[5] = (int16_t)data[11] | ( (int16_t)data[12] << 8);
+	
+	*aax = buff[0];
+	*aay = buff[1];
+	*aaz = buff[2];
+	*ggx = buff[3];
+	*ggy = buff[4];
+	*ggz = buff[5];	
+}
+
+void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz)
+{
+	uint8_t data[13];
+	int16_t buff[6];
+	EX_MPU_Read_all(ACCD_X_LSB, data, 13);
 	
 	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
 	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);

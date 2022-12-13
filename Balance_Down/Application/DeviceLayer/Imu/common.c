@@ -18,6 +18,7 @@
 */
 
 
+extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi2;
 
 #define IIC_CS_HIG()			(HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET))
@@ -25,6 +26,8 @@ extern SPI_HandleTypeDef hspi2;
 
 #define SPI_CS_HIG()			(HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET))
 #define SPI_CS_LOW()			(HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET))
+#define EX_SPI_CS_HIG()		(HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET))
+#define EX_SPI_CS_LOW()		(HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET))
 
 
 
@@ -171,12 +174,42 @@ BMI2_INTF_RETURN_TYPE bmi2_spi_write(uint8_t reg_addr, const uint8_t *reg_data, 
 
 }
 
+/*!
+ * extern device SPI1 read function
+ */
+BMI2_INTF_RETURN_TYPE ex_bmi2_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
+{
+	uint8_t res;
+	
+	EX_SPI_CS_LOW();
+	HAL_SPI_Transmit(&hspi1, &reg_addr, 1, 1000);
+	res = HAL_SPI_Receive(&hspi1, reg_data, len, 1000);
+	EX_SPI_CS_HIG();
+	return res;
+	
+}
+
+/*!
+ * extern device SPI1 write function
+ */
+BMI2_INTF_RETURN_TYPE ex_bmi2_spi_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr)
+{
+	uint8_t res;
+	
+	EX_SPI_CS_LOW();
+	HAL_SPI_Transmit(&hspi1, &reg_addr, 1, 1000);
+	res = HAL_SPI_Transmit(&hspi1, (uint8_t *)reg_data, len, 1000);
+	EX_SPI_CS_HIG();
+	return res;
+
+}
+
 
 /*!
  *  @brief Function to select the interface between SPI and I2C.
  *  Also to initialize coines platform
  */
-int8_t bmi2_interface_init(struct bmi2_dev *bmi, uint8_t intf)
+int8_t bmi2_interface_init(struct bmi2_dev *bmi, uint8_t intf, uint8_t aces)
 {
     int8_t rslt = BMI2_OK;
 
@@ -205,8 +238,16 @@ int8_t bmi2_interface_init(struct bmi2_dev *bmi, uint8_t intf)
 
             /* To initialize the user SPI function */
             bmi->intf = BMI2_SPI_INTF;
-            bmi->read = bmi2_spi_read;
-            bmi->write = bmi2_spi_write;
+						if (aces == BMI2_INT_ACES)
+						{
+							bmi->read = bmi2_spi_read;
+							bmi->write = bmi2_spi_write;
+						}
+						else if (aces == BMI2_EXT_ACES)
+						{
+							bmi->read = ex_bmi2_spi_read;
+							bmi->write = ex_bmi2_spi_write;
+						}
         }
 
         /* Assign device address to interface pointer */

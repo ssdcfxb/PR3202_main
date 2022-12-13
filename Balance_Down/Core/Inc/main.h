@@ -59,6 +59,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BMI_CS_Pin GPIO_PIN_12
 #define BMI_CS_GPIO_Port GPIOB
+#define EX_BMI_CS_Pin GPIO_PIN_8
+#define EX_BMI_CS_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

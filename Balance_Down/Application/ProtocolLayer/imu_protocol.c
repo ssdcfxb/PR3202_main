@@ -27,7 +27,14 @@ void imu_update(imu_sensor_t *imu_sen)
 	short gyro_tp, acc_tp;
 	
 	/* 获取陀螺仪数据 */
-  BMI_Get_RawData(&gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
+	if(imu_sen->driver.tpye == DR_SPI1)
+	{
+		EX_BMI_Get_RawData(&gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
+	}
+	else if(imu_sen->driver.tpye == DR_SPI2)
+	{
+		BMI_Get_RawData(&gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
+	}
 	
 	imu_info->raw_info.acc_x = accx;
 	imu_info->raw_info.acc_y = accy;

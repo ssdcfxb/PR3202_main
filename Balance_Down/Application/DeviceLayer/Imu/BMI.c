@@ -264,7 +264,7 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
 {
 	uint8_t data[13];
 	int16_t buff[6];
-	MPU_Read_all(ACCD_X_LSB, data, 13);
+	EX_MPU_Read_all(ACCD_X_LSB, data, 13);
 	
 	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
 	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);

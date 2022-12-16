@@ -1,5 +1,9 @@
 #include "BMI.h"
 
+
+#include "rp_math.h"
+#include "ave_filter.h"
+
 /**\
  * Copyright (c) 2021 Bosch Sensortec GmbH. All rights reserved.
  *
@@ -282,6 +286,68 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
 	*ggz = buff[5];	
 }
 
+
+/**
+    @param
+    @axr
+        陀螺仪x轴与roll轴之间的夹角，单位为rad
+    @axy
+        陀螺仪x轴与yaw轴之间的夹角，单位为rad
+    @ayy
+        陀螺仪y轴与yaw轴之间的夹角，单位为rad
+    @param[in]  (int16_t) gx,  gy,  gz,  ax,  ay,  az
+    @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
+*/
+float axr = 90.0f * 0.017453f;
+float axy = 90.0f * 0.017453f;
+float ayy = 90.0f * 0.017453f;
+arm_matrix_instance_f32 Trans;
+arm_matrix_instance_f32 Src;
+arm_matrix_instance_f32 Dst;
+uint8_t setup = 0;
+float trans[9];
+float gyro_in[3];
+float acc_in[3];
+float gyro_out[3];
+float acc_out[3];
+void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
+	                    int16_t ax, int16_t ay, int16_t az,\
+	                    float *ggx, float *ggy, float *ggz,\
+											float *aax, float *aay, float *aaz)
+{
+	/* 旋转矩阵初始化 */
+	if(setup == 0)
+	{
+		trans[0] = arm_cos_f32(axr), trans[1] = -arm_sin_f32(axr), trans[2] =  arm_sin_f32(axr) * arm_cos_f32(ayy) - arm_cos_f32(axy) * arm_cos_f32(axr);
+		trans[3] = arm_sin_f32(axr), trans[4] =  arm_cos_f32(axr), trans[5] = -arm_cos_f32(axy) * arm_sin_f32(axr) - arm_cos_f32(axr) * arm_cos_f32(ayy);
+		trans[6] = arm_cos_f32(axy), trans[7] =  arm_cos_f32(ayy), trans[8] =  1.0f;
+		
+		arm_mat_init_f32(&Trans, 3, 3, (float *)trans); //3x3矩阵
+		setup = 1;
+	}
+	
+	/* 陀螺仪赋值 */
+	gyro_in[0] = gx, gyro_in[1] = gy, gyro_in[2] = gz;
+	
+	/* 加速度计赋值 */
+	acc_in[0] = ax, acc_in[1] = ay, acc_in[2] = ay;
+	
+	/* 陀螺仪坐标变换 */
+	arm_mat_init_f32(&Src, 3, 1, gyro_in);
+	arm_mat_init_f32(&Dst, 3, 1, gyro_out);
+	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	*ggx = gyro_out[0], *ggy = gyro_out[1], *ggz = gyro_out[2];
+	
+	/* 陀螺仪坐标变换 */
+	arm_mat_init_f32(&Src, 3, 1, acc_in);
+	arm_mat_init_f32(&Dst, 3, 1, acc_out);
+	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	*aax = acc_out[0], *aay = acc_out[1], *aaz = acc_out[2];
+	
+}
+
+
+
 extern struct bmi2_dev bmi270;
 
 /**
@@ -292,10 +358,18 @@ extern struct bmi2_dev bmi270;
         越小积分误差越小
     @halfT
         解算周期的一半，比如1ms解算1次则halfT为0.0005f
+    @lp
+        陀螺仪距pitch轴的垂直距离，单位为m
+    @ly
+        水平时陀螺仪距yaw轴的垂直距离，单位为m
 */
-float Kp = -3.5f;//4
+float Kp = 0.5f;//4
 float norm;
 float halfT = 0.00025f;
+float lp, ly;
+float wx, wy, wz;
+float afx, afy, afz;
+float thr, thp, thy, cosr, cosp, cosy;
 float vx, vy, vz;
 float ex, ey, ez;
 float gx,gy,gz,ax,ay,az;
@@ -342,14 +416,76 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	gy_ = gy;
 	gz_ = gz;
 	
+	/* 速度解算begin */
+	q0temp_ = q0_init;
+	q1temp_ = q1_init;
+	q2temp_ = q2_init;
+	q3temp_ = q3_init;
+	
+	q0_ = q0temp_ + (-q1temp_*gx_ - q2temp_*gy_ -q3temp_*gz_)*halfT;
+	q1_ = q1temp_ + ( q0temp_*gx_ + q2temp_*gz_ -q3temp_*gy_)*halfT;
+	q2_ = q2temp_ + ( q0temp_*gy_ - q1temp_*gz_ +q3temp_*gx_)*halfT;
+	q3_ = q3temp_ + ( q0temp_*gz_ + q1temp_*gy_ -q2temp_*gx_)*halfT;
+	
+	norm = inVSqrt(q0_*q0_ + q1_*q1_ + q2_*q2_ + q3_*q3_);
+	q0_ = q0_ * norm;
+	q1_ = q1_ * norm;
+	q2_ = q2_ * norm;
+	q3_ = q3_ * norm;
+	
+	//*roll_ = atan2(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_)* 57.295773f;
+	arm_atan2_f32(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_, roll_);
+	*roll_ *= 57.295773f;
+	
+  //*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
+  //asin(x) = atan(x/sqrt(1-x*x))
+	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
+	arm_sqrt_f32(1 - sintemp_ * sintemp_, &costemp_);
+	arm_atan2_f32(sintemp_, costemp_, pitch_);
+	*pitch_ *= -57.295773f;
+	
+	//*yaw_ =  atan2(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_)*57.295773f;
+	arm_atan2_f32(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_, yaw_);
+	*yaw_  *= 57.295773f;
+	
+	/* 过零点处理 */
+	if (abs(*roll_) > 180.0f)
+		*roll_ = *roll_ - one(*roll_) * 360.0f;
+	if (abs(*pitch_) > 180.0f)
+		*pitch_ = *pitch_ - one(*pitch_) * 360.0f;
+	if (abs(*yaw_) > 180.0f)
+		*yaw_ = *yaw_ - one(*yaw_) * 360.0f;
+	
+	*roll_  = *roll_  / (halfT * 2);
+	*pitch_ = *pitch_ / (halfT * 2);
+	*yaw_   = *yaw_   / (halfT * 2);
+	
+	/* 角加速度计算 */
+	afx = (*roll_  - wx)/(halfT * 2);
+	afy = (*pitch_ - wy)/(halfT * 2);
+	afz = (*yaw_   - wz)/(halfT * 2);
+	
+	wx = *roll_;
+	wy = *pitch_;
+	wz = *yaw_;
+	/* 速度解算end */
+	
 	/* 角度解算start */
 	/* 加速度计数据检查 */
-	if(ax * ay *az != 0)
+	if(ax * ay * az != 0)
 	{
 		/* 加速度计数据单位转换（to米每二次方秒） */
 		ax = lsb_to_mps2(ax,2,bmi270.resolution);
 		ay = lsb_to_mps2(ay,2,bmi270.resolution);
 		az = lsb_to_mps2(az,2,bmi270.resolution);
+		
+		/* 利用角速度修正重力加速度测量值 */
+//		ax = ax - afy * lp;
+//		az = az - wy * wy * lp;
+//		
+//		cosp = arm_cos_f32(thp);
+//		ax = ax - wz* wz * ly * cosp;
+//		ay = ay - afz * ly * cosp;
 
 		norm = inVSqrt(ax*ax + ay*ay + az*az);
 		ax = ax *norm;
@@ -385,56 +521,28 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	q2 = q2 * norm;
 	q3 = q3 * norm;
 	
-//	*roll = atan2(2 * q2 * q3 + 2 * q0 * q1,q0*q0 - q1 * q1 -  q2 * q2 + q3 *q3)* 57.295773f;
+	//*roll = atan2(2 * q2 * q3 + 2 * q0 * q1,q0*q0 - q1 * q1 -  q2 * q2 + q3 *q3)* 57.295773f;
 	arm_atan2_f32(2 * q2 * q3 + 2 * q0 * q1, q0 * q0 - q1 * q1 -  q2 * q2 + q3 * q3, roll);
-	*roll *= 57.295773f;
 	
-//	*pitch = -asin( 2 * q1 * q3 -2 * q0* q2)*57.295773f;
-//  asin(x) = atan(x/sqrt(1-x*x))
+	//*pitch = -asin( 2 * q1 * q3 -2 * q0* q2)*57.295773f;
+  //asin(x) = atan(x/sqrt(1-x*x))
 	sintemp = 2 * q1 * q3 -2 * q0* q2;
 	arm_sqrt_f32(1 - sintemp * sintemp, &costemp);
 	arm_atan2_f32(sintemp, costemp, pitch);
-	*pitch *= -57.295773f;
 	
-//	*yaw =  atan2(2*(q1*q2 + q0*q3),q0*q0 +q1*q1-q2*q2 -q3*q3)*57.295773f;
+	//*yaw =  atan2(2*(q1*q2 + q0*q3),q0*q0 +q1*q1-q2*q2 -q3*q3)*57.295773f;
 	arm_atan2_f32(2 * (q1*q2 + q0*q3), q0*q0 +q1*q1-q2*q2 -q3*q3, yaw);
-	*yaw  *= 57.295773f;
+	
+	
+//	thr =  *roll;
+//	thp = -*pitch;
+//	thy =  *yaw;
+	*roll  *=  57.295773f;
+	*pitch *= -57.295773f;
+	*yaw   *=  57.295773f;
 	/* 角度解算end */
+	
 
-	/* 速度解算begin */
-	q0temp_ = q0_init;
-	q1temp_ = q1_init;
-	q2temp_ = q2_init;
-	q3temp_ = q3_init;
-	
-	q0_ = q0temp_ + (-q1temp_*gx_ - q2temp_*gy_ -q3temp_*gz_)*halfT;
-	q1_ = q1temp_ + ( q0temp_*gx_ + q2temp_*gz_ -q3temp_*gy_)*halfT;
-	q2_ = q2temp_ + ( q0temp_*gy_ - q1temp_*gz_ +q3temp_*gx_)*halfT;
-	q3_ = q3temp_ + ( q0temp_*gz_ + q1temp_*gy_ -q2temp_*gx_)*halfT;
-	
-	norm = inVSqrt(q0_*q0_ + q1_*q1_ + q2_*q2_ + q3_*q3_);
-	q0_ = q0_ * norm;
-	q1_ = q1_ * norm;
-	q2_ = q2_ * norm;
-	q3_ = q3_ * norm;
-	
-//	*roll_ = atan2(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_)* 57.295773f;
-	arm_atan2_f32(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_, roll_);
-	*roll_ *= 57.295773f;
-	
-//	*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
-//  asin(x) = atan(x/sqrt(1-x*x))
-	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
-	arm_sqrt_f32(1 - sintemp_ * sintemp_, &costemp_);
-	arm_atan2_f32(sintemp_, costemp_, pitch_);
-	*pitch_ *= -57.295773f;
-	
-//	*yaw_ =  atan2(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_)*57.295773f;
-	arm_atan2_f32(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_, yaw_);
-	*yaw_  *= 57.295773f;
-	
-	/* 速度解算end */
-	
 	return 0;
 }
 

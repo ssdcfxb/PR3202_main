@@ -47,6 +47,10 @@ extern SPI_HandleTypeDef hspi2;
 int8_t bmi_init(struct bmi2_dev *bmi2_dev, uint8_t intf, uint8_t aces);
 void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz);
 void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz);
+void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
+	                    int16_t ax, int16_t ay, int16_t az,\
+	                    float *ggx, float *ggy, float *ggz,\
+											float *aax, float *aay, float *aaz);
 uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
                            float *pitch_,float *roll_,float *yaw_,\
 													 float *ggx,float *ggy,float *ggz,\

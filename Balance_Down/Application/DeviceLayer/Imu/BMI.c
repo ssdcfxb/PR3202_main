@@ -287,50 +287,72 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
 }
 
 
+
 /**
+    @brief  坐标变换采用Z-Y-X欧拉角描述，即从陀螺仪坐标系向云台坐标系变换中，坐标系按照绕陀螺仪Z轴、Y轴、X轴的顺序旋转
+						每一次旋转的参考坐标系为当前陀螺仪坐标系
     @param
-    @axr
-        陀螺仪x轴与roll轴之间的夹角，单位为rad
-    @axy
-        陀螺仪x轴与yaw轴之间的夹角，单位为rad
-    @ayy
-        陀螺仪y轴与yaw轴之间的夹角，单位为rad
+    @arz
+        陀螺仪x轴与roll轴之间的夹角，单位为度
+    @ary
+        陀螺仪x轴与yaw轴之间的夹角，单位为度
+    @arx
+        陀螺仪y轴与yaw轴之间的夹角，单位为度
     @param[in]  (int16_t) gx,  gy,  gz,  ax,  ay,  az
     @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
 */
-float axr = 90.0f * 0.017453f;
-float axy = 90.0f * 0.017453f;
-float ayy = 90.0f * 0.017453f;
+float arz = -90.0f;
+float ary = 0.0f;
+float arx = 0.0f;
 arm_matrix_instance_f32 Trans;
 arm_matrix_instance_f32 Src;
 arm_matrix_instance_f32 Dst;
-uint8_t setup = 0;
 float trans[9];
 float gyro_in[3];
-float acc_in[3];
 float gyro_out[3];
+float acc_in[3];
 float acc_out[3];
+/**
+  * @brief  陀螺仪坐标变换初始化，若不需要变换可在imu_sensor.c中imu_init将其注释
+  * @param  
+  * @retval 
+  */
+void transform_init(void)
+{
+	/* 角度单位转换（to弧度） */
+	arz = arz * (double)0.017453;
+	ary = ary * (double)0.017453;
+	arx = arx * (double)0.017453;
+
+	/* 旋转矩阵赋值（三个旋转矩阵叠加） */
+	trans[0] =  arm_cos_f32(arz)*arm_cos_f32(ary);
+	trans[1] =  arm_sin_f32(arz)*arm_cos_f32(ary);
+	trans[2] =  arm_sin_f32(ary);
+	trans[3] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) - arm_sin_f32(arz)*arm_cos_f32(arx);
+	trans[4] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) + arm_cos_f32(arz)*arm_cos_f32(arx);
+	trans[5] =  arm_cos_f32(ary)*arm_sin_f32(arx);
+	trans[6] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) + arm_sin_f32(arz)*arm_sin_f32(arx);
+	trans[7] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) - arm_cos_f32(arz)*arm_sin_f32(arx);
+	trans[8] =  arm_cos_f32(ary)*arm_cos_f32(arx);
+
+	arm_mat_init_f32(&Trans, 3, 3, (float *)trans); //3x3变换矩阵初始化
+}
+
+/**
+  * @brief  将陀螺仪坐标变换为云台坐标，若不需要变换可在imu_protocol.c中imu_update将其注释
+  * @param  
+  * @retval 
+  */
 void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
 	                    int16_t ax, int16_t ay, int16_t az,\
 	                    float *ggx, float *ggy, float *ggz,\
 											float *aax, float *aay, float *aaz)
 {
-	/* 旋转矩阵初始化 */
-	if(setup == 0)
-	{
-		trans[0] = arm_cos_f32(axr), trans[1] = -arm_sin_f32(axr), trans[2] =  arm_sin_f32(axr) * arm_cos_f32(ayy) - arm_cos_f32(axy) * arm_cos_f32(axr);
-		trans[3] = arm_sin_f32(axr), trans[4] =  arm_cos_f32(axr), trans[5] = -arm_cos_f32(axy) * arm_sin_f32(axr) - arm_cos_f32(axr) * arm_cos_f32(ayy);
-		trans[6] = arm_cos_f32(axy), trans[7] =  arm_cos_f32(ayy), trans[8] =  1.0f;
-		
-		arm_mat_init_f32(&Trans, 3, 3, (float *)trans); //3x3矩阵
-		setup = 1;
-	}
-	
 	/* 陀螺仪赋值 */
-	gyro_in[0] = gx, gyro_in[1] = gy, gyro_in[2] = gz;
+	gyro_in[0] = (float)gx, gyro_in[1] = (float)gy, gyro_in[2] = (float)gz;
 	
 	/* 加速度计赋值 */
-	acc_in[0] = ax, acc_in[1] = ay, acc_in[2] = ay;
+	acc_in[0] = (float)ax, acc_in[1] = (float)ay, acc_in[2] = (float)az;
 	
 	/* 陀螺仪坐标变换 */
 	arm_mat_init_f32(&Src, 3, 1, gyro_in);
@@ -338,14 +360,13 @@ void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
 	arm_mat_mult_f32(&Trans, &Src, &Dst);
 	*ggx = gyro_out[0], *ggy = gyro_out[1], *ggz = gyro_out[2];
 	
-	/* 陀螺仪坐标变换 */
+	/* 加速度计坐标变换 */
 	arm_mat_init_f32(&Src, 3, 1, acc_in);
 	arm_mat_init_f32(&Dst, 3, 1, acc_out);
 	arm_mat_mult_f32(&Trans, &Src, &Dst);
 	*aax = acc_out[0], *aay = acc_out[1], *aaz = acc_out[2];
 	
 }
-
 
 
 extern struct bmi2_dev bmi270;
@@ -366,7 +387,7 @@ extern struct bmi2_dev bmi270;
 float Kp = 0.5f;//4
 float norm;
 float halfT = 0.00025f;
-float lp, ly;
+float lp = 0.0f, ly = 0.0f;
 float wx, wy, wz;
 float afx, afy, afz;
 float thr, thp, thy, cosr, cosp, cosy;
@@ -480,12 +501,12 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		az = lsb_to_mps2(az,2,bmi270.resolution);
 		
 		/* 利用角速度修正重力加速度测量值 */
-//		ax = ax - afy * lp;
-//		az = az - wy * wy * lp;
-//		
-//		cosp = arm_cos_f32(thp);
-//		ax = ax - wz* wz * ly * cosp;
-//		ay = ay - afz * ly * cosp;
+		ax = ax - afy * lp;
+		az = az - wy * wy * lp;
+		
+		cosp = arm_cos_f32(thp);
+		ax = ax - wz* wz * ly * cosp;
+		ay = ay - afz * ly * cosp;
 
 		norm = inVSqrt(ax*ax + ay*ay + az*az);
 		ax = ax *norm;
@@ -534,15 +555,14 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	arm_atan2_f32(2 * (q1*q2 + q0*q3), q0*q0 +q1*q1-q2*q2 -q3*q3, yaw);
 	
 	
-//	thr =  *roll;
-//	thp = -*pitch;
-//	thy =  *yaw;
+	thr =  *roll;
+	thp = -*pitch;
+	thy =  *yaw;
 	*roll  *=  57.295773f;
 	*pitch *= -57.295773f;
 	*yaw   *=  57.295773f;
 	/* 角度解算end */
 	
-
 	return 0;
 }
 

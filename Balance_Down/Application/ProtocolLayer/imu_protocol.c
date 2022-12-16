@@ -24,7 +24,6 @@ float pitch_, roll_, yaw_;
 void imu_update(imu_sensor_t *imu_sen)
 {
   imu_info_t *imu_info = imu_sen->info;
-	short gyro_tp, acc_tp;
 	
 	/* 获取陀螺仪数据 */
 	if(imu_sen->driver.tpye == DR_SPI1)
@@ -44,20 +43,8 @@ void imu_update(imu_sensor_t *imu_sen)
 	imu_info->raw_info.gyro_z = ggz;
 	
 	/* 坐标系变换 */
-//	Vector_Transform(ggx, ggy, ggz, aax, aay, aaz,\
-//	                 &gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
-	
-	accx = aax;
-	accy = aay;
-	gyrox = ggx;
-	gyroy = ggy;
-	
-	acc_tp = accx;
-	accx   = -accy;
-	accy   = acc_tp;
-	gyro_tp = gyrox;
-	gyrox   = -gyroy;
-	gyroy   = gyro_tp;
+	Vector_Transform(ggx, ggy, ggz, aax, aay, aaz,\
+	                 &gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
 	
 	/* 原始数据低通滤波 */
 	gyrox_ = lowpass(gyrox_, gyrox, 0.3);

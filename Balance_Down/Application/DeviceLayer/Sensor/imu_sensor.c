@@ -7,6 +7,7 @@
 void imu_init(imu_sensor_t *self);
 void imu_heart_beat(work_state_t *heart);
 extern void imu_update(imu_sensor_t *self);
+extern void transform_init(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 struct bmi2_dev bmi270;
@@ -83,6 +84,9 @@ void imu_init(struct imu_struct *self)
 
 	self->work_state.dev_state = DEV_ONLINE;
 	self->work_state.err_code = IMU_NONE_ERR;
+	
+	/* Ğı×ª¾ØÕó³õÊ¼»¯ */
+	transform_init();
 	
 	self->info->init_flag = 1;
 }

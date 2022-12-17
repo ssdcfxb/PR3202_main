@@ -513,13 +513,13 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		ay = ay *norm;
 		az = az *norm;
 		
-		vx = 2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
-		vy = 2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
-		vz = q0*q0 - q1*q1 - q2*q2 + q3*q3;//cos(Roll)cos(Pitch) cos(K,k)
+		vx = -2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
+		vy = -2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
+		vz = -q0*q0 - q1*q1 - q2*q2 + q3*q3;//cos(Roll)cos(Pitch) cos(K,k)
 		
-		ex = (ay*vz - az*vy) ;
-		ey = (az*vx - ax*vz) ;//切线方向加速度
-		ez = (ax*vy - ay*vx) ;
+		ex = (az*vy - ay*vz) ;
+		ey = (ax*vz - az*vx) ;//切线方向加速度
+		ez = (ay*vx - ax*vy) ;
 		
 		gx = gx + Kp*ex;
 		gy = gy + Kp*ey;

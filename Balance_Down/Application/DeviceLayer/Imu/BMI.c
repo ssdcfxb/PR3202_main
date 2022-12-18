@@ -326,13 +326,13 @@ void transform_init(void)
 
 	/* 旋转矩阵赋值（三个旋转矩阵叠加） */
 	trans[0] =  arm_cos_f32(arz)*arm_cos_f32(ary);
-	trans[1] =  arm_sin_f32(arz)*arm_cos_f32(ary);
-	trans[2] =  arm_sin_f32(ary);
-	trans[3] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) - arm_sin_f32(arz)*arm_cos_f32(arx);
-	trans[4] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) + arm_cos_f32(arz)*arm_cos_f32(arx);
-	trans[5] =  arm_cos_f32(ary)*arm_sin_f32(arx);
-	trans[6] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) + arm_sin_f32(arz)*arm_sin_f32(arx);
-	trans[7] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) - arm_cos_f32(arz)*arm_sin_f32(arx);
+	trans[1] =  arm_cos_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) - arm_sin_f32(arz)*arm_cos_f32(arx);
+	trans[2] =  arm_cos_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) + arm_sin_f32(arz)*arm_sin_f32(arx);
+	trans[3] =  arm_sin_f32(arz)*arm_cos_f32(ary);
+	trans[4] =  arm_sin_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) + arm_cos_f32(arz)*arm_cos_f32(arx);
+	trans[5] =  arm_sin_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) - arm_cos_f32(arz)*arm_sin_f32(arx);
+	trans[6] = -arm_sin_f32(ary);
+	trans[7] =  arm_cos_f32(ary)*arm_sin_f32(arx);
 	trans[8] =  arm_cos_f32(ary)*arm_cos_f32(arx);
 
 	arm_mat_init_f32(&Trans, 3, 3, (float *)trans); //3x3变换矩阵初始化
@@ -355,15 +355,15 @@ void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
 	acc_in[0] = (float)ax, acc_in[1] = (float)ay, acc_in[2] = (float)az;
 	
 	/* 陀螺仪坐标变换 */
-	arm_mat_init_f32(&Src, 3, 1, gyro_in);
-	arm_mat_init_f32(&Dst, 3, 1, gyro_out);
-	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	arm_mat_init_f32(&Src, 1, 3, gyro_in);
+	arm_mat_init_f32(&Dst, 1, 3, gyro_out);
+	arm_mat_mult_f32(&Src, &Trans, &Dst);
 	*ggx = gyro_out[0], *ggy = gyro_out[1], *ggz = gyro_out[2];
 	
 	/* 加速度计坐标变换 */
-	arm_mat_init_f32(&Src, 3, 1, acc_in);
-	arm_mat_init_f32(&Dst, 3, 1, acc_out);
-	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	arm_mat_init_f32(&Src, 1, 3, acc_in);
+	arm_mat_init_f32(&Dst, 1, 3, acc_out);
+	arm_mat_mult_f32(&Src, &Trans, &Dst);
 	*aax = acc_out[0], *aay = acc_out[1], *aaz = acc_out[2];
 	
 }
@@ -394,13 +394,13 @@ float thr, thp, thy, cosr, cosp, cosy;
 float vx, vy, vz;
 float ex, ey, ez;
 float gx,gy,gz,ax,ay,az;
-float q0_init = 1.0f, q1_init = 0.0f, q2_init = 0.0f, q3_init = 0.0f;  //将云台摆到yaw、pitch都为零时即初始值
+//float q0_init = 1.0f, q1_init = 0.0f, q2_init = 0.0f, q3_init = 0.0f;  //将云台摆到yaw、pitch都为零时即初始值
 float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;  //将云台摆到yaw、pitch都为零时即初始值
 float q0temp,q1temp,q2temp,q3temp;
-float gx_, gy_, gz_;
-float q0_, q1_, q2_, q3_;
-float q0temp_,q1temp_,q2temp_,q3temp_;
-float a_sum;
+//float gx_, gy_, gz_;
+//float q0_, q1_, q2_, q3_;
+//float q0temp_,q1temp_,q2temp_,q3temp_;
+//float a_sum;
 float sintemp, sintemp_, costemp, costemp_;
 /**
   * @brief  不带_的为涉及加速度计的，带_的为不涉及加速度计的，用于差分计算速度
@@ -427,68 +427,74 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	gy = lsb_to_dps(gy,2000,bmi270.resolution);
 	gz = lsb_to_dps(gz,2000,bmi270.resolution);
 	
+	/* 陀螺仪数据赋值 */
+	*roll_  = gx;
+	*pitch_ = gy;
+	*yaw_   = gz;
+	
 	/* 陀螺仪数据单位转换（to弧度每秒） */
 	gx = gx * (double)0.017453;
 	gy = gy * (double)0.017453;
 	gz = gz * (double)0.017453;
 	
 	/* 备份给速度解算用 */
-	gx_ = gx;
-	gy_ = gy;
-	gz_ = gz;
+//	gx_ = gx;
+//	gy_ = gy;
+//	gz_ = gz;
 	
 	/* 速度解算begin */
-	q0temp_ = q0_init;
-	q1temp_ = q1_init;
-	q2temp_ = q2_init;
-	q3temp_ = q3_init;
-	
-	q0_ = q0temp_ + (-q1temp_*gx_ - q2temp_*gy_ -q3temp_*gz_)*halfT;
-	q1_ = q1temp_ + ( q0temp_*gx_ + q2temp_*gz_ -q3temp_*gy_)*halfT;
-	q2_ = q2temp_ + ( q0temp_*gy_ - q1temp_*gz_ +q3temp_*gx_)*halfT;
-	q3_ = q3temp_ + ( q0temp_*gz_ + q1temp_*gy_ -q2temp_*gx_)*halfT;
-	
-	norm = inVSqrt(q0_*q0_ + q1_*q1_ + q2_*q2_ + q3_*q3_);
-	q0_ = q0_ * norm;
-	q1_ = q1_ * norm;
-	q2_ = q2_ * norm;
-	q3_ = q3_ * norm;
-	
-	//*roll_ = atan2(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_)* 57.295773f;
-	arm_atan2_f32(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_, roll_);
-	*roll_ *= 57.295773f;
-	
-  //*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
-  //asin(x) = atan(x/sqrt(1-x*x))
-	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
-	arm_sqrt_f32(1 - sintemp_ * sintemp_, &costemp_);
-	arm_atan2_f32(sintemp_, costemp_, pitch_);
-	*pitch_ *= -57.295773f;
-	
-	//*yaw_ =  atan2(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_)*57.295773f;
-	arm_atan2_f32(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_, yaw_);
-	*yaw_  *= 57.295773f;
-	
-	/* 过零点处理 */
-	if (abs(*roll_) > 180.0f)
-		*roll_ = *roll_ - one(*roll_) * 360.0f;
-	if (abs(*pitch_) > 180.0f)
-		*pitch_ = *pitch_ - one(*pitch_) * 360.0f;
-	if (abs(*yaw_) > 180.0f)
-		*yaw_ = *yaw_ - one(*yaw_) * 360.0f;
-	
-	*roll_  = *roll_  / (halfT * 2);
-	*pitch_ = *pitch_ / (halfT * 2);
-	*yaw_   = *yaw_   / (halfT * 2);
+//	q0temp_ = q0_init;
+//	q1temp_ = q1_init;
+//	q2temp_ = q2_init;
+//	q3temp_ = q3_init;
+//	
+//	q0_ = q0temp_ + (-q1temp_*gx_ - q2temp_*gy_ -q3temp_*gz_)*halfT;
+//	q1_ = q1temp_ + ( q0temp_*gx_ + q2temp_*gz_ -q3temp_*gy_)*halfT;
+//	q2_ = q2temp_ + ( q0temp_*gy_ - q1temp_*gz_ +q3temp_*gx_)*halfT;
+//	q3_ = q3temp_ + ( q0temp_*gz_ + q1temp_*gy_ -q2temp_*gx_)*halfT;
+//	
+//	norm = inVSqrt(q0_*q0_ + q1_*q1_ + q2_*q2_ + q3_*q3_);
+//	q0_ = q0_ * norm;
+//	q1_ = q1_ * norm;
+//	q2_ = q2_ * norm;
+//	q3_ = q3_ * norm;
+//	
+//	//*roll_ = atan2(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_)* 57.295773f;
+//	arm_atan2_f32(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_, roll_);
+//	*roll_ *= 57.295773f;
+//	
+//  //*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
+//  //asin(x) = atan(x/sqrt(1-x*x))
+//	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
+//	arm_sqrt_f32(1 - sintemp_ * sintemp_, &costemp_);
+//	arm_atan2_f32(sintemp_, costemp_, pitch_);
+//	*pitch_ *= -57.295773f;
+//	
+//	//*yaw_ =  atan2(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_)*57.295773f;
+//	arm_atan2_f32(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_, yaw_);
+//	*yaw_  *= 57.295773f;
+//	
+//	/* 过零点处理 */
+//	if (abs(*roll_) > 180.0f)
+//		*roll_ = *roll_ - one(*roll_) * 360.0f;
+//	if (abs(*pitch_) > 180.0f)
+//		*pitch_ = *pitch_ - one(*pitch_) * 360.0f;
+//	if (abs(*yaw_) > 180.0f)
+//		*yaw_ = *yaw_ - one(*yaw_) * 360.0f;
+//	
+//	*roll_  = gx;//*roll_  / (halfT * 2);
+//	*pitch_ = gy;//*pitch_ / (halfT * 2);
+//	*yaw_   = gz;//*yaw_   / (halfT * 2);
 	
 	/* 角加速度计算 */
-	afx = (*roll_  - wx)/(halfT * 2);
-	afy = (*pitch_ - wy)/(halfT * 2);
-	afz = (*yaw_   - wz)/(halfT * 2);
+	afx = (gx - wx)/(halfT * 2);
+	afy = (gy - wy)/(halfT * 2);
+	afz = (gz - wz)/(halfT * 2);
 	
-	wx = *roll_;
-	wy = *pitch_;
-	wz = *yaw_;
+	/* 角速度赋值 */
+	wx = gx;
+	wy = gy;
+	wz = gz;
 	/* 速度解算end */
 	
 	/* 角度解算start */
@@ -513,13 +519,13 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		ay = ay *norm;
 		az = az *norm;
 		
-		vx = 2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
-		vy = 2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
-		vz = q0*q0 - q1*q1 - q2*q2 + q3*q3;//cos(Roll)cos(Pitch) cos(K,k)
+		vx = -2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
+		vy = -2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
+		vz = -(q0*q0 - q1*q1 - q2*q2 + q3*q3);//cos(Roll)cos(Pitch) cos(K,k)
 		
-		ex = (ay*vz - az*vy) ;
-		ey = (az*vx - ax*vz) ;//切线方向加速度
-		ez = (ax*vy - ay*vx) ;
+		ex = (-ay*vz + az*vy) ;
+		ey = (-az*vx + ax*vz) ;//切线方向加速度
+		ez = (-ax*vy + ay*vx) ;
 		
 		gx = gx + Kp*ex;
 		gy = gy + Kp*ey;

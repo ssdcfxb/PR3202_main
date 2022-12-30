@@ -58,6 +58,10 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 													 
 
 
+uint8_t EX_BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
+                           float *pitch_,float *roll_,float *yaw_,\
+													 float *ggx,float *ggy,float *ggz,\
+													 float *aax,float *aay,float *aaz);
 
 
 #endif

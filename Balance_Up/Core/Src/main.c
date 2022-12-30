@@ -28,7 +28,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "driver.h"
+#include "device.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -103,7 +104,10 @@ int main(void)
   MX_TIM4_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-
+	DRIVER_Init();
+	DEVICE_Init();
+	TIM4_Init();
+	CAN_Filter_Init();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -184,6 +188,19 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+	static uint16_t i = 0;
+	if (htim->Instance == TIM4)
+	{
+		//500us
+		if (i++ == 60000)
+		{
+			i = 0;
+		}
+		imu_sensor.update(&imu_sensor);
+		
+		
+		
+	}
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM2) {

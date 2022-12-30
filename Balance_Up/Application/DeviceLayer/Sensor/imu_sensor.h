@@ -84,6 +84,7 @@ typedef struct imu_info_struct {
 typedef struct imu_struct {
 	
   bmi_t       *bmi;	
+	bmi_t       *ex_bmi;	
 	imu_info_t	*info;
 	driver_t	  driver;
 	

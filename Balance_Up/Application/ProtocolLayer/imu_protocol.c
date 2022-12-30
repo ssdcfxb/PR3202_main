@@ -11,8 +11,14 @@ ave_filter_t imu_pitch_dif_speed_ave_filter;
 ave_filter_t imu_roll_dif_speed_ave_filter;
 ave_filter_t imu_yaw_dif_speed_ave_filter;
 
+uint16_t i = 0;
+
 short ggx, ggy, ggz;
 short aax, aay, aaz;
+
+short ggx_, ggy_, ggz_;
+short aax_, aay_, aaz_;
+
 float gyrox, gyroy, gyroz;
 float accx, accy, accz;
 float gyrox_, gyroy_, gyroz_;
@@ -34,6 +40,17 @@ void imu_update(imu_sensor_t *imu_sen)
 	{
 		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
 	}
+//	if (++i == 60000)
+//		i = 0;
+//	if (i % 2 == 1)
+//	{
+//		EX_BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
+//		ggx_=ggx,ggy_=ggy,ggz_=ggz,aax_=aax,aay_=aay,aaz_=aaz;
+//	}
+//	else
+//	{
+//		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
+//	}
 	
 	imu_info->raw_info.acc_x = aax;
 	imu_info->raw_info.acc_y = aay;

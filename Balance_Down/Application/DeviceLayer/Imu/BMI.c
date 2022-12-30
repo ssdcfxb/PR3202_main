@@ -301,7 +301,7 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
     @param[in]  (int16_t) gx,  gy,  gz,  ax,  ay,  az
     @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
 */
-float q0_init = 0.0f, q1_init = 1.0f, q2_init = 0.0f, q3_init = 0.0f;
+float q0_init = 1.0f, q1_init = 0.0f, q2_init = 0.0f, q3_init = 0.0f;
 //float arz = -90.0f;
 //float ary = 0.0f;
 //float arx = 0.0f;

@@ -16,8 +16,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
 
-#include "rc_sensor.h"
-#include "user_motor.h"
+#include "device.h"
 
 /* Exported macro ------------------------------------------------------------*/
 #define Fric_15 4400.0f

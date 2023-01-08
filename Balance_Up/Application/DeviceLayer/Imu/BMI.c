@@ -302,8 +302,8 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
     @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
 */
 //float q0_init = 0.0f, q1_init = 1.0f, q2_init = 0.0f, q3_init = 0.0f;
-float arz = 0.0f;
-float ary = 90.0f;
+float arz = 180.0f;
+float ary = 0.0f;//90
 float arx = 0.0f;
 arm_matrix_instance_f32 Trans;
 arm_matrix_instance_f32 Src;
@@ -478,7 +478,7 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		
 		vx = -2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
 		vy = -2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
-		vz = -q0*q0 - q1*q1 - q2*q2 + q3*q3;//cos(Roll)cos(Pitch) cos(K,k)
+		vz = -2*(q0*q0 - q1*q1 - q2*q2 + q3*q3);//cos(Roll)cos(Pitch) cos(K,k)
 		
 		ex = (az*vy - ay*vz) ;
 		ey = (ax*vz - az*vx) ;//切线方向加速度

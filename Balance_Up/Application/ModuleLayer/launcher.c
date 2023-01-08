@@ -42,9 +42,6 @@ void Launcher_SendOut(void);
 
 void Launcher_Stop(void);
 
-/* Exported functions --------------------------------------------------------*/
-//临时发送函数
-extern void CAN1_Send_With_int16_to_uint8(uint32_t stdId, int16_t *dat);
 /* Private variables ---------------------------------------------------------*/
 float      left_speed = 0, right_speed = 0;
 int16_t    launcher_out[3];
@@ -90,7 +87,9 @@ launcher_t launcher = {
 };
 
 /* Exported variables --------------------------------------------------------*/
+extern int16_t can1_send_buf[8];
 
+/* Exported functions --------------------------------------------------------*/
 /**
   * @brief  发射机构初始化
   * @param  
@@ -594,6 +593,7 @@ void Dial_Ctrl(void)
 	{
 		launcher_out[RM_motor[DIAL].id.buff_p] = RM_motor[DIAL].ctr_posit(&RM_motor[DIAL], 
 		                                      launcher.info->measure_dial_angle / M2006_ECD_TO_ANGLE);
+		
 	}
 	
 }
@@ -608,10 +608,20 @@ void Dial_Ctrl(void)
   */
 void Launcher_SendOut(void)
 {
-	CAN1_Send_With_int16_to_uint8(RM_motor[FRIC_L].id.tx_id,launcher_out);
-//	CAN1_Send_With_int16_to_uint8(RM_motor[FRIC_R].id.tx_id,launcher_out);
-//	CAN1_Send_With_int16_to_uint8(RM_motor[DIAL].id.tx_id,launcher_out);
+	if(RM_motor[FRIC_L].state.work_state == M_ONLINE)
+		can1_send_buf[RM_motor[FRIC_L].id.buff_p] = launcher_out[RM_motor[FRIC_L].id.buff_p];
+	else
+		can1_send_buf[RM_motor[FRIC_L].id.buff_p] = 0;
 	
+	if(RM_motor[FRIC_R].state.work_state == M_ONLINE)
+		can1_send_buf[RM_motor[FRIC_R].id.buff_p] = launcher_out[RM_motor[FRIC_R].id.buff_p];
+	else
+		can1_send_buf[RM_motor[FRIC_R].id.buff_p] = 0;
+	
+	if(RM_motor[DIAL].state.work_state == M_ONLINE)
+		can1_send_buf[RM_motor[DIAL].id.buff_p] = launcher_out[RM_motor[DIAL].id.buff_p];
+	else
+		can1_send_buf[RM_motor[DIAL].id.buff_p] = 0;
 }
 
 
@@ -639,7 +649,7 @@ void Launcher_Stop(void)
 	launcher_out[1] = 0;
 	launcher_out[2] = 0;
 	
-	CAN1_Send_With_int16_to_uint8(RM_motor[FRIC_L].id.tx_id,launcher_out);
-//	CAN1_Send_With_int16_to_uint8(RM_motor[FRIC_R].id.tx_id,launcher_out);
-//	CAN1_Send_With_int16_to_uint8(RM_motor[DIAL].id.tx_id,launcher_out);
+	can1_send_buf[0] = launcher_out[0];
+	can1_send_buf[1] = launcher_out[1];
+	can1_send_buf[2] = launcher_out[2];
 }

@@ -16,8 +16,11 @@ uint16_t i = 0;
 short ggx, ggy, ggz;
 short aax, aay, aaz;
 
+//临时变量
 short ggx_, ggy_, ggz_;
 short aax_, aay_, aaz_;
+float pitch_ex, roll_ex, yaw_ex;
+float pitch, roll, yaw;
 
 float gyrox, gyroy, gyroz;
 float accx, accy, accz;
@@ -46,12 +49,24 @@ void imu_update(imu_sensor_t *imu_sen)
 //	{
 //		EX_BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
 //		ggx_=ggx,ggy_=ggy,ggz_=ggz,aax_=aax,aay_=aay,aaz_=aaz;
+//		
+//	/* 原始数据低通滤波 */
+//	gyrox_ = lowpass(gyrox_, gyrox, 0.3);
+//	gyroy_ = lowpass(gyroy_, gyroy, 0.3);
+//	gyroz_ = lowpass(gyroz_, gyroz, 0.3);
+//	accx_ = lowpass(accx_, accx, 1);
+//	accy_ = lowpass(accy_, accy, 1);
+//	accz_ = lowpass(accz_, accz, 1);
+//	
+//	/* 解算陀螺仪数据 */
+//  BMI_Get_EulerAngle(&pitch_ex, &roll_ex, &yaw_ex,\
+//										 &pitch_, &roll_, &yaw_, \
+//										 &gyrox_, &gyroy_, &gyroz_, \
+//										 &accx_, &accy_, &accz_);
 //	}
 //	else
 //	{
 //		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
-//	}
-	
 	imu_info->raw_info.acc_x = aax;
 	imu_info->raw_info.acc_y = aay;
 	imu_info->raw_info.acc_z = aaz;
@@ -76,7 +91,35 @@ void imu_update(imu_sensor_t *imu_sen)
 										 &pitch_, &roll_, &yaw_, \
 										 &gyrox_, &gyroy_, &gyroz_, \
 										 &accx_, &accy_, &accz_);
-    
+										 
+	pitch = imu_info->base_info.pitch, roll = imu_info->base_info.roll, yaw = imu_info->base_info.yaw;
+//	}
+	
+//	imu_info->raw_info.acc_x = aax;
+//	imu_info->raw_info.acc_y = aay;
+//	imu_info->raw_info.acc_z = aaz;
+//	imu_info->raw_info.gyro_x = ggx;
+//	imu_info->raw_info.gyro_y = ggy;
+//	imu_info->raw_info.gyro_z = ggz;
+//	
+//	/* 坐标系变换 */
+//	Vector_Transform(ggx, ggy, ggz, aax, aay, aaz,\
+//	                 &gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
+//	
+//	/* 原始数据低通滤波 */
+//	gyrox_ = lowpass(gyrox_, gyrox, 0.3);
+//	gyroy_ = lowpass(gyroy_, gyroy, 0.3);
+//	gyroz_ = lowpass(gyroz_, gyroz, 0.3);
+//	accx_ = lowpass(accx_, accx, 1);
+//	accy_ = lowpass(accy_, accy, 1);
+//	accz_ = lowpass(accz_, accz, 1);
+//	
+//	/* 解算陀螺仪数据 */
+//  BMI_Get_EulerAngle(&imu_info->base_info.pitch, &imu_info->base_info.roll, &imu_info->base_info.yaw,\
+//										 &pitch_, &roll_, &yaw_, \
+//										 &gyrox_, &gyroy_, &gyroz_, \
+//										 &accx_, &accy_, &accz_);
+//    
 	/* 计算陀螺仪数据 */
 	//pitch
 	imu_info->base_info.rate_pitch = pitch_;

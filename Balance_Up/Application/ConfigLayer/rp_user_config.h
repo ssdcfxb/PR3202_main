@@ -18,27 +18,6 @@
 #define EVENT_SEND_CAN2_MAILBOX (0x1UL << 1)
 /* Exported types ------------------------------------------------------------*/
 /* Ó¦ÓÃ²ã --------------------------------------------------------------------*/
-/**
- *	@brief	pid¿ØÖÆÆ÷
- *	@class	controller
- */
-typedef struct pid_ctrl {
-	float		target;
-	float		measure;
-	float 	err;
-	float 	last_err;
-	float		kp;
-	float 	ki;
-	float 	kd;
-	float 	pout;
-	float 	iout;
-	float 	dout;
-	float 	out;
-	float		integral;
-	float 	integral_max;
-	float 	out_max;
-} pid_ctrl_t;
-
 /* Remote Mode Enum */
 typedef enum {
 	RC = 0,

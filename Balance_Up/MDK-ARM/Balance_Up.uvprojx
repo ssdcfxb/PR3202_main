@@ -10,6 +10,7 @@
       <TargetName>Balance_Up</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
@@ -323,14 +324,14 @@
             <PlainCh>0</PlainCh>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
-            <wLevel>3</wLevel>
+            <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
-            <v6Lang>5</v6Lang>
-            <v6LangP>3</v6LangP>
+            <v6Lang>3</v6Lang>
+            <v6LangP>5</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -340,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\Application\AlgorithmLayer;..\Application\ConfigLayer;..\Application\DeviceLayer;..\Application\DriverLayer;..\Application\DeviceLayer\Imu;..\Application\DeviceLayer\Sensor;..\Application\ModuleLayer;..\Application\HardwareLayer;..\Application\ProtocolLayer;..\Application\TaskLayer;..\Application\UserLayer</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Application/AlgorithmLayer;../Application/ConfigLayer;../Application/DeviceLayer;../Application/DriverLayer;../Application/DeviceLayer/Imu;../Application/DeviceLayer/Sensor;../Application/ModuleLayer;../Application/HardwareLayer;../Application/ProtocolLayer;../Application/TaskLayer;../Application/UserLayer</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -445,14 +446,19 @@
           <GroupName>Module</GroupName>
           <Files>
             <File>
+              <FileName>gimbal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ModuleLayer\gimbal.c</FilePath>
+            </File>
+            <File>
               <FileName>launcher.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ModuleLayer\launcher.c</FilePath>
             </File>
             <File>
-              <FileName>module.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\ModuleLayer\module.h</FilePath>
+              <FileName>module.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ModuleLayer\module.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -550,11 +556,6 @@
           <GroupName>Driver</GroupName>
           <Files>
             <File>
-              <FileName>driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\DriverLayer\driver.c</FilePath>
-            </File>
-            <File>
               <FileName>drv_can.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DriverLayer\drv_can.c</FilePath>
@@ -578,6 +579,11 @@
               <FileName>drv_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DriverLayer\drv_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DriverLayer\driver.c</FilePath>
             </File>
           </Files>
         </Group>

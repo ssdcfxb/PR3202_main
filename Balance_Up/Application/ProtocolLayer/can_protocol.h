@@ -21,6 +21,7 @@
 #define MOMENTUM_CAN_ID_L      GM6020_CAN_ID_205 
 #define MOMENTUM_CAN_ID_R 		 GM6020_CAN_ID_206
 
+void CAN_SendAll(void);
 void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 

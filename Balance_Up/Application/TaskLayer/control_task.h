@@ -4,6 +4,7 @@
 #include "cmsis_os.h"
 #include "main.h"
 #include "module.h"
+#include "can_protocol.h"
 void StartControlTask(void const * argument);
 
 #endif

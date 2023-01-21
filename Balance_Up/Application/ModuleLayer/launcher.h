@@ -4,10 +4,6 @@
  * @Version     V1.0
  * @date        20-November-2022
  * @brief       Launcher Control Center
- * @update
- *              v1.0(18-November-2022)
- *              v1.1(20-November-2022)
- *                  1.修改速射连发模式，闭角度环->闭速度环
  */
 
 #ifndef __LAUNCHER_H

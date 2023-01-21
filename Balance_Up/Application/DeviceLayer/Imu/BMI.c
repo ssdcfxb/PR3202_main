@@ -326,25 +326,25 @@ void transform_init(void)
 	arx = arx * (double)0.017453;
 
 	/* 旋转矩阵赋值（三个旋转矩阵叠加） */
-	trans[0] =  arm_cos_f32(arz)*arm_cos_f32(ary);
-	trans[1] =  arm_sin_f32(arz)*arm_cos_f32(ary);
-	trans[2] =  arm_sin_f32(ary);
-	trans[3] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) - arm_sin_f32(arz)*arm_cos_f32(arx);
-	trans[4] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) + arm_cos_f32(arz)*arm_cos_f32(arx);
-	trans[5] =  arm_cos_f32(ary)*arm_sin_f32(arx);
-	trans[6] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) + arm_sin_f32(arz)*arm_sin_f32(arx);
-	trans[7] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) - arm_cos_f32(arz)*arm_sin_f32(arx);
-	trans[8] =  arm_cos_f32(ary)*arm_cos_f32(arx);
+	trans[0] = arm_cos_f32(arz)*arm_cos_f32(ary);
+	trans[1] = arm_cos_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) - arm_sin_f32(arz)*arm_cos_f32(arx);
+	trans[2] = arm_cos_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) + arm_sin_f32(arz)*arm_sin_f32(arx);
+	trans[3] = arm_sin_f32(arz)*arm_cos_f32(ary);
+	trans[4] = arm_sin_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) + arm_cos_f32(arz)*arm_cos_f32(arx);
+	trans[5] = arm_sin_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) - arm_cos_f32(arz)*arm_sin_f32(arx);
+	trans[6] = -arm_sin_f32(ary);
+	trans[7] = arm_cos_f32(ary)*arm_sin_f32(arx);
+	trans[8] = arm_cos_f32(ary)*arm_cos_f32(arx);
 	
 	/* 四元数旋转矩阵 */
 //	trans[0] = q0_init*q0_init + q1_init*q1_init - q2_init*q2_init - q3_init*q3_init;
 //	trans[1] = 2*(q1_init * q2_init - q0_init * q3_init);
-//	trans[2] = 2*(q1_init * q3_init - q0_init * q2_init);
-//	trans[3] = 2*(q1_init * q2_init - q0_init * q3_init);
+//	trans[2] = 2*(q0_init * q2_init + q1_init * q3_init);
+//	trans[3] = 2*(q0_init * q3_init + q1_init * q2_init);
 //	trans[4] = q0_init*q0_init - q1_init*q1_init + q2_init*q2_init - q3_init*q3_init;
 //	trans[5] = 2*(q2_init * q3_init - q0_init * q1_init);
 //	trans[6] = 2*(q1_init * q3_init - q0_init * q2_init);
-//	trans[7] = 2*(q2_init * q3_init - q0_init * q1_init);
+//	trans[7] = 2*(q0_init * q1_init + q2_init * q3_init);
 //	trans[8] = q0_init*q0_init - q1_init*q1_init - q2_init*q2_init + q3_init*q3_init;
 
 	arm_mat_init_f32(&Trans, 3, 3, (float *)trans); //3x3变换矩阵初始化
@@ -397,9 +397,10 @@ extern struct bmi2_dev ex_bmi270;
     @ly
         水平时陀螺仪距yaw轴的垂直距离，单位为m
 */
-float Kp = 0.5f;//4
+float Kp = 1.f;//4
 float norm;
-float halfT = 0.00025f;
+//float halfT = 0.00025f;
+float halfT = 0.0005f;
 float lp = 0.0f, ly = 0.0f;
 float wx, wy, wz;
 float afx, afy, afz;
@@ -478,7 +479,7 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		
 		vx = -2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
 		vy = -2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
-		vz = -2*(q0*q0 - q1*q1 - q2*q2 + q3*q3);//cos(Roll)cos(Pitch) cos(K,k)
+		vz = -(q0*q0 - q1*q1 - q2*q2 + q3*q3);//cos(Roll)cos(Pitch) cos(K,k)
 		
 		ex = (az*vy - ay*vz) ;
 		ey = (ax*vz - az*vx) ;//切线方向加速度
@@ -643,5 +644,4 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 //	
 //	return 0;
 //}
-
 

@@ -42,7 +42,7 @@ imu_sensor_t imu_sensor = {
 	.bmi = &bmi_client,
 	.ex_bmi = &ex_bmi_client,
 	.info = &imu_info,
-	.driver.tpye = DR_SPI1,
+	.driver.tpye = DR_SPI2,
 	.work_state.dev_state = DEV_OFFLINE,
 	.id = DEV_ID_IMU,	
 	.work_state.offline_max_cnt = 50,	
@@ -83,21 +83,31 @@ void imu_init(struct imu_struct *self)
 		
 	}
 	
-	self->ex_bmi->drive_type = BMI2_SPI_INTF;
-	self->ex_bmi->device_aces = BMI2_EXT_ACES;
-	
 	rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
 	rs = rslt;
-//	rslt = self->ex_bmi->init(self->ex_bmi->dev,self->ex_bmi->drive_type,self->ex_bmi->device_aces);
-//	rs1 = rslt;
 
 	while(rslt)
 	{
         self->work_state.err_code = IMU_INIT_ERR;
         rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
 		rs = rslt;
-//	rslt = self->ex_bmi->init(self->ex_bmi->dev,self->ex_bmi->drive_type,self->ex_bmi->device_aces);
-//		rs1 = rslt;
+	}	
+
+	
+	
+	self->ex_bmi->read = bmi2_get_regs;
+  self->ex_bmi->write = bmi2_set_regs;
+	
+	self->ex_bmi->drive_type = BMI2_SPI_INTF;
+	self->ex_bmi->device_aces = BMI2_EXT_ACES;
+	
+	rslt = self->ex_bmi->init(self->ex_bmi->dev,self->ex_bmi->drive_type,self->ex_bmi->device_aces);
+	rs1 = rslt;
+	
+	while(rslt)
+	{
+	rslt = self->ex_bmi->init(self->ex_bmi->dev,self->ex_bmi->drive_type,self->ex_bmi->device_aces);
+		rs1 = rslt;
 	}	
 
 	self->work_state.dev_state = DEV_ONLINE;

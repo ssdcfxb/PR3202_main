@@ -4,10 +4,6 @@
  * @Version     V1.0
  * @date        20-November-2022
  * @brief       Launcher Control Center
- * @update
- *              v1.0(18-November-2022)
- *              v1.1(20-November-2022)
- *                  1.修改速射连发模式，闭角度环->闭速度环
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -18,8 +14,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-/* Private typedef -----------------------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 void Launcher_Init(void);
 void Launcher_Ctrl(void);
 void Launcher_SelfProtect(void);
@@ -42,6 +36,7 @@ void Launcher_SendOut(void);
 
 void Launcher_Stop(void);
 
+/* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 float      left_speed = 0, right_speed = 0;
 int16_t    launcher_out[3];
@@ -76,6 +71,9 @@ launcher_conf_t   launcher_conf = {
 	.wait_time = 1000,  //发射间隔时间，单位ms
 };
 
+/* Exported variables --------------------------------------------------------*/
+extern int16_t can1_send_buf[8];
+
 launcher_t launcher = {
 	.dev = &launcher_dev,
 	.info = &launcher_info,
@@ -85,9 +83,6 @@ launcher_t launcher = {
 	.ctrl = Launcher_Ctrl,
 	.self_protect = Launcher_SelfProtect,
 };
-
-/* Exported variables --------------------------------------------------------*/
-extern int16_t can1_send_buf[8];
 
 /* Exported functions --------------------------------------------------------*/
 /**
@@ -107,7 +102,6 @@ void Launcher_Init(void)
 }
 
 
-
 /**
   * @brief  发射机构控制
   * @param  
@@ -123,6 +117,19 @@ void Launcher_Ctrl(void)
 }
 
 
+/**
+  * @brief  发射机构控制离线保护
+  * @param  
+  * @retval 
+  */
+void Launcher_SelfProtect(void)
+{
+	Launcher_Stop();
+	Launcher_GetInfo();
+}
+
+
+/* Private functions ---------------------------------------------------------*/
 /**
   * @brief  读取发射机构相关信息
   * @param  
@@ -624,18 +631,6 @@ void Launcher_SendOut(void)
 		can1_send_buf[RM_motor[DIAL].id.buff_p] = 0;
 }
 
-
-
-/**
-  * @brief  发射机构控制离线保护
-  * @param  
-  * @retval 
-  */
-void Launcher_SelfProtect(void)
-{
-	Launcher_Stop();
-	Launcher_GetInfo();
-}
 
 
 /**

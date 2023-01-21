@@ -196,8 +196,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			i = 0;
 		}
-		imu_sensor.update(&imu_sensor);
 		
+		
+		imu_sensor.update(&imu_sensor);
 		
 		
 	}

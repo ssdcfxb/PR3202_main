@@ -1,18 +1,9 @@
+
+/* Includes ------------------------------------------------------------------*/
 #include "gimbal.h"
 
-//  0:yaw轴  1:pitch轴
-int16_t  gim_out[2];
-extern int16_t can2_send_buf[8];
-
-float yaw_gyro_position[7] = {10.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-float yaw_gyro_position_in[7] = {500.f, 2.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-float pitch_gyro_position[7] = {20.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-float pitch_gyro_position_in[7] = {80.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
-float yaw_mach_position[7] = {0.638f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-float yaw_mach_position_in[7] = {350.f, 1.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-float pitch_mach_position[7] = {1.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-float pitch_mach_position_in[7] = {200.f, 7.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-
+/* Private macro -------------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 void Gimbal_Init(void);
 void Gimbal_Ctrl(void);
 void Gimbal_SelfProtect(void);
@@ -30,6 +21,35 @@ void Gimbal_Yaw_Angle_PidCalc(void);
 void Gimbal_Pitch_Angle_PidCalc(void);
 void Gimbal_SendOut(void);
 void Gimbal_Stop(void);
+
+void Gimbal_Test(void);
+
+/* Private typedef -----------------------------------------------------------*/
+/* Private functions ---------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+
+//  0:yaw轴  1:pitch轴
+int16_t  gim_out[2];
+
+/*
+	float	  kp;
+	float 	ki;
+	float 	kd;
+	
+	float   blind_err;	
+	float 	integral_max;	
+	float   iout_max;
+	float 	out_max;
+*/
+float yaw_gyro_position[7] = {20.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+float yaw_gyro_position_in[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
+float pitch_gyro_position[7] = {40.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+float pitch_gyro_position_in[7] = {80.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
+
+float yaw_mach_position[7] = {0.638f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+float yaw_mach_position_in[7] = {350.f, 1.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+float pitch_mach_position[7] = {1.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+float pitch_mach_position_in[7] = {200.f, 7.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
 
 // 云台设备
 gimbal_dev_t		gim_dev = {
@@ -53,11 +73,14 @@ gimbal_conf_t   gim_conf = {
 	.rc_pitch_motor_offset = 110,
 	.rc_yaw_imu_offset = 1100.0f,//3300
 	.rc_pitch_imu_offset = 1100.0f,
-	.max_pitch_imu_angle = 55.0f,
-	.min_pitch_imu_angle = -22.0f,
+	.max_pitch_imu_angle = 18.0f,
+	.min_pitch_imu_angle = -35.0f,
 	.max_pitch_motor_angle = 6100, // 双枪、麦轮 7200  
 	.min_pitch_motor_angle = 5000, // 双枪、麦轮 6100
 };
+
+/* Exported variables --------------------------------------------------------*/
+extern int16_t can2_send_buf[8];
 
 gimbal_t gimbal = {
 	.dev = &gim_dev,
@@ -68,7 +91,7 @@ gimbal_t gimbal = {
 	.self_protect = Gimbal_SelfProtect,
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Exported functions --------------------------------------------------------*/
 void Gimbal_Init(void)
 {
 	
@@ -85,9 +108,51 @@ void Gimbal_Ctrl(void)
 	
 	Gimbal_Reset();
 	
+	Gimbal_Test();
+	
 	Gimbal_MotorCtrl();
 	
 	Gimbal_SendOut();
+}
+
+
+/**
+  * @brief  云台控制离线保护
+  * @param  
+  * @retval 
+  */
+void Gimbal_SelfProtect(void)
+{
+	Gimbal_Stop();
+	Gimbal_GetInfo();
+	flag.gimbal_flag.reset_start = 1;
+	flag.gimbal_flag.reset_ok = 0;
+}
+
+/* Private functions ---------------------------------------------------------*/
+void Gimbal_Test(void)
+{
+	static uint16_t cnt = 0;
+	gimbal.info->target_pitch_imu_angle = 0.f;
+	if (abs(gimbal.info->target_yaw_imu_angle - gimbal.info->measure_yaw_imu_angle) < 0.5f)
+	{
+		cnt++;
+		if (cnt == 500)
+		{
+			if (gimbal.info->target_yaw_imu_angle > 0)
+			{
+				gimbal.info->target_yaw_imu_angle = -30.f;
+			}
+			else
+			{
+				gimbal.info->target_yaw_imu_angle = 30.f;
+			}
+		}
+	}
+	else
+	{
+		cnt = 0;
+	}
 }
 
 
@@ -120,6 +185,22 @@ void Gimbal_GetInfo(void)
 	}
 }
 
+void Gimbal_GetBaseInfo(void)
+{
+	gimbal.info->measure_yaw_motor_angle = RM_motor[GIM_Y].rx_info.angle;
+	gimbal.info->measure_yaw_motor_speed = RM_motor[GIM_Y].rx_info.speed;
+	gimbal.info->measure_pitch_motor_angle = RM_motor[GIM_P].rx_info.angle;
+	gimbal.info->measure_pitch_motor_speed = RM_motor[GIM_P].rx_info.speed;
+	
+	gimbal.info->measure_yaw_imu_speed = imu_sensor.info->base_info.ave_rate_yaw;
+	gimbal.info->measure_yaw_imu_angle = imu_sensor.info->base_info.yaw;
+	gimbal.info->measure_pitch_imu_speed = imu_sensor.info->base_info.ave_rate_pitch;
+	gimbal.info->measure_pitch_imu_angle = imu_sensor.info->base_info.pitch;
+	gimbal.info->measure_roll_imu_speed = imu_sensor.info->base_info.ave_rate_roll;
+	gimbal.info->measure_roll_imu_angle = imu_sensor.info->base_info.roll;
+	
+}
+
 void PID_ParamsInit(void)
 {
 	if (gimbal.info->gimbal_mode == gim_machine)
@@ -136,22 +217,6 @@ void PID_ParamsInit(void)
 		RM_motor[GIM_Y].pid_init(&RM_motor[GIM_Y].pid.position_in, yaw_gyro_position_in);
 		RM_motor[GIM_Y].pid_init(&RM_motor[GIM_Y].pid.position, yaw_gyro_position);
 	}
-}
-
-void Gimbal_GetBaseInfo(void)
-{
-	gimbal.info->measure_yaw_motor_angle = RM_motor[GIM_Y].rx_info.angle;
-	gimbal.info->measure_yaw_motor_speed = RM_motor[GIM_Y].rx_info.speed;
-	gimbal.info->measure_pitch_motor_angle = RM_motor[GIM_P].rx_info.angle;
-	gimbal.info->measure_pitch_motor_speed = RM_motor[GIM_P].rx_info.speed;
-	
-	gimbal.info->measure_yaw_imu_speed = imu_sensor.info->base_info.ave_rate_yaw;
-	gimbal.info->measure_yaw_imu_angle = imu_sensor.info->base_info.yaw;
-	gimbal.info->measure_pitch_imu_speed = imu_sensor.info->base_info.ave_rate_pitch;
-	gimbal.info->measure_pitch_imu_angle = imu_sensor.info->base_info.pitch;
-	gimbal.info->measure_roll_imu_speed = imu_sensor.info->base_info.ave_rate_roll;
-	gimbal.info->measure_roll_imu_angle = imu_sensor.info->base_info.roll;
-	
 }
 
 void Gimbal_GetRcInfo(void)
@@ -399,13 +464,15 @@ void Gimbal_Pitch_Angle_PidCalc(void)
 	}
 	else if (gimbal.info->gimbal_mode == gim_gyro)
 	{
-		RM_motor[GIM_P].base_info.motor_out = RM_motor[GIM_P].ctr_pid2(&RM_motor[GIM_P].pid.position, 
+		// pitch轴增量与电机增量方向不同
+		RM_motor[GIM_P].base_info.motor_out = -RM_motor[GIM_P].ctr_pid2(&RM_motor[GIM_P].pid.position, 
 																																	&RM_motor[GIM_P].pid.position_in,
 																																	gimbal.info->measure_pitch_imu_angle,
 																																	gimbal.info->measure_pitch_imu_speed,
 																																	gimbal.info->target_pitch_imu_angle,
 																																	0);
-		gim_out[RM_motor[GIM_P].id.buff_p] = RM_motor[GIM_P].base_info.motor_out;
+		gim_out[RM_motor[GIM_P].id.buff_p] = RM_motor[GIM_P].base_info.motor_out\
+																				- 47 * gimbal.info->target_pitch_imu_angle - 6200;//前馈
 	}
 	
 }
@@ -422,7 +489,7 @@ void Gimbal_SendOut(void)
 	// yaw轴电机离线保护
 	if (RM_motor[GIM_Y].state.work_state == M_ONLINE)
 	{
-		can2_send_buf[RM_motor[GIM_Y].id.buff_p] = 0;//gim_out[RM_motor[GIM_Y].id.buff_p];
+		can2_send_buf[RM_motor[GIM_Y].id.buff_p] = gim_out[RM_motor[GIM_Y].id.buff_p];
 	}
 	else
 	{
@@ -432,7 +499,7 @@ void Gimbal_SendOut(void)
 	// pitch轴电机离线保护
 	if (RM_motor[GIM_P].state.work_state == M_ONLINE)
 	{
-		can2_send_buf[RM_motor[GIM_P].id.buff_p] = -gim_out[RM_motor[GIM_P].id.buff_p];
+		can2_send_buf[RM_motor[GIM_P].id.buff_p] = gim_out[RM_motor[GIM_P].id.buff_p];
 	}
 	else
 	{
@@ -440,20 +507,6 @@ void Gimbal_SendOut(void)
 	}
 }
 
-
-
-/**
-  * @brief  云台控制离线保护
-  * @param  
-  * @retval 
-  */
-void Gimbal_SelfProtect(void)
-{
-	Gimbal_Stop();
-	Gimbal_GetInfo();
-	flag.gimbal_flag.reset_start = 1;
-	flag.gimbal_flag.reset_ok = 0;
-}
 
 
 void Gimbal_Stop()

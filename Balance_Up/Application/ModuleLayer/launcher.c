@@ -20,12 +20,14 @@ void Launcher_SelfProtect(void);
 
 void Launcher_GetInfo(void);
 void Launcher_GetBaseInfo(void);
+void Judge_GetInfo(void);
+void Judge_GetSpeedInfo(void);
+void Judge_AdaptFricSpeed(void);
+void Judge_AdaptDialSpeed(void);
 void Launcher_GetCtrlInfo(void);
 void Launcher_GetRcState(void);
 void Get_LauncherStatus(void);
 void Fric_StatusCheck(void);
-void Fric_SpeedInc(void);
-void Fric_SpeedDec(void);
 void Dial_StatusCheck(void);
 
 void Launcher_MotorCtrl(void);
@@ -38,7 +40,7 @@ void Launcher_Stop(void);
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-float      left_speed = 0, right_speed = 0;
+//float      left_speed = 0, right_speed = 0;
 int16_t    launcher_out[3];
 
 // 发射机构设备
@@ -61,14 +63,14 @@ launcher_work_info_t  launcher_work_info = {
 };
 
 launcher_conf_t   launcher_conf = {
-	.fric_speed = Fric_30,
-	.dial_speed = -5000.0f,
+	.fric_speed = Fric_15,
+	.dial_speed = -1000.0f,
 	.dial_torque_limit = 2000.0f,
 	.lock_angle_check = 1.5f,
 	.lock_cnt = 50,
 	.Back_Angle = 45.0f,
 	.Load_Angle = -45.0f,
-	.wait_time = 1000,  //发射间隔时间，单位ms
+//	.wait_time = 1000,  //发射间隔时间，单位ms
 };
 
 /* Exported variables --------------------------------------------------------*/
@@ -157,10 +159,163 @@ void Launcher_GetBaseInfo(void)
 	launcher.info->measure_dial_speed = RM_motor[DIAL].rx_info.speed;
 	launcher.info->measure_dial_angle = RM_motor[DIAL].rx_info.angle_sum * M2006_ECD_TO_ANGLE;
 	
-	left_speed = RM_motor[FRIC_L].rx_info.speed;
-	right_speed = RM_motor[FRIC_R].rx_info.speed;
+	Judge_GetInfo();
+//	left_speed = RM_motor[FRIC_L].rx_info.speed;
+//	right_speed = RM_motor[FRIC_R].rx_info.speed;
 }
 
+
+/**
+  * @brief  读取裁判系统信息
+  * @param  
+  * @retval 
+  */
+void Judge_GetInfo(void)
+{
+	Judge_GetSpeedInfo();
+	
+	Judge_AdaptFricSpeed();
+	
+	Judge_AdaptDialSpeed();
+	
+}
+
+
+/**
+  * @brief  读取限制弹速与测量弹速
+  * @param  
+  * @retval 
+  */
+void Judge_GetSpeedInfo(void)
+{
+	launcher.info->limit_speed = (float)judge.info->game_robot_status.shooter_id1_17mm_speed_limit;
+	launcher.info->measure_launcher_speed = judge.info->shoot_data.bullet_speed;
+	
+	if (judge.work_state == DEV_OFFLINE)
+	{
+		launcher.conf->fric_speed = Fric_15;
+	}
+	else
+	{
+		switch (judge.info->game_robot_status.shooter_id1_17mm_speed_limit)
+		{
+			case 0:
+				launcher.conf->fric_speed = 0;
+				break;
+			case 15:
+				launcher.conf->fric_speed = Fric_15;
+				break;
+			case 18:
+				launcher.conf->fric_speed = Fric_18;
+				break;		
+			case 20:
+				launcher.conf->fric_speed = Fric_20;
+				break;	
+			case 22:
+				launcher.conf->fric_speed = Fric_22;
+				break;			
+			case 30:
+				launcher.conf->fric_speed = Fric_30;
+				break;	
+			default:
+				launcher.conf->fric_speed = 0;
+				break;
+		}
+	}
+}
+
+
+/**
+  * @brief  调整摩擦轮转速
+  * @param  
+  * @retval 
+  */
+void Judge_AdaptFricSpeed(void)
+{
+	static int8_t cnt = 0, speed_adapt = 0, adapt_k = 5;
+	
+	if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.95f))
+	{
+		cnt++;
+		if (cnt > 2)
+		{
+			cnt = 0;
+			speed_adapt = -1;
+		}
+	}
+	else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.95f))
+	{
+		cnt--;
+		if (cnt < -2)
+		{
+			cnt = 0;
+			speed_adapt = 1;
+		}
+	}
+	else
+	{
+		cnt = 0;
+		speed_adapt = 0;
+	}
+	
+	launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
+}
+
+
+/**
+  * @brief  调整拨盘转速
+  * @param  
+  * @retval 
+  */
+void Judge_AdaptDialSpeed(void)
+{
+	static uint8_t heat_low = 0, heat_high = 0;
+	
+	launcher.info->limit_heat = judge.info->game_robot_status.shooter_id1_17mm_cooling_limit;
+	launcher.info->measure_launcher_heat = judge.info->power_heat_data.shooter_id1_17mm_cooling_heat;
+	
+	if ((launcher.info->limit_heat - launcher.info->measure_launcher_heat) > 50)
+	{
+		heat_low = 1;
+	}
+	else 
+	{
+		heat_low = 0;
+	}
+	if ((launcher.info->limit_heat - launcher.info->measure_launcher_heat) < 20)
+	{
+		heat_high = 1;
+	}
+	else
+	{
+		heat_high = 0;
+	}
+	
+	
+	if (judge.work_state == DEV_OFFLINE)
+	{
+		launcher.conf->dial_speed = -500.0f;
+	}
+	else
+	{
+		if (heat_low == 1)
+		{
+			launcher.conf->dial_speed = -1500.0f;
+		}
+		else
+		{
+			launcher.conf->dial_speed = -1000.0f;
+		}
+		if (heat_high == 1)
+		{
+			launcher.conf->dial_speed = -0.0f;
+		}
+		else
+		{
+			launcher.conf->dial_speed = -1000.0f;
+		}
+	}
+}
 
 /**
   * @brief  读取遥控器控制信息
@@ -203,7 +358,7 @@ void Launcher_GetRcState(void)
 			launcher.info->init_s2 = 0;
 			
 			/**    读取遥控器拨杆跳变信息    **/
-			if (rc_sensor.info->s1 == RC_SW_UP)
+			if (launcher.info->launcher_mode == lch_gyro)
 			{
 				
 				if (rc_sensor.info->s2 == RC_SW_MID)
@@ -212,7 +367,11 @@ void Launcher_GetRcState(void)
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
-					launcher.work_info->launcher_commond = Adjust_Speed;
+					launcher.work_info->launcher_commond = Keep_Shoot;
+					if (launcher.info->last_s2 != rc_sensor.info->s2)
+					{
+						launcher.work_info->dial_status = Reload_Dial;
+					}
 				}
 				else if (rc_sensor.info->s2 == RC_SW_DOWN)
 				{
@@ -220,29 +379,7 @@ void Launcher_GetRcState(void)
 				}
 				
 			}
-			else if (rc_sensor.info->s1 == RC_SW_MID)
-			{
-				
-				if (rc_sensor.info->s2 == RC_SW_MID)
-				{
-					launcher.work_info->launcher_commond = Func_Reset;
-				}
-				else if (rc_sensor.info->s2 == RC_SW_UP)
-				{
-					launcher.work_info->launcher_commond = Sweep_Shoot;
-					if (launcher.info->last_s2 != rc_sensor.info->s2)
-					{
-						launcher.work_info->dial_status = SpeedKeep_Dial;
-						launcher.info->target_dial_speed = launcher.conf->dial_speed;
-					}
-				}
-				else if (rc_sensor.info->s2 == RC_SW_DOWN)
-				{
-					launcher.work_info->launcher_commond = Func_Reset;
-				}
-				
-			}
-			else if (rc_sensor.info->s1 == RC_SW_DOWN)
+			else if (launcher.info->launcher_mode == lch_machine)
 			{
 				
 				if (rc_sensor.info->s2 == RC_SW_MID)
@@ -260,12 +397,7 @@ void Launcher_GetRcState(void)
 				}
 				else if (rc_sensor.info->s2 == RC_SW_DOWN)
 				{
-					launcher.work_info->launcher_commond = Keep_Shoot;
-					if (launcher.info->last_s2 != rc_sensor.info->s2)
-					{
-						launcher.work_info->dial_status = Reload_Dial;
-						launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
-					}
+					launcher.work_info->launcher_commond = Magz_Open;
 				}
 				
 			}
@@ -307,7 +439,6 @@ void Get_LauncherStatus(void)
   */
 void Fric_StatusCheck(void)
 {
-	static int16_t last_thumbwheel = 0;
 	if ((launcher.work_info->launcher_commond == Fric_Toggle)
 		&& (launcher.info->last_s2 != rc_sensor.info->s2))
 	{
@@ -323,76 +454,6 @@ void Fric_StatusCheck(void)
 		{
 			launcher.work_info->fric_status = On_Fric;
 		}
-	}
-	if (launcher.work_info->launcher_commond == Adjust_Speed)
-	{
-		if (last_thumbwheel <= -600 && rc_sensor.info->thumbwheel > -590)
-		{
-			Fric_SpeedInc();
-		}
-		else if (last_thumbwheel >= 600 && rc_sensor.info->thumbwheel < 590)
-		{
-			Fric_SpeedDec();
-		}
-		last_thumbwheel = rc_sensor.info->thumbwheel;
-	}
-}
-
-/**
-  * @brief  增加摩擦轮转速
-  * @param  
-  * @retval 
-  */
-void Fric_SpeedInc(void)
-{
-	if(launcher.conf->fric_speed == Fric_30)
-	{
-		launcher.conf->fric_speed = Fric_30;
-	}
-	else if (launcher.conf->fric_speed == Fric_22)
-	{
-		launcher.conf->fric_speed = Fric_30;
-	}
-	else if (launcher.conf->fric_speed == Fric_20)
-	{
-		launcher.conf->fric_speed = Fric_22;
-	}
-	else if (launcher.conf->fric_speed == Fric_18)
-	{
-		launcher.conf->fric_speed = Fric_20;
-	}
-	else if (launcher.conf->fric_speed == Fric_15)
-	{
-		launcher.conf->fric_speed = Fric_18;
-	}
-}
-
-/**
-  * @brief  降低摩擦轮转速
-  * @param  
-  * @retval 
-  */
-void Fric_SpeedDec(void)
-{
-	if(launcher.conf->fric_speed == Fric_15)
-	{
-		launcher.conf->fric_speed = Fric_15;
-	}
-	else if (launcher.conf->fric_speed == Fric_18)
-	{
-		launcher.conf->fric_speed = Fric_15;
-	}
-	else if (launcher.conf->fric_speed == Fric_20)
-	{
-		launcher.conf->fric_speed = Fric_18;
-	}
-	else if (launcher.conf->fric_speed == Fric_22)
-	{
-		launcher.conf->fric_speed = Fric_20;
-	}
-	else if (launcher.conf->fric_speed == Fric_30)
-	{
-		launcher.conf->fric_speed = Fric_22;
 	}
 }
 
@@ -429,19 +490,6 @@ void Dial_StatusCheck(void)
 			else if (launcher.work_info->launcher_commond == Keep_Shoot)
 			{
 				/**    连发    **/
-				if (++launcher.work_info->shoot_cnt == 60000)
-				{
-					launcher.work_info->shoot_cnt = 0;
-				}
-				
-				if (launcher.work_info->shoot_cnt % launcher.conf->wait_time == 0)
-				{
-					launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
-				}
-			}
-			else if (launcher.work_info->launcher_commond == Sweep_Shoot)
-			{
-				/**    速射连发    **/
 				launcher.work_info->dial_status = SpeedKeep_Dial;
 			}
 		}
@@ -506,6 +554,7 @@ void Dial_StatusCheck(void)
 	else
 	{
 		launcher.work_info->dial_status = WaitCommond_Dial;
+//		launcher.info->target_dial_angle = launcher.info->measure_dial_angle;
 	}
 }
 

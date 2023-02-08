@@ -108,7 +108,7 @@ void Gimbal_Ctrl(void)
 	
 	Gimbal_Reset();
 	
-	Gimbal_Test();
+//	Gimbal_Test();
 	
 	Gimbal_MotorCtrl();
 	

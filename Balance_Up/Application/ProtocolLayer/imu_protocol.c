@@ -11,7 +11,7 @@ ave_filter_t imu_pitch_dif_speed_ave_filter;
 ave_filter_t imu_roll_dif_speed_ave_filter;
 ave_filter_t imu_yaw_dif_speed_ave_filter;
 
-uint16_t i = 0;
+//uint16_t i = 0;
 
 short ggx, ggy, ggz;
 short aax, aay, aaz;
@@ -35,21 +35,21 @@ void imu_update(imu_sensor_t *imu_sen)
   imu_info_t *imu_info = imu_sen->info;
 	
 	/* 获取陀螺仪数据 */
-//	if(imu_sen->driver.tpye == DR_SPI1)
-//	{
-//		EX_BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
-//	}
-//	else if(imu_sen->driver.tpye == DR_SPI2)
-//	{
-//		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
-//	}
-	if (++i == 60000)
-		i = 0;
-	if (i % 2 == 1)
+	if(imu_sen->driver.tpye == DR_SPI1)
+	{
+		EX_BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
+	}
+	else if(imu_sen->driver.tpye == DR_SPI2)
 	{
 		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
-		ggx_=ggx,ggy_=ggy,ggz_=ggz,aax_=aax,aay_=aay,aaz_=aaz;
-		
+	}
+//	if (++i == 60000)
+//		i = 0;
+//	if (i % 2 == 1)
+//	{
+//		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
+//		ggx_=ggx,ggy_=ggy,ggz_=ggz,aax_=aax,aay_=aay,aaz_=aaz;
+//		
 		/* 原始数据低通滤波 */
 //		gyrox_ = lowpass(gyrox_, ggx_, 0.3);
 //		gyroy_ = lowpass(gyroy_, ggy_, 0.3);
@@ -63,10 +63,10 @@ void imu_update(imu_sensor_t *imu_sen)
 //											 &pitch_, &roll_, &yaw_, \
 //											 &gyrox_, &gyroy_, &gyroz_, \
 //											 &accx_, &accy_, &accz_);
-	}
-	else
-	{
-		EX_BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
+//	}
+//	else
+//	{
+//		EX_BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
 	imu_info->raw_info.acc_x = aax;
 	imu_info->raw_info.acc_y = aay;
 	imu_info->raw_info.acc_z = aaz;
@@ -107,5 +107,5 @@ void imu_update(imu_sensor_t *imu_sen)
 	imu_info->base_info.ave_rate_yaw = ave_fil_update(&imu_yaw_dif_speed_ave_filter, imu_info->base_info.rate_yaw, 3);
 	
 	imu_sen->work_state.offline_cnt = 0;
-	}
+//	}
 }

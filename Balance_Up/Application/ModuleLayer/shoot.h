@@ -1,35 +1,19 @@
-/**
- * @file        launcher.c/.h
- * @author      SSDCFXB
- * @Version     V1.0
- * @date        20-November-2022
- * @brief       Launcher Control Center
- */
+#ifndef __SHOOT_H
+#define __SHOOT_H
 
-#ifndef __LAUNCHER_H
-#define __LAUNCHER_H
-
-/* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
+#include "rp_math.h"
 
-#include "device.h"
+#include "gimbal.h"
+#include "rc_sensor.h"
+//#include "key.h"
 #include "judge.h"
 
-/* Exported macro ------------------------------------------------------------*/
 #define Fric_15 4400.0f
 #define Fric_18 4700.0f
 #define Fric_20 4950.0f
 #define Fric_22 5200.0f
 #define Fric_30 7020.0f
-
-/* Exported types ------------------------------------------------------------*/
-// 发射机构模式枚举
-typedef enum
-{
-	lch_gyro,      // 陀螺仪
-	lch_machine,   // 机械
-	lch_keep,      // 保持
-} launcher_mode_e;
 
 // 摩擦轮状态枚举
 typedef enum
@@ -42,9 +26,8 @@ typedef enum
 // 拨盘状态枚举
 typedef enum
 {
-	Reload_Dial,     // 补弹
-	F_Lock_Dial,     // 正向卡弹
-	SpeedKeep_Dial,  // 速度保持
+	Reload_Dial,   // 补弹
+	F_Lock_Dial,   // 正向卡弹
 //	Unload_Dial,   // 退弹
 //	B_Lock_Dial ,  // 反向卡弹
 	WaitCommond_Dial // 等待指令
@@ -57,31 +40,31 @@ typedef enum
 	Magz_Open,      // 开弹仓
 	Magz_Close,     // 关弹仓
 	Func_Reset,     // 功能复位
-	Single_Shoot,   // 单发
 	Keep_Shoot,     // 连发
-	WaitCommond_L   // 等待指令
+	Single_Shoot,   // 单发
+	WaitCommond_L // 等待指令
 } launcher_commond_e;
 
 typedef struct 
 {
-	RM_motor_t  *user_motor;
+//	motor_3508_t  *fric_left;
+//	motor_3508_t  *fric_right;
+//	motor_2006_t  *dial_motor;
 	rc_sensor_t		*rc_sensor;
-} launcher_dev_t;
+} shoot_dev_t;
 
 typedef struct
 {
-	remote_mode_t	 	remote_mode;
-	launcher_mode_e launcher_mode;
-	
+	remote_mode_t	 remote_mode;
 	int16_t  measure_left_speed;
 	int16_t  measure_right_speed;
 	int16_t  measure_dial_speed;
 	float    measure_dial_angle;
 	
 	float    limit_speed;
-	float    measure_launcher_speed;
+	float    measure_shoot_speed;
 	uint16_t limit_heat;
-	uint16_t measure_launcher_heat;
+	uint16_t measure_shoot_heat;
 	
 	float  target_left_speed;
 	float  target_right_speed;
@@ -92,7 +75,7 @@ typedef struct
 	uint8_t  last_s2;
 	
 	dev_work_state_t  rc_work_state;
-} launcher_info_t;
+} shoot_info_t;
 
 typedef struct
 {
@@ -100,27 +83,24 @@ typedef struct
 	fric_status_e       fric_status;
 	dial_status_e       dial_status;
 	uint16_t            lock_cnt;
-	uint16_t            shoot_cnt;
-} launcher_work_info_t;
+} shoot_work_info_t;
 
 typedef struct
 {
 	float    fric_speed;
 	float    dial_speed;
-	float    dial_torque_limit;
 	float    lock_angle_check;
 	int16_t  lock_cnt;
 	float    Back_Angle;
 	float    Load_Angle;
-	uint16_t wait_time;
-} launcher_conf_t;
+} shoot_conf_t;
 
 typedef struct 
 {
-	launcher_dev_t        *dev;
-	launcher_info_t       *info;
-	launcher_work_info_t  *work_info;
-	launcher_conf_t       *conf;
+	shoot_dev_t        *dev;
+	shoot_info_t       *info;
+	shoot_work_info_t  *work_info;
+	shoot_conf_t       *conf;
 	void			(*init)(void);
 	void			(*ctrl)(void);
 	void			(*self_protect)(void);
@@ -128,10 +108,9 @@ typedef struct
 
 extern launcher_t launcher;
 
-/* Exported functions --------------------------------------------------------*/
-//void Launcher_GetInfo(void);
-//void Launcher_Stop(void);
-//void Launcher_RcCtrl(void);
-//void Launcher_PidCtrl(void);
+//void Shoot_GetInfo(void);
+//void Shoot_Stop(void);
+//void Shoot_RcCtrl(void);
+//void Shoot_PidCtrl(void);
 
 #endif

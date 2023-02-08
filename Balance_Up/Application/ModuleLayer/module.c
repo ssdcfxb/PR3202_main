@@ -35,9 +35,13 @@ flag_t flag = {
 /* Private functions ---------------------------------------------------------*/
 void module_info_update(module_t *mod)
 {
+	RC_StateCheck();
+	
 	if(module.state != MODULE_STATE_NORMAL) 
 	{
 		module.mode = MODULE_MODE_RESET;
+		gimbal.info->gimbal_mode = gim_keep;
+		launcher.info->launcher_mode = lch_keep;
 	}
 	else 
 	{
@@ -46,12 +50,14 @@ void module_info_update(module_t *mod)
 			module.remote_mode = RC;
 			module.mode = MODULE_MODE_MACHINE;
 			gimbal.info->gimbal_mode = gim_machine;
+			launcher.info->launcher_mode = lch_machine;
 		}
 		else if (rc_sensor.info->s1 == RC_SW_MID)
 		{
 			module.remote_mode = RC;
 			module.mode = MODULE_MODE_GYRO;
 			gimbal.info->gimbal_mode = gim_gyro;
+			launcher.info->launcher_mode = lch_gyro;
 			
 			if (rc_sensor.info->s2 == RC_SW_DOWN)
 			{
@@ -74,19 +80,21 @@ void module_info_update(module_t *mod)
 		{
 			module.mode = MODULE_MODE_RESET;
 			gimbal.info->gimbal_mode = gim_keep;
+			launcher.info->launcher_mode = lch_keep;
 		}
 	}
 	
 	if (module.remote_mode == RC)
 	{
 		gimbal.info->remote_mode = RC;
+		launcher.info->remote_mode = RC;
 	}
 	else if (module.remote_mode == KEY)
 	{
 		gimbal.info->remote_mode = KEY;
+		launcher.info->remote_mode = KEY;
 	}
 	
-	RC_StateCheck();
 }
 
 void RC_StateCheck(void)

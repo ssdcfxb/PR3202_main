@@ -456,6 +456,11 @@
               <FilePath>..\Application\ModuleLayer\launcher.c</FilePath>
             </File>
             <File>
+              <FileName>judge.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ModuleLayer\judge.c</FilePath>
+            </File>
+            <File>
               <FileName>module.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ModuleLayer\module.c</FilePath>
@@ -484,6 +489,11 @@
               <FileName>rm_protocol.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ProtocolLayer\rm_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>judge_protocol.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Application\ProtocolLayer\judge_protocol.h</FilePath>
             </File>
           </Files>
         </Group>

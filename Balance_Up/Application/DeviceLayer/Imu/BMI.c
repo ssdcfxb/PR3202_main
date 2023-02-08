@@ -302,9 +302,10 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
     @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
 */
 //float q0_init = 0.0f, q1_init = 1.0f, q2_init = 0.0f, q3_init = 0.0f;
-float arz = 180.0f;
-float ary = 0.0f;//90
-float arx = 0.0f;
+float arz_ = 180.0f;//180.0f;
+float ary_ = 0.0f;//-90
+float arx_ = 0.0f;
+float arz, ary, arx;
 arm_matrix_instance_f32 Trans;
 arm_matrix_instance_f32 Src;
 arm_matrix_instance_f32 Dst;
@@ -321,9 +322,9 @@ float acc_out[3];
 void transform_init(void)
 {
 	/* 角度单位转换（to弧度） */
-	arz = arz * (double)0.017453;
-	ary = ary * (double)0.017453;
-	arx = arx * (double)0.017453;
+	arz = arz_ * (double)0.017453;
+	ary = ary_ * (double)0.017453;
+	arx = arx_ * (double)0.017453;
 
 	/* 旋转矩阵赋值（三个旋转矩阵叠加） */
 	trans[0] = arm_cos_f32(arz)*arm_cos_f32(ary);
@@ -367,14 +368,14 @@ void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
 	acc_in[0] = (float)ax, acc_in[1] = (float)ay, acc_in[2] = (float)az;
 	
 	/* 陀螺仪坐标变换 */
-	arm_mat_init_f32(&Src, 3, 1, gyro_in);
-	arm_mat_init_f32(&Dst, 3, 1, gyro_out);
-	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	arm_mat_init_f32(&Src, 1, 3, gyro_in);
+	arm_mat_init_f32(&Dst, 1, 3, gyro_out);
+	arm_mat_mult_f32(&Src, &Trans, &Dst);
 	*ggx = gyro_out[0], *ggy = gyro_out[1], *ggz = gyro_out[2];
 	
 	/* 加速度计坐标变换 */
-	arm_mat_init_f32(&Src, 3, 1, acc_in);
-	arm_mat_init_f32(&Dst, 3, 1, acc_out);
+	arm_mat_init_f32(&Src, 1, 3, acc_in);
+	arm_mat_init_f32(&Dst, 1, 3, acc_out);
 	arm_mat_mult_f32(&Trans, &Src, &Dst);
 	*aax = acc_out[0], *aay = acc_out[1], *aaz = acc_out[2];
 	
@@ -397,10 +398,10 @@ extern struct bmi2_dev ex_bmi270;
     @ly
         水平时陀螺仪距yaw轴的垂直距离，单位为m
 */
-float Kp = 1.f;//4
+float Kp = 0.5f;//4
 float norm;
-//float halfT = 0.00025f;
-float halfT = 0.0005f;
+float halfT = 0.00025f;
+//float halfT = 0.0005f;
 float lp = 0.0f, ly = 0.0f;
 float wx, wy, wz;
 float afx, afy, afz;
@@ -529,119 +530,3 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	
 	return 0;
 }
-
-
-//uint8_t EX_BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
-//                           float *pitch_,float *roll_,float *yaw_,\
-//													 float *ggx,float *ggy,float *ggz,\
-//													 float *aax,float *aay,float *aaz)
-//{
-//	/* 陀螺仪值赋值 */
-//	gx = *ggx;
-//	gy = *ggy;
-//	gz = *ggz;
-//	
-//	/* 加速度计值赋值 */
-//	ax = *aax;
-//	ay = *aay;
-//	az = *aaz;
-//	
-//	/* 陀螺仪数据单位转换（to度每秒） */
-//	gx = lsb_to_dps(gx,2000,bmi270.resolution);
-//	gy = lsb_to_dps(gy,2000,bmi270.resolution);
-//	gz = lsb_to_dps(gz,2000,bmi270.resolution);
-//	
-//	*roll_  = gx;
-//	*pitch_ = gy;
-//	*yaw_   = gz;
-//	
-//	/* 陀螺仪数据单位转换（to弧度每秒） */
-//	gx = gx * (double)0.017453;
-//	gy = gy * (double)0.017453;
-//	gz = gz * (double)0.017453;
-//	
-//	/* 角加速度计算 */
-//	afx = (gx - wx)/(halfT * 2);
-//	afy = (gy - wy)/(halfT * 2);
-//	afz = (gz - wz)/(halfT * 2);
-//	
-//	/* 角速度赋值 */
-//	wx = gx;
-//	wy = gy;
-//	wz = gz;
-//	
-//	/* 角度解算start */
-//	/* 加速度计数据检查 */
-//	if(ax * ay * az != 0)
-//	{
-//		/* 加速度计数据单位转换（to米每二次方秒） */
-//		ax = lsb_to_mps2(ax,2,bmi270.resolution);
-//		ay = lsb_to_mps2(ay,2,bmi270.resolution);
-//		az = lsb_to_mps2(az,2,bmi270.resolution);
-//		
-//		/* 利用角速度修正重力加速度测量值 */
-//		ax = ax - afy * lp;
-//		az = az - wy * wy * lp;
-//		
-//		cosp = arm_cos_f32(thp);
-//		ax = ax - wz* wz * ly * cosp;
-//		ay = ay - afz * ly * cosp;
-
-//		norm = inVSqrt(ax*ax + ay*ay + az*az);
-//		ax = ax *norm;
-//		ay = ay *norm;
-//		az = az *norm;
-//		
-//		vx = -2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
-//		vy = -2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
-//		vz = -q0*q0 - q1*q1 - q2*q2 + q3*q3;//cos(Roll)cos(Pitch) cos(K,k)
-//		
-//		ex = (az*vy - ay*vz) ;
-//		ey = (ax*vz - az*vx) ;//切线方向加速度
-//		ez = (ay*vx - ax*vy) ;
-//		
-//		gx = gx + Kp*ex;
-//		gy = gy + Kp*ey;
-//		gz = gz + Kp*ez;
-//	}
-//	
-//	q0temp=q0;
-//  q1temp=q1;
-//  q2temp=q2;
-//  q3temp=q3;
-//	
-//	q0 = q0temp + (-q1temp*gx - q2temp*gy -q3temp*gz)*halfT;
-//	q1 = q1temp + ( q0temp*gx + q2temp*gz -q3temp*gy)*halfT;
-//	q2 = q2temp + ( q0temp*gy - q1temp*gz +q3temp*gx)*halfT;
-//	q3 = q3temp + ( q0temp*gz + q1temp*gy -q2temp*gx)*halfT;
-//	
-//	norm = inVSqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
-//	q0 = q0 * norm;
-//	q1 = q1 * norm;
-//	q2 = q2 * norm;
-//	q3 = q3 * norm;
-//	
-//	//*roll = atan2(2 * q2 * q3 + 2 * q0 * q1,q0*q0 - q1 * q1 -  q2 * q2 + q3 *q3)* 57.295773f;
-//	arm_atan2_f32(2 * q2 * q3 + 2 * q0 * q1, q0 * q0 - q1 * q1 -  q2 * q2 + q3 * q3, roll);
-//	
-//	//*pitch = -asin( 2 * q1 * q3 -2 * q0* q2)*57.295773f;
-//  //asin(x) = atan(x/sqrt(1-x*x))
-//	sintemp = 2 * q1 * q3 -2 * q0* q2;
-//	arm_sqrt_f32(1 - sintemp * sintemp, &costemp);
-//	arm_atan2_f32(sintemp, costemp, pitch);
-//	
-//	//*yaw =  atan2(2*(q1*q2 + q0*q3),q0*q0 +q1*q1-q2*q2 -q3*q3)*57.295773f;
-//	arm_atan2_f32(2 * (q1*q2 + q0*q3), q0*q0 +q1*q1-q2*q2 -q3*q3, yaw);
-//	
-//	
-//	thr =  *roll;
-//	thp = -*pitch;
-//	thy =  *yaw;
-//	*roll  *=  57.295773f;
-//	*pitch *= -57.295773f;
-//	*yaw   *=  57.295773f;
-//	/* 角度解算end */
-//	
-//	return 0;
-//}
-

@@ -9,7 +9,7 @@ void StartControlTask(void const * argument)
 		if(module.state == MODULE_STATE_NORMAL) 
 		{
 			gimbal.ctrl();
-//			launcher.ctrl();
+			launcher.ctrl();
 		} 
 		else 
 		{

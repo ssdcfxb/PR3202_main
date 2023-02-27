@@ -103,6 +103,7 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM4_Init();
   MX_SPI1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	DRIVER_Init();
 	DEVICE_Init();

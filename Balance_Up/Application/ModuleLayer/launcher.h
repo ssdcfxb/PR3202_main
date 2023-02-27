@@ -64,7 +64,9 @@ typedef enum
 
 typedef struct 
 {
-	RM_motor_t  *user_motor;
+	RM_motor_t    *fricl_motor;
+	RM_motor_t    *fricr_motor;
+	RM_motor_t    *dial_motor;
 	rc_sensor_t		*rc_sensor;
 } launcher_dev_t;
 

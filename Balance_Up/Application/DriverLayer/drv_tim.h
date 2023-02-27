@@ -8,6 +8,10 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
+void TIM3_Init(void);
 void TIM4_Init(void);
 
+/* Servo functions */
+void Magazine_Open(void);
+void Magazine_Close(void);
 #endif

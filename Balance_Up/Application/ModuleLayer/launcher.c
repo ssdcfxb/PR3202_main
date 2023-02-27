@@ -45,7 +45,9 @@ int16_t    launcher_out[3];
 
 // 发射机构设备
 launcher_dev_t		launcher_dev = {
-	.user_motor = RM_motor,
+	.fricl_motor = &RM_motor[FRIC_L],
+	.fricr_motor = &RM_motor[FRIC_R],
+	.dial_motor = &RM_motor[DIAL],
 	.rc_sensor = &rc_sensor,
 };
 
@@ -64,7 +66,7 @@ launcher_work_info_t  launcher_work_info = {
 
 launcher_conf_t   launcher_conf = {
 	.fric_speed = Fric_15,
-	.dial_speed = -1000.0f,
+	.dial_speed = -1500.0f,
 	.dial_torque_limit = 2000.0f,
 	.lock_angle_check = 1.5f,
 	.lock_cnt = 50,
@@ -234,28 +236,31 @@ void Judge_AdaptFricSpeed(void)
 {
 	static int8_t cnt = 0, speed_adapt = 0, adapt_k = 5;
 	
-	if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.95f))
+	if (judge.work_state == DEV_ONLINE)
 	{
-		cnt++;
-		if (cnt > 2)
+		if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.95f))
+		{
+			cnt++;
+			if (cnt > 2)
+			{
+				cnt = 0;
+				speed_adapt = -1;
+			}
+		}
+		else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.95f))
+		{
+			cnt--;
+			if (cnt < -2)
+			{
+				cnt = 0;
+				speed_adapt = 1;
+			}
+		}
+		else
 		{
 			cnt = 0;
-			speed_adapt = -1;
+			speed_adapt = 0;
 		}
-	}
-	else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.95f))
-	{
-		cnt--;
-		if (cnt < -2)
-		{
-			cnt = 0;
-			speed_adapt = 1;
-		}
-	}
-	else
-	{
-		cnt = 0;
-		speed_adapt = 0;
 	}
 	
 	launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
@@ -294,7 +299,7 @@ void Judge_AdaptDialSpeed(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->dial_speed = -500.0f;
+		launcher.conf->dial_speed = -1500.0f;
 	}
 	else
 	{
@@ -338,8 +343,8 @@ void Launcher_GetCtrlInfo(void)
 void Launcher_GetRcState(void)
 {
 	/**    读取遥控器上电时刻信息    **/
-	if ((launcher.info->rc_work_state == DEV_OFFLINE)
-		&& rc_sensor.work_state == DEV_ONLINE)
+	if ((launcher.info->rc_work_state == DEV_OFFLINE) \
+		&& (rc_sensor.work_state == DEV_ONLINE))
 	{
 		launcher.info->init_s2 = rc_sensor.info->s2;
 		launcher.info->last_s2 = rc_sensor.info->s2;
@@ -401,6 +406,13 @@ void Launcher_GetRcState(void)
 				}
 				
 			}
+			else 
+			{
+				/**    遥控器离线信息    **/
+				launcher.work_info->launcher_commond = WaitCommond_L;
+				launcher.work_info->fric_status = WaitCommond_Fric;
+				launcher.work_info->dial_status = WaitCommond_Dial;
+			}
 		}
 	}
 	else 
@@ -433,13 +445,13 @@ void Get_LauncherStatus(void)
 
 
 /**
-  * @brief  摩擦轮开启跳变检测与射速调整
+  * @brief  摩擦轮开启跳变检测与弹仓盖开关
   * @param  
   * @retval 
   */
 void Fric_StatusCheck(void)
 {
-	if ((launcher.work_info->launcher_commond == Fric_Toggle)
+	if ((launcher.work_info->launcher_commond == Fric_Toggle) \
 		&& (launcher.info->last_s2 != rc_sensor.info->s2))
 	{
 		if (launcher.work_info->fric_status == WaitCommond_Fric)
@@ -454,6 +466,15 @@ void Fric_StatusCheck(void)
 		{
 			launcher.work_info->fric_status = On_Fric;
 		}
+	}
+	
+	if (launcher.work_info->launcher_commond == Magz_Open)
+	{
+		Magazine_Open();
+	}
+	else
+	{
+		Magazine_Close();
 	}
 }
 

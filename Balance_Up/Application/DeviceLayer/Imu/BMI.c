@@ -376,7 +376,7 @@ void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
 	/* 加速度计坐标变换 */
 	arm_mat_init_f32(&Src, 1, 3, acc_in);
 	arm_mat_init_f32(&Dst, 1, 3, acc_out);
-	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	arm_mat_mult_f32(&Src, &Trans, &Dst);
 	*aax = acc_out[0], *aay = acc_out[1], *aaz = acc_out[2];
 	
 }
@@ -398,7 +398,7 @@ extern struct bmi2_dev ex_bmi270;
     @ly
         水平时陀螺仪距yaw轴的垂直距离，单位为m
 */
-float Kp = 0.5f;//4
+float Kp = 4.f;//4
 float norm;
 float halfT = 0.00025f;
 //float halfT = 0.0005f;
@@ -447,14 +447,14 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	gz = gz * (double)0.017453;
 	
 	/* 角加速度计算 */
-	afx = (gx - wx)/(halfT * 2);
-	afy = (gy - wy)/(halfT * 2);
-	afz = (gz - wz)/(halfT * 2);
+//	afx = (gx - wx)/(halfT * 2);
+//	afy = (gy - wy)/(halfT * 2);
+//	afz = (gz - wz)/(halfT * 2);
 	
 	/* 角速度赋值 */
-	wx = gx;
-	wy = gy;
-	wz = gz;
+//	wx = gx;
+//	wy = gy;
+//	wz = gz;
 	
 	/* 角度解算start */
 	/* 加速度计数据检查 */
@@ -466,12 +466,12 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		az = lsb_to_mps2(az,2,bmi270.resolution);
 		
 		/* 利用角速度修正重力加速度测量值 */
-		ax = ax - afy * lp;
-		az = az - wy * wy * lp;
-		
-		cosp = arm_cos_f32(thp);
-		ax = ax - wz* wz * ly * cosp;
-		ay = ay - afz * ly * cosp;
+//		ax = ax - afy * lp;
+//		az = az - wy * wy * lp;
+//		
+//		cosp = arm_cos_f32(thp);
+//		ax = ax - wz* wz * ly * cosp;
+//		ay = ay - afz * ly * cosp;
 
 		norm = inVSqrt(ax*ax + ay*ay + az*az);
 		ax = ax *norm;
@@ -520,9 +520,9 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	arm_atan2_f32(2 * (q1*q2 + q0*q3), q0*q0 +q1*q1-q2*q2 -q3*q3, yaw);
 	
 	
-	thr =  *roll;
-	thp = -*pitch;
-	thy =  *yaw;
+//	thr =  *roll;
+//	thp = -*pitch;
+//	thy =  *yaw;
 	*roll  *=  57.295773f;
 	*pitch *= -57.295773f;
 	*yaw   *=  57.295773f;

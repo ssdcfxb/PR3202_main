@@ -12,13 +12,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rc_protocol.h"
 
+#include "slave.h"
 #include "rc_sensor.h"
+#include "string.h"
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
+uint8_t rc_infoBuf[16] = {0};
 /* Private functions ---------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 void rc_sensor_init(rc_sensor_t *rc_sen)
@@ -73,4 +76,7 @@ void USART2_rxDataHandler(uint8_t *rxBuf)
 	// 更新遥控数据
 	rc_sensor.update(&rc_sensor, rxBuf);
 	rc_sensor.check(&rc_sensor);
+	memcpy(rc_infoBuf, rxBuf, 16);
+	memcpy(slave.info->tx_info->rc_info, rc_infoBuf, 16);
+	
 }

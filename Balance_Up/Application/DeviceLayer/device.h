@@ -6,6 +6,7 @@
 
 #include "imu_sensor.h"
 #include "rc_sensor.h"
+#include "slave.h"
 #include "user_motor.h"
 
 

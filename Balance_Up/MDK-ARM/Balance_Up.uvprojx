@@ -410,6 +410,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\AlgorithmLayer\rp_math.c</FilePath>
             </File>
+            <File>
+              <FileName>crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\AlgorithmLayer\crc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -491,6 +496,11 @@
               <FilePath>..\Application\ProtocolLayer\rm_protocol.c</FilePath>
             </File>
             <File>
+              <FileName>slave_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ProtocolLayer\slave_protocol.c</FilePath>
+            </File>
+            <File>
               <FileName>judge_protocol.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Application\ProtocolLayer\judge_protocol.h</FilePath>
@@ -534,6 +544,11 @@
               <FileName>rc_sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DeviceLayer\Sensor\rc_sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>slave.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\slave.c</FilePath>
             </File>
             <File>
               <FileName>user_motor.c</FileName>

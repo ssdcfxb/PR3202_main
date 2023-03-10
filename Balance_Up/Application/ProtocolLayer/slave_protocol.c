@@ -2,8 +2,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "slave_protocol.h"
 
+#include "crc.h"
+#include "rc_sensor.h"
+#include "judge.h"
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+/* Exported function prototypes ----------------------------------------------*/
+extern void judge_update(judge_t *self, slave_info_t *info);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t slave_txBuf[30];
@@ -23,6 +28,10 @@ void USART3_rxDataHandler(uint8_t *rxBuf)
 
 bool slave_send_data(slave_t *slef)
 {
+	slave_tx_info.rc_work_state = 0;
+	if(rc_sensor.work_state == DEV_ONLINE)
+		slave_tx_info.rc_work_state = 1;
+	
 	slave_tx_info.data_length = sizeof(slv_tx_info_t);
 	memcpy(slave_txBuf, &slave_tx_info, sizeof(slv_tx_info_t));
 	Append_CRC8_Check_Sum(slave_txBuf, 3);
@@ -49,6 +58,7 @@ void slave_receive_data(slave_t *slef, uint8_t *rxBuf)
 	
 	info->offline_cnt = 0;
 	
+	slef->info->rx_flag = 0;
 	if(rxBuf[0] == 0xA5)
 	{
 		if(Verify_CRC8_Check_Sum(rxBuf, 3) == true)
@@ -58,11 +68,7 @@ void slave_receive_data(slave_t *slef, uint8_t *rxBuf)
 				memcpy(rx_info, rxBuf, sizeof(slv_rx_info_t));
 				slef->info->rx_flag = 1;
 			}
-			else
-				slef->info->rx_flag = 0;
 		}
-		else
-			slef->info->rx_flag = 0;
 	}
 	
 	if (info->rx_flag == 1)
@@ -71,6 +77,14 @@ void slave_receive_data(slave_t *slef, uint8_t *rxBuf)
 		memcpy(&info->shooter_speed_limit, (const void*)&rx_info->shooter_speed_limit, 2);
 		memcpy(&info->shooter_cooling_heat, (const void*)&rx_info->shooter_cooling_heat, 2);
 		memcpy(&info->bullet_speed, (void*)&rx_info->bullet_speed, 4);
+		
+		judge_update(&judge, info);
+	}
+	
+	
+	if(rxBuf[sizeof(slv_rx_info_t)] == 0xA5)
+	{
+		slave_receive_data(&slave, &rxBuf[sizeof(slv_rx_info_t)]);
 	}
 }
 

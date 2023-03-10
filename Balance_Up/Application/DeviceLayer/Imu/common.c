@@ -5,6 +5,7 @@
  */
 
 #include "common.h"
+#include "bmi2_defs.h"
 
 
 
@@ -217,7 +218,7 @@ int8_t bmi2_interface_init(struct bmi2_dev *bmi, uint8_t intf, uint8_t aces)
 		{
         /* Bus configuration : I2C */
         if (intf == BMI2_I2C_INTF)
-        {     
+        {
             /* To initialize the user I2C function */
             dev_addr = BMI2_I2C_SEC_ADDR;
             bmi->intf = BMI2_I2C_INTF;

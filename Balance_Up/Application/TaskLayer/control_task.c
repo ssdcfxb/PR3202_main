@@ -17,6 +17,7 @@ void StartControlTask(void const * argument)
 			launcher.self_protect();
 		}
 		
+		slave.tx(&slave);
 		CAN_SendAll();
 		
     osDelay(1);

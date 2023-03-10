@@ -302,9 +302,9 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
     @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
 */
 //float q0_init = 0.0f, q1_init = 1.0f, q2_init = 0.0f, q3_init = 0.0f;
-float arz_ = 180.0f;//180.0f;
-float ary_ = 0.0f;//-90
-float arx_ = 0.0f;
+float arz_ = -90.0f;
+float ary_ = 0.0f;
+float arx_ = 180.0f;
 float arz, ary, arx;
 arm_matrix_instance_f32 Trans;
 arm_matrix_instance_f32 Src;

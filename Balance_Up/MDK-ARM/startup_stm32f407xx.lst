@@ -832,12 +832,12 @@ ARM Macro Assembler    Page 13
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
 interwork --depend=balance_up\startup_stm32f407xx.d -obalance_up\startup_stm32f
 407xx.o -I..\Core\Inc -I.\RTE\_Balance_Up -ID:\AppData\Local\Arm\Packs\ARM\CMSI
-S\5.9.0\CMSIS\Core\Include -ID:\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\D
-SP\Include -ID:\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\DSP\PrivateInclud
-e -ID:\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.16.0\Drivers\CMSIS\Device\S
-T\STM32F4xx\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERS
-ION SETA 537" --predefine="_RTE_ SETA 1" --predefine="STM32F407xx SETA 1" --pre
-define="_RTE_ SETA 1" --list=startup_stm32f407xx.lst startup_stm32f407xx.s
+S-DSP\1.14.2\Include -ID:\AppData\Local\Arm\Packs\ARM\CMSIS-DSP\1.14.2\PrivateI
+nclude -ID:\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include -ID:\App
+Data\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.16.0\Drivers\CMSIS\Device\ST\STM32F4x
+x\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 5
+38" --predefine="_RTE_ SETA 1" --predefine="STM32F407xx SETA 1" --predefine="_R
+TE_ SETA 1" --list=startup_stm32f407xx.lst startup_stm32f407xx.s
 
 
 

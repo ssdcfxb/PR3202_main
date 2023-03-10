@@ -1,7 +1,6 @@
 #include "can_protocol.h"
 
 int16_t can1_send_buf[8], can2_send_buf[8];
-int16_t slave_send_buf[8]; //CAN2
 
 void CAN_SendAll(void)
 {

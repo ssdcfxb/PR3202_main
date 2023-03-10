@@ -6,6 +6,7 @@ void StartHeartBeatTask(void const * argument)
   {
 		imu_sensor.heart_beat(&imu_sensor.work_state);
 		rc_sensor.heart_beat(&rc_sensor);
+		judge.heart_beat(&judge);
 		slave.heart_beat(&slave);
 		for (int16_t i = 0; i < MOTOR_LIST; i++)
 		{

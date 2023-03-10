@@ -67,7 +67,7 @@ void imu_init(struct imu_struct *self)
 	if(self->driver.tpye == DR_SPI1 || self->driver.tpye == DR_SPI2 || self->driver.tpye == DR_SPI3){
 
 		self->bmi->drive_type = BMI2_SPI_INTF;
-		if(self->driver.tpye == DR_SPI2)
+		if(self->driver.tpye == DR_SPI1)
 		{
 			self->bmi->device_aces = BMI2_INT_ACES;
 		}

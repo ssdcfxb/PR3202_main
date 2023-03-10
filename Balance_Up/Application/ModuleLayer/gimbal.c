@@ -2,6 +2,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "gimbal.h"
 
+#include "rp_math.h"
+#include "arm_math.h"
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 void Gimbal_Init(void);
@@ -75,7 +77,7 @@ gimbal_conf_t   gim_conf = {
 	.rc_pitch_imu_offset = 3300.0f,
 	.max_pitch_imu_angle = 22.0f,
 	.min_pitch_imu_angle = -39.0f,
-	.max_pitch_motor_angle = 8150, // 双枪、麦轮 7200  
+	.max_pitch_motor_angle = 8150, // 双枪、麦轮 7200  mid 7250
 	.min_pitch_motor_angle = 6790, // 双枪、麦轮 6100
 };
 
@@ -187,17 +189,40 @@ void Gimbal_GetInfo(void)
 
 void Gimbal_GetBaseInfo(void)
 {
+	// 电机数据更新
 	gimbal.info->measure_yaw_motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	gimbal.info->measure_yaw_motor_speed = RM_motor[GIM_Y].rx_info.speed;
 	gimbal.info->measure_pitch_motor_angle = RM_motor[GIM_P].rx_info.angle;
 	gimbal.info->measure_pitch_motor_speed = RM_motor[GIM_P].rx_info.speed;
 	
+	// pitch轴电机imu动态限位
+	gimbal.conf->max_pitch_imu_angle = ECD_TO_ANGLE * \
+							(gimbal.info->measure_pitch_motor_angle - gimbal.conf->min_pitch_motor_angle);
+	gimbal.conf->min_pitch_imu_angle = ECD_TO_ANGLE * \
+							(gimbal.info->measure_pitch_motor_angle - gimbal.conf->max_pitch_motor_angle);
+	
+	// imu数据更新
 	gimbal.info->measure_yaw_imu_speed = imu_sensor.info->base_info.ave_rate_yaw;
 	gimbal.info->measure_yaw_imu_angle = imu_sensor.info->base_info.yaw;
 	gimbal.info->measure_pitch_imu_speed = imu_sensor.info->base_info.ave_rate_pitch;
 	gimbal.info->measure_pitch_imu_angle = imu_sensor.info->base_info.pitch;
 	gimbal.info->measure_roll_imu_speed = imu_sensor.info->base_info.ave_rate_roll;
 	gimbal.info->measure_roll_imu_angle = imu_sensor.info->base_info.roll;
+	
+	// 发送yaw轴电机角度数据
+	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
+	// 发送yaw轴陀螺仪角度数据
+	slave.info->tx_info->imu_angle = imu_sensor.info->base_info.yaw;
+	
+	// 世界坐标系数据更新
+//	gimbal.info->measure_pitch_global_speed = gimbal.info->measure_pitch_imu_speed * arm_cos_f32(angle2rad(gimbal.info->measure_roll_imu_angle)) \
+//																			  	- gimbal.info->measure_yaw_imu_speed * arm_sin_f32(angle2rad(gimbal.info->measure_roll_imu_angle));
+//	gimbal.info->measure_yaw_global_speed = gimbal.info->measure_pitch_imu_speed * arm_sin_f32(angle2rad(gimbal.info->measure_roll_imu_angle)) \
+//																				+ gimbal.info->measure_yaw_imu_speed * arm_cos_f32(angle2rad(gimbal.info->measure_roll_imu_angle));
+//	gimbal.info->measure_pitch_global_angle = gimbal.info->measure_pitch_imu_angle * arm_cos_f32(angle2rad(gimbal.info->measure_roll_imu_angle)) \
+//																			  	- gimbal.info->measure_yaw_imu_angle * arm_sin_f32(angle2rad(gimbal.info->measure_roll_imu_angle));
+//	gimbal.info->measure_yaw_global_angle = gimbal.info->measure_yaw_imu_angle * arm_cos_f32(angle2rad(gimbal.info->measure_roll_imu_angle)) \
+//																				- gimbal.info->measure_pitch_imu_angle * arm_sin_f32(angle2rad(gimbal.info->measure_roll_imu_angle));
 	
 }
 
@@ -347,6 +372,12 @@ void Gimbal_MotorCtrl(void)
 	{
 			gimbal.info->target_pitch_imu_angle += gimbal.info->target_pitch_imu_deltaangle;
 			gimbal.info->target_yaw_imu_angle += gimbal.info->target_yaw_imu_deltaangle;
+		
+			///////////////////////////
+//			gimbal.info->target_pitch_imu_angle = gimbal.info->target_pitch_global_angle * arm_cos_f32(angle2rad(gimbal.info->measure_roll_imu_angle)) \
+//																					+ gimbal.info->target_yaw_global_angle * arm_sin_f32(angle2rad(gimbal.info->measure_roll_imu_angle));
+//			gimbal.info->target_yaw_imu_angle = - gimbal.info->target_pitch_global_angle * arm_sin_f32(angle2rad(gimbal.info->measure_roll_imu_angle)) \
+//																					+ gimbal.info->target_yaw_global_angle * arm_cos_f32(angle2rad(gimbal.info->measure_roll_imu_angle));
 			
 			
 			// pitch轴电机限位（陀螺仪模式下需要修改）

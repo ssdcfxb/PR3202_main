@@ -1,3 +1,4 @@
+
 /* Includes ------------------------------------------------------------------*/
 #include "slave.h"
 #include "string.h"
@@ -43,9 +44,12 @@ void slave_init(slave_t *slef)
 	slv_rx_info_t *rx_info = slef->info->rx_info;
 	
 	tx_info->data_length = 0;
+	tx_info->rc_work_state = 0;
+	tx_info->rc_ch_ws_val = 0;
+	tx_info->rc_ch_ad_val = 0;
 	tx_info->magz_mode = 0;
-	tx_info->angle = 0;
-	memset(tx_info->rc_info, 0, 16);
+	tx_info->imu_angle = 0.f;
+	tx_info->motor_angle = 0;
 	
 	rx_info->data_length = 0;
 	rx_info->shooter_cooling_limit = 0;

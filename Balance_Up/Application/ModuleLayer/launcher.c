@@ -471,10 +471,12 @@ void Fric_StatusCheck(void)
 	if (launcher.work_info->launcher_commond == Magz_Open)
 	{
 		Magazine_Open();
+		slave.info->tx_info->magz_mode = 1;
 	}
 	else
 	{
 		Magazine_Close();
+		slave.info->tx_info->magz_mode = 0;
 	}
 }
 

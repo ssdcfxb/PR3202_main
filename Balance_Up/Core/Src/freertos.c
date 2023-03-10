@@ -50,6 +50,7 @@
 osThreadId defaultTaskHandle;
 osThreadId heartbeatTaskHandle;
 osThreadId controlTaskHandle;
+osThreadId ledTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -59,6 +60,7 @@ osThreadId controlTaskHandle;
 void StartDefaultTask(void const * argument);
 void StartHeartBeatTask(void const * argument);
 void StartControlTask(void const * argument);
+void StartLedTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -116,6 +118,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of controlTask */
   osThreadDef(controlTask, StartControlTask, osPriorityHigh, 0, 256);
   controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
+
+  /* definition and creation of ledTask */
+  osThreadDef(ledTask, StartLedTask, osPriorityNormal, 0, 128);
+  ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -175,6 +181,24 @@ __weak void StartControlTask(void const * argument)
     osDelay(1);
   }
   /* USER CODE END StartControlTask */
+}
+
+/* USER CODE BEGIN Header_StartLedTask */
+/**
+* @brief Function implementing the ledTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartLedTask */
+__weak void StartLedTask(void const * argument)
+{
+  /* USER CODE BEGIN StartLedTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartLedTask */
 }
 
 /* Private application code --------------------------------------------------*/

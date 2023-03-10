@@ -13,9 +13,12 @@ typedef __packed struct slv_tx_info_struct {
 	uint8_t data_length;
 	uint8_t CRC8;
 	
-	uint8_t  rc_info[16];
+	uint8_t  rc_work_state;  //0:关 1:开
+	int16_t  rc_ch_ws_val;
+	int16_t  rc_ch_ad_val;
 	uint8_t  magz_mode;  //0:关 1:开
-	int16_t  angle;
+	float    imu_angle;
+	int16_t  motor_angle;
 	uint16_t CRC16;
 
 } slv_tx_info_t;

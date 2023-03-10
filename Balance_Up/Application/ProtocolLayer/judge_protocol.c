@@ -1,14 +1,8 @@
-/**
- * @file        driver.c
- * @author      RobotPilots@2020
- * @Version     V1.0
- * @date        9-September-2020
- * @brief       Drivers' Manager.
- */
  
 /* Includes ------------------------------------------------------------------*/
-#include "driver.h"
+#include "judge_protocol.h"
 
+#include "slave.h"
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -16,13 +10,12 @@
 /* Exported variables --------------------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
-void DRIVER_Init(void)
+void judge_update(judge_t *self, slave_info_t *info)
 {
-  USART1_Init();
-	USART2_Init();
-	USART3_Init();
-	USART6_Init();
-	TIM5_Init();
-	SPI1_Init();
-	SPI2_Init();
+	self->info->game_robot_status.shooter_id1_17mm_cooling_limit = info->shooter_cooling_limit;
+	self->info->game_robot_status.shooter_id1_17mm_speed_limit = info->shooter_speed_limit;
+	self->info->power_heat_data.shooter_id1_17mm_cooling_heat = info->shooter_cooling_heat;
+	self->info->shoot_data.bullet_speed = info->bullet_speed;
+	
+	self->info->offline_cnt = 0;
 }

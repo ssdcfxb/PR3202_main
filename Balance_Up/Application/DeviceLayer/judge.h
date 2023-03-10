@@ -1,11 +1,14 @@
 #ifndef __JUDGE_H
 #define __JUDGE_H
 
+/* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "rp_config.h"
 
-#include "judge_protocol.h"
+#include "judge_defs.h"
 
+/* Exported macro ------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
 typedef struct 
 {
 	ext_rfid_status_t rfid_status;
@@ -29,7 +32,7 @@ typedef struct judge_struct
 
 extern judge_t judge;
 
-void judge_update(uint16_t id, uint8_t *rxBuf);
+/* Exported functions --------------------------------------------------------*/
 void judge_heart_beat(judge_t *jud_sen);
 
 #endif

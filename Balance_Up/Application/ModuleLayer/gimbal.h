@@ -39,12 +39,23 @@ typedef struct
 	float    measure_roll_imu_speed;
 	float    measure_roll_imu_angle;
 	
+//	float    measure_yaw_global_speed;
+//	float    measure_yaw_global_angle;
+//	float    measure_pitch_global_speed;
+//	float    measure_pitch_global_angle;
+//	float    target_yaw_global_speed;
+//	float    target_yaw_global_angle;
+//	float    target_yaw_global_deltaangle;
+//	float    target_pitch_global_speed;
+//	float    target_pitch_global_angle;
+//	float    target_pitch_global_deltaangle;
+	
 	float    target_yaw_imu_angle;
-	float    target_yaw_imu_deltaangle;
+	int16_t  target_yaw_imu_deltaangle;
 	int16_t  target_yaw_motor_angle;
 	int16_t  target_yaw_motor_deltaangle;
 	float    target_pitch_imu_angle;
-	float    target_pitch_imu_deltaangle;
+	int16_t  target_pitch_imu_deltaangle;
 	int16_t  target_pitch_motor_angle;
 	int16_t  target_pitch_motor_deltaangle;
 	

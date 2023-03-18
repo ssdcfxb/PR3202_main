@@ -369,6 +369,8 @@ void Launcher_GetRcState(void)
 				if (rc_sensor.info->s2 == RC_SW_MID)
 				{
 					launcher.work_info->launcher_commond = Func_Reset;
+					if (launcher.info->last_s2 == RC_SW_DOWN)
+						launcher.work_info->launcher_commond = Fric_Toggle;
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
@@ -380,11 +382,11 @@ void Launcher_GetRcState(void)
 				}
 				else if (rc_sensor.info->s2 == RC_SW_DOWN)
 				{
-					launcher.work_info->launcher_commond = Fric_Toggle;
+					launcher.work_info->launcher_commond = Func_Reset;
 				}
 				
 			}
-			else if (launcher.info->launcher_mode == lch_machine)
+			else if ((launcher.info->launcher_mode == lch_machine) || (launcher.info->launcher_mode == lch_gyro2))
 			{
 				
 				if (rc_sensor.info->s2 == RC_SW_MID)
@@ -471,6 +473,7 @@ void Fric_StatusCheck(void)
 	if (launcher.work_info->launcher_commond == Magz_Open)
 	{
 		Magazine_Open();
+		launcher.work_info->fric_status = Off_Fric;
 		slave.info->tx_info->magz_mode = 1;
 	}
 	else

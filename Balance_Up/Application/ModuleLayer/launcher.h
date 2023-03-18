@@ -27,6 +27,7 @@
 typedef enum
 {
 	lch_gyro,      // мсбщрг
+	lch_gyro2,     // мсбщрг2
 	lch_machine,   // ╩Зп╣
 	lch_keep,      // ╠ёЁж
 } launcher_mode_e;

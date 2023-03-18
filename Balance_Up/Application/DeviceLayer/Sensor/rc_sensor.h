@@ -88,20 +88,57 @@
 #define    KEY_PRESSED_SHIFT   ( (rc_sensor_info.key_v & KEY_PRESSED_OFFSET_SHIFT) != 0 )
 
 /* Exported types ------------------------------------------------------------*/
+/* 按键状态枚举 */
+typedef enum
+{
+  relax_K,        //放松
+  down_K,         //按下
+  up_K,           //抬起
+  short_press_K,  //短按
+  long_press_K,   //长按
+}key_board_status_e;
+
+/* 按键信息 */
+typedef struct key_board_info_struct {
+  uint8_t						 value;    //值
+  key_board_status_e status;   //状态
+	
+  int16_t cnt;      //当前计数
+  int16_t cnt_max;  //计数上限
+}key_board_info_t;
+
 typedef struct rc_sensor_info_struct {
+	/* 遥控器 */
 	int16_t 	ch0;
 	int16_t 	ch1;
 	int16_t 	ch2;
 	int16_t 	ch3;
 	uint8_t  	s1;
 	uint8_t  	s2;
-	int16_t		mouse_vx;
-	int16_t 	mouse_vy;
-	int16_t 	mouse_vz;
-	uint8_t 	mouse_btn_l;
-	uint8_t 	mouse_btn_r;
-	uint16_t	key_v;
 	int16_t 	thumbwheel;	
+	/* 键鼠 */
+  int16_t                 mouse_vx;             //鼠标x轴速度
+  int16_t                 mouse_vy;             //鼠标y轴速度
+  int16_t                 mouse_vz;             //鼠标z轴速度
+  key_board_info_t        mouse_btn_l;          //鼠标左键
+  key_board_info_t        mouse_btn_r;          //鼠标右键
+  key_board_info_t        Q;                    //按键Q
+  key_board_info_t        W;                    //按键W
+  key_board_info_t        E;                    //按键E
+  key_board_info_t        R;                    //按键R
+  key_board_info_t        A;                    //按键A
+  key_board_info_t        S;                    //按键S
+  key_board_info_t        D;                    //按键D
+  key_board_info_t        F;                    //按键F
+  key_board_info_t        G;                    //按键G
+  key_board_info_t        Z;                    //按键Z
+  key_board_info_t        X;                    //按键X
+  key_board_info_t        C;                    //按键C
+  key_board_info_t        V;                    //按键V
+  key_board_info_t        B;                    //按键B
+  key_board_info_t        Shift;                //按键Shift
+  key_board_info_t        Ctrl;                 //按键Ctrl
+	uint16_t								key_v;
 	
 	int16_t		offline_cnt;
 	int16_t		offline_max_cnt;

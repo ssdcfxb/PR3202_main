@@ -54,6 +54,7 @@ static void dma_m0_rxcplt_callback(DMA_HandleTypeDef *hdma)
 	// 将当前目标内存设置为Memory1
 	hdma->Instance->CR |= (uint32_t)(DMA_SxCR_CT);
 	USART2_rxDataHandler(usart2_dma_rxbuf[0]);
+	memset(usart2_dma_rxbuf[0], 0, USART2_RX_BUF_LEN);
 }
 
 static void dma_m1_rxcplt_callback(DMA_HandleTypeDef *hdma)
@@ -61,6 +62,7 @@ static void dma_m1_rxcplt_callback(DMA_HandleTypeDef *hdma)
 	// 将当前目标内存设置为Memory0
 	hdma->Instance->CR &= ~(uint32_t)(DMA_SxCR_CT);
 	USART2_rxDataHandler(usart2_dma_rxbuf[1]);
+	memset(usart2_dma_rxbuf[1], 0, USART2_RX_BUF_LEN);
 }
 
 /**

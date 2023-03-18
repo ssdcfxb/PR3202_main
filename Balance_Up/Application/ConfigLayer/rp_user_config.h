@@ -16,6 +16,7 @@
 /* Exported macro ------------------------------------------------------------*/
 #define EVENT_SEND_CAN1_MAILBOX (0x1UL << 0)
 #define EVENT_SEND_CAN2_MAILBOX (0x1UL << 1)
+#define USE_MACHINE_MODE (0)
 /* Exported types ------------------------------------------------------------*/
 /* Ó¦ÓÃ²ã --------------------------------------------------------------------*/
 /* Remote Mode Enum */

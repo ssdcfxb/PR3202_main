@@ -3,6 +3,7 @@
 #include "slave_protocol.h"
 
 #include "crc.h"
+#include "slave.h"
 #include "rc_sensor.h"
 #include "judge.h"
 /* Private macro -------------------------------------------------------------*/

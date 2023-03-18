@@ -10,7 +10,6 @@
 #include "rc_sensor.h"
 
 #include "rp_math.h"
-#include "rc_protocol.h"
 
 extern void rc_sensor_init(rc_sensor_t *rc_sen);
 extern void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf);
@@ -121,10 +120,26 @@ void RC_ResetData(rc_sensor_t *rc)
 	rc->info->mouse_vx = 0;
 	rc->info->mouse_vy = 0;
 	rc->info->mouse_vz = 0;
-	rc->info->mouse_btn_l = 0;
-	rc->info->mouse_btn_r = 0;
+	rc->info->mouse_btn_l.value = 0;
+	rc->info->mouse_btn_r.value = 0;
 	// ¼üÅÌ
 	rc->info->key_v = 0;
+  rc->info->W.value = 0;
+  rc->info->S.value = 0;
+  rc->info->A.value = 0;
+  rc->info->D.value = 0;
+  rc->info->Shift.value = 0;
+  rc->info->Ctrl.value = 0;
+  rc->info->Q.value = 0;
+  rc->info->E.value = 0;
+  rc->info->R.value = 0;
+  rc->info->F.value = 0;
+  rc->info->G.value = 0;
+  rc->info->Z.value = 0;
+  rc->info->X.value = 0;
+  rc->info->C.value = 0;
+  rc->info->V.value = 0;
+  rc->info->B.value = 0;
 	// ×ó²¦ÂÖ
 	rc->info->thumbwheel = 0;
 }

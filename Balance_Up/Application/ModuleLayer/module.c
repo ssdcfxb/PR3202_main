@@ -48,9 +48,15 @@ void module_info_update(module_t *mod)
 		if (rc_sensor.info->s1 == RC_SW_DOWN)
 		{
 			module.remote_mode = RC;
+#if USE_MACHINE_MODE == 1
 			module.mode = MODULE_MODE_MACHINE;
 			gimbal.info->gimbal_mode = gim_machine;
 			launcher.info->launcher_mode = lch_machine;
+#else
+			module.mode = MODULE_MODE_GYRO2;
+			gimbal.info->gimbal_mode = gim_gyro2;
+			launcher.info->launcher_mode = lch_gyro2;
+#endif
 		}
 		else if (rc_sensor.info->s1 == RC_SW_MID)
 		{
@@ -59,10 +65,10 @@ void module_info_update(module_t *mod)
 			gimbal.info->gimbal_mode = gim_gyro;
 			launcher.info->launcher_mode = lch_gyro;
 			
-			if (rc_sensor.info->s2 == RC_SW_DOWN)
-			{
-				gimbal.info->gimbal_mode = gim_vision;
-			}
+//			if (rc_sensor.info->s2 == RC_SW_DOWN)
+//			{
+//				gimbal.info->gimbal_mode = gim_vision;
+//			}
 		}
 		else if (rc_sensor.info->s1 == RC_SW_UP)
 		{

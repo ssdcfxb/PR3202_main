@@ -32,6 +32,7 @@ typedef enum {
 	MODULE_MODE_RESET,		// 模式复位
 	MODULE_MODE_MACHINE,	// 机械模式
 	MODULE_MODE_GYRO,			// 陀螺仪模式
+	MODULE_MODE_GYRO2,		// 陀螺仪模式2
 //	MODULE_MODE_KEY,			// 键盘模式
 	MODULE_MODE_CNT,
 } module_mode_t;

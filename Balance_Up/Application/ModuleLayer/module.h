@@ -13,13 +13,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "launcher.h"
 #include "gimbal.h"
-#include "judge.h"
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 typedef enum {
-	MODULE_STATE_NORMAL,	// 组件正常
 	MODULE_STATE_RCLOST,	// 遥控失联
+	MODULE_STATE_NORMAL,	// 组件正常
+	MODULE_STATE_RCINIT,	// 遥控初始化
 //	MODULE_STATE_CHALOST,	// 底盘失联
 	MODULE_STATE_GIMLOST,	// 云台电机失联
 	MODULE_STATE_LCHLOST,	// 发射机构电机失联

@@ -398,7 +398,7 @@ extern struct bmi2_dev ex_bmi270;
     @ly
         水平时陀螺仪距yaw轴的垂直距离，单位为m
 */
-float Kp = 4.f;//4
+float Kp = 0.5f;//4
 float norm;
 float halfT = 0.00025f;
 //float halfT = 0.0005f;

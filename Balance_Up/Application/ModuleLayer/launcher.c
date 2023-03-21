@@ -353,6 +353,12 @@ void Launcher_GetRcState(void)
 	
 	if (rc_sensor.work_state == DEV_ONLINE)
 	{
+		/**    模式切换保护    **/
+		if (launcher.info->last_s1 != rc_sensor.info->s1)
+		{
+			launcher.info->init_s2 = rc_sensor.info->s2;
+		}
+		
 		/**    遥控器上电保护    **/
 		if (launcher.info->init_s2 == rc_sensor.info->s2)
 		{
@@ -417,6 +423,13 @@ void Launcher_GetRcState(void)
 			}
 		}
 	}
+	else if(launcher.info->rc_work_state == DEV_ONLINE)
+	{
+		/**    遥控器离线跳变信息    **/
+		launcher.work_info->launcher_commond = WaitCommond_L;
+		launcher.work_info->fric_status = Off_Fric;
+		launcher.work_info->dial_status = WaitCommond_Dial;
+	}
 	else 
 	{
 		/**    遥控器离线信息    **/
@@ -441,6 +454,7 @@ void Get_LauncherStatus(void)
 	Dial_StatusCheck();
 	
 	launcher.info->rc_work_state = rc_sensor.work_state;
+	launcher.info->last_s1 = rc_sensor.info->s1;
 	launcher.info->last_s2 = rc_sensor.info->s2;
 }
 
@@ -474,12 +488,12 @@ void Fric_StatusCheck(void)
 	{
 		Magazine_Open();
 		launcher.work_info->fric_status = Off_Fric;
-		slave.info->tx_info->magz_mode = 1;
+		slave.info->tx_info->status |= 0x02;
 	}
 	else
 	{
 		Magazine_Close();
-		slave.info->tx_info->magz_mode = 0;
+		slave.info->tx_info->status &= 0xFD;
 	}
 }
 
@@ -492,7 +506,7 @@ void Fric_StatusCheck(void)
 void Dial_StatusCheck(void)
 {
 	/**    拨盘功能复位    **/
-	if (launcher.work_info->launcher_commond == Func_Reset)
+	if ((launcher.work_info->launcher_commond == Func_Reset) || (launcher.work_info->launcher_commond == WaitCommond_L))
 	{
 		launcher.work_info->dial_status = WaitCommond_Dial;
 	}

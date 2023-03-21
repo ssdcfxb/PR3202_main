@@ -27,7 +27,7 @@
 typedef enum
 {
 	lch_gyro,      // ÍÓÂİÒÇ
-	lch_gyro2,     // ÍÓÂİÒÇ2
+	lch_gyro2,     // ÍÓÂİÒÇ
 	lch_machine,   // »úĞµ
 	lch_keep,      // ±£³Ö
 } launcher_mode_e;
@@ -91,6 +91,7 @@ typedef struct
 	float  target_dial_speed;
 	float  target_dial_angle;
 	
+	uint8_t  last_s1;
 	uint8_t  init_s2;
 	uint8_t  last_s2;
 	

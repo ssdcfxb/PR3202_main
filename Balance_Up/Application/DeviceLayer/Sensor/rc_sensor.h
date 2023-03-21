@@ -18,6 +18,14 @@
 #define    RC_SW_MID             ((uint16_t)3)
 #define    RC_SW_DOWN            ((uint16_t)2)
 
+/* ----------------------- RC Thumbwheel Definition-------------------------------*/
+
+#define    RC_TB_UP              ((uint16_t)1)
+#define    RC_TB_MID             ((uint16_t)0)
+#define    RC_TB_DOWN            ((uint16_t)2)
+
+#define 	 WHEEL_JUMP_VALUE        (550)         //旋钮跳变判断值
+
 /* ----------------------- PC Key Definition-------------------------------- */
 
 #define    KEY_PRESSED_OFFSET_W        ((uint16_t)0x01<<0)
@@ -36,6 +44,26 @@
 #define    KEY_PRESSED_OFFSET_C        ((uint16_t)0x01<<13)
 #define    KEY_PRESSED_OFFSET_V        ((uint16_t)0x01<<14)
 #define    KEY_PRESSED_OFFSET_B        ((uint16_t)0x01<<15)
+
+/* 检测按键长按时间 */
+#define MOUSE_BTN_L_CNT_MAX     500         //ms 鼠标左键
+#define MOUSE_BTN_R_CNT_MAX     500         //ms 鼠标右键
+#define KEY_Q_CNT_MAX           500         //ms Q键
+#define KEY_W_CNT_MAX           1000        //ms W键
+#define KEY_E_CNT_MAX           500         //ms E键
+#define KEY_R_CNT_MAX           500         //ms R键
+#define KEY_A_CNT_MAX           1000        //ms A键
+#define KEY_S_CNT_MAX           1000        //ms S键
+#define KEY_D_CNT_MAX           1000        //ms D键
+#define KEY_F_CNT_MAX           500         //ms F键
+#define KEY_G_CNT_MAX           500         //ms G键
+#define KEY_Z_CNT_MAX           500         //ms Z键
+#define KEY_X_CNT_MAX           500         //ms X键
+#define KEY_C_CNT_MAX           500         //ms C键
+#define KEY_V_CNT_MAX           500         //ms V键
+#define KEY_B_CNT_MAX           500         //ms B键
+#define KEY_SHIFT_CNT_MAX       500         //ms SHIFT键
+#define KEY_CTRL_CNT_MAX        500         //ms CTRL键
 
 /* ----------------------- Function Definition-------------------------------- */
 /* 遥控摇杆通道偏移值 */
@@ -107,6 +135,14 @@ typedef struct key_board_info_struct {
   int16_t cnt_max;  //计数上限
 }key_board_info_t;
 
+/* 拨轮信息 */
+typedef struct
+{
+  int16_t value_last;  //上一次值
+  int16_t value;       //新值
+  uint8_t status;      //状态
+}thumbwheel_info_t;
+
 typedef struct rc_sensor_info_struct {
 	/* 遥控器 */
 	int16_t 	ch0;
@@ -115,7 +151,9 @@ typedef struct rc_sensor_info_struct {
 	int16_t 	ch3;
 	uint8_t  	s1;
 	uint8_t  	s2;
-	int16_t 	thumbwheel;	
+	uint8_t  	last_s1;
+	uint8_t  	last_s2;
+	thumbwheel_info_t 			thumbwheel;						//拨轮
 	/* 键鼠 */
   int16_t                 mouse_vx;             //鼠标x轴速度
   int16_t                 mouse_vy;             //鼠标y轴速度

@@ -44,10 +44,9 @@ void slave_init(slave_t *slef)
 	slv_rx_info_t *rx_info = slef->info->rx_info;
 	
 	tx_info->data_length = 0;
-	tx_info->rc_work_state = 0;
 	tx_info->rc_ch_ws_val = 0;
 	tx_info->rc_ch_ad_val = 0;
-	tx_info->magz_mode = 0;
+	tx_info->status = 0;
 	tx_info->imu_angle = 0.f;
 	tx_info->motor_angle = 0;
 	
@@ -56,6 +55,9 @@ void slave_init(slave_t *slef)
 	rx_info->shooter_speed_limit = 0;
 	rx_info->shooter_cooling_heat = 0;
 	rx_info->bullet_speed = 0.f;
+	
+	slef->info->gyro_status = WaitCommond_Gyro;
+	slef->info->rx_flag = 0;
 	
 }
 

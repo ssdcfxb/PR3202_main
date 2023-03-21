@@ -6,6 +6,15 @@ void StartControlTask(void const * argument)
 	launcher.init();
   for(;;)
   {
+		if (flag.rc_update == 1)
+		{
+			keyboard_update_interrupt(rc_sensor.info);
+		}
+		else
+		{
+			keyboard_update(rc_sensor.info);
+		}
+		
 		if(module.state == MODULE_STATE_NORMAL) 
 		{
 			gimbal.ctrl();

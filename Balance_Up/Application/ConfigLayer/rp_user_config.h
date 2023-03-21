@@ -55,7 +55,7 @@ typedef struct __flag
 {
 	gimbal_flag_t   gimbal_flag;
 	chassis_flag_t  chassis_flag;
-	uint8_t rc_init;
+	uint8_t rc_update;
 } flag_t;
 
 typedef struct {

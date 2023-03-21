@@ -21,6 +21,9 @@
 /* Private variables ---------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
+void keyboard_cnt_max_set(rc_sensor_t *rc_sen);
+void keyboard_status_update_interrupt(key_board_info_t *key);
+void keyboard_status_update(key_board_info_t *key);
 /* Exported functions --------------------------------------------------------*/
 void rc_sensor_init(rc_sensor_t *rc_sen)
 {
@@ -28,10 +31,40 @@ void rc_sensor_init(rc_sensor_t *rc_sen)
 	rc_sen->info->offline_cnt = rc_sen->info->offline_max_cnt + 1;
 	rc_sen->work_state = DEV_OFFLINE;
 	
+	RC_ResetData(rc_sen);
+	keyboard_cnt_max_set(rc_sen);
+	
 	if(rc_sen->id == DEV_ID_RC)
 		rc_sen->errno = NONE_ERR;
 	else
 		rc_sen->errno = DEV_ID_ERR;
+}
+
+/**
+  * @brief  按键长按时间设置
+  */
+void keyboard_cnt_max_set(rc_sensor_t *rc_sen)
+{
+	rc_sensor_info_t *info = rc_sen->info;
+	
+  info->mouse_btn_l.cnt_max = MOUSE_BTN_L_CNT_MAX;
+  info->mouse_btn_r.cnt_max = MOUSE_BTN_R_CNT_MAX;
+  info->Q.cnt_max = KEY_Q_CNT_MAX;
+  info->W.cnt_max = KEY_W_CNT_MAX;
+  info->E.cnt_max = KEY_E_CNT_MAX;
+  info->R.cnt_max = KEY_R_CNT_MAX;
+  info->A.cnt_max = KEY_A_CNT_MAX;
+  info->S.cnt_max = KEY_S_CNT_MAX;
+  info->D.cnt_max = KEY_D_CNT_MAX;
+  info->F.cnt_max = KEY_F_CNT_MAX;
+  info->G.cnt_max = KEY_G_CNT_MAX;
+  info->Z.cnt_max = KEY_Z_CNT_MAX;
+  info->X.cnt_max = KEY_X_CNT_MAX;
+  info->C.cnt_max = KEY_C_CNT_MAX;
+  info->V.cnt_max = KEY_V_CNT_MAX;
+  info->B.cnt_max = KEY_B_CNT_MAX;
+  info->Shift.cnt_max = KEY_SHIFT_CNT_MAX;
+  info->Ctrl.cnt_max = KEY_CTRL_CNT_MAX;
 }
 
 /**
@@ -50,9 +83,11 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
 	rc_info->ch3 = (rxBuf[4] >> 1 | rxBuf[5] << 7) & 0x07FF;
 	rc_info->ch3 -= 1024;
 
-	rc_info->thumbwheel = ((int16_t)rxBuf[16] | ((int16_t)rxBuf[17] << 8)) & 0x07ff;
-	rc_info->thumbwheel -= 1024;
+	rc_info->thumbwheel.value = ((int16_t)rxBuf[16] | ((int16_t)rxBuf[17] << 8)) & 0x07ff;
+	rc_info->thumbwheel.value -= 1024;
 
+	rc_info->last_s1 = rc_info->s1;
+	rc_info->last_s2 = rc_info->s2;
 	rc_info->s1 = ((rxBuf[5] >> 4) & 0x000C) >> 2;
 	rc_info->s2 = (rxBuf[5] >> 4) & 0x0003;	
 	
@@ -82,6 +117,127 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
   rc_info->B.value = 	KEY_PRESSED_B;
 	
 	rc_info->offline_cnt = 0;
+	flag.rc_update = 1;
+}
+
+/**
+ *	@brief	在遥控器中断中更新键盘状态
+ */
+void keyboard_update_interrupt(rc_sensor_info_t	*info)
+{
+  keyboard_status_update_interrupt(&info->mouse_btn_l);
+  keyboard_status_update_interrupt(&info->mouse_btn_r);
+  keyboard_status_update_interrupt(&info->Q);
+  keyboard_status_update_interrupt(&info->W);
+  keyboard_status_update_interrupt(&info->E);
+  keyboard_status_update_interrupt(&info->R);
+  keyboard_status_update_interrupt(&info->A);
+  keyboard_status_update_interrupt(&info->S);
+  keyboard_status_update_interrupt(&info->D);
+  keyboard_status_update_interrupt(&info->F);
+  keyboard_status_update_interrupt(&info->G);
+  keyboard_status_update_interrupt(&info->Z);
+  keyboard_status_update_interrupt(&info->X);
+  keyboard_status_update_interrupt(&info->C);
+  keyboard_status_update_interrupt(&info->V);
+  keyboard_status_update_interrupt(&info->B);
+  keyboard_status_update_interrupt(&info->Shift);
+  keyboard_status_update_interrupt(&info->Ctrl);
+}
+
+/**
+ *	@brief	在遥控器中断中更新键盘按键状态
+ */
+void keyboard_status_update_interrupt(key_board_info_t *key)
+{
+  switch(key->status)
+  {
+    case relax_K:
+      if(key->value == 1)
+      {
+        key->status = down_K;
+        key->cnt = 0;
+      }
+      break;
+    case short_press_K:
+      if(key->value == 0)
+      {
+        key->status = up_K;
+				key->cnt = 0;
+      }
+      else if(key->value == 1)
+      {
+        key->cnt++;
+        if(key->cnt >= key->cnt_max)
+        {
+          key->status = long_press_K;
+					key->cnt = key->cnt_max;
+        }
+      }
+      break;
+    case long_press_K:
+      if(key->value == 0)
+      {
+        key->status = up_K;
+				key->cnt = 0;
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+/**
+ *	@brief	更新键盘状态
+ */
+void keyboard_update(rc_sensor_info_t	*info)
+{
+  keyboard_status_update(&info->mouse_btn_l);
+  keyboard_status_update(&info->mouse_btn_r);
+  keyboard_status_update(&info->Q);
+  keyboard_status_update(&info->W);
+  keyboard_status_update(&info->E);
+  keyboard_status_update(&info->R);
+  keyboard_status_update(&info->A);
+  keyboard_status_update(&info->S);
+  keyboard_status_update(&info->D);
+  keyboard_status_update(&info->F);
+  keyboard_status_update(&info->G);
+  keyboard_status_update(&info->Z);
+  keyboard_status_update(&info->X);
+  keyboard_status_update(&info->C);
+  keyboard_status_update(&info->V);
+  keyboard_status_update(&info->B);
+  keyboard_status_update(&info->Shift);
+  keyboard_status_update(&info->Ctrl);
+}
+
+/**
+ *	@brief	更新键盘按键状态
+ */
+void keyboard_status_update(key_board_info_t *key)
+{
+  switch(key->status)
+  {
+    case down_K:
+      key->status = short_press_K;
+      key->cnt++;
+      break;
+    case up_K:
+      key->status = relax_K;
+			key->cnt = 0;
+      break;
+    case short_press_K:
+      key->cnt++;
+      if(key->cnt >= key->cnt_max)
+      {
+        key->value = long_press_K;
+				key->cnt = key->cnt_max;
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 /**

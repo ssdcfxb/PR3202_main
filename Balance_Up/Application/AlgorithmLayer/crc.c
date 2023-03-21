@@ -95,6 +95,7 @@ uint8_t Get_CRC8_Check_Sum( uint8_t *pchMessage, uint16_t dwLength, uint8_t ucCR
 ** Input: Data to Verify,Stream length = Data + checksum
 ** Output: True or False (CRC Verify Result)
 */
+uint8_t crc_test = 0;
 uint32_t Verify_CRC8_Check_Sum( uint8_t *pchMessage, uint16_t dwLength)
 {
 		uint8_t ucExpected = 0;
@@ -105,6 +106,8 @@ uint32_t Verify_CRC8_Check_Sum( uint8_t *pchMessage, uint16_t dwLength)
 		}
 		
 		ucExpected = Get_CRC8_Check_Sum( pchMessage, dwLength-1, CRC8_INIT);
+		
+		crc_test = ucExpected;
 		
 		return ( ucExpected == pchMessage[dwLength-1] );
 }

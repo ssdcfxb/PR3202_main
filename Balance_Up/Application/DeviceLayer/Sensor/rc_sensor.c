@@ -64,7 +64,9 @@ static void rc_sensor_check(rc_sensor_t *rc_sen)
 		rc_info->ch3 = 0;		
 		rc_info->s1 = RC_SW_MID;
 		rc_info->s2 = RC_SW_MID;
-		rc_info->thumbwheel = 0;
+		rc_info->thumbwheel.value = 0;
+		rc_info->thumbwheel.value_last = 0;
+		rc_info->thumbwheel.status = RC_TB_MID;
 	}
 	else
 	{
@@ -99,7 +101,8 @@ bool RC_IsChannelReset(void)
 	if(  (DeathZoom(rc_sensor_info.ch0, 0, 50) == 0) && 
 		 (DeathZoom(rc_sensor_info.ch1, 0, 50) == 0) && 
 		 (DeathZoom(rc_sensor_info.ch2, 0, 50) == 0) && 
-		 (DeathZoom(rc_sensor_info.ch3, 0, 50) == 0)   )	
+		 (DeathZoom(rc_sensor_info.ch3, 0, 50) == 0) &&
+		 (rc_sensor_info.s1 != RC_SW_UP))	
 	{
 		return true;
 	}
@@ -116,6 +119,8 @@ void RC_ResetData(rc_sensor_t *rc)
 	// 左右开关选择强行设置成中间值状态
 	rc->info->s1 = RC_SW_MID;
 	rc->info->s2 = RC_SW_MID;
+	rc->info->last_s1 = RC_SW_MID;
+	rc->info->last_s2 = RC_SW_MID;
 	// 鼠标
 	rc->info->mouse_vx = 0;
 	rc->info->mouse_vy = 0;
@@ -141,5 +146,7 @@ void RC_ResetData(rc_sensor_t *rc)
   rc->info->V.value = 0;
   rc->info->B.value = 0;
 	// 左拨轮
-	rc->info->thumbwheel = 0;
+	rc->info->thumbwheel.value = 0;
+	rc->info->thumbwheel.value_last = 0;
+	rc->info->thumbwheel.status = RC_TB_MID;
 }

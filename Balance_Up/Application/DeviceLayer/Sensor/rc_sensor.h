@@ -65,6 +65,9 @@
 #define KEY_SHIFT_CNT_MAX       500         //ms SHIFT键
 #define KEY_CTRL_CNT_MAX        500         //ms CTRL键
 
+/* 平滑滤波次数 */
+#define REMOTE_SMOOTH_TIMES     10          //鼠标平滑滤波次数
+
 /* ----------------------- Function Definition-------------------------------- */
 /* 遥控摇杆通道偏移值 */
 #define		RC_SW1_VALUE				(rc_sensor_info.s1)
@@ -158,6 +161,9 @@ typedef struct rc_sensor_info_struct {
   int16_t                 mouse_vx;             //鼠标x轴速度
   int16_t                 mouse_vy;             //鼠标y轴速度
   int16_t                 mouse_vz;             //鼠标z轴速度
+  int16_t                 mouse_x;         	    //鼠标x轴滤波后速度
+  int16_t                 mouse_y;          	  //鼠标y轴滤波后速度
+  int16_t                 mouse_z;          	  //鼠标z轴滤波后速度
   key_board_info_t        mouse_btn_l;          //鼠标左键
   key_board_info_t        mouse_btn_r;          //鼠标右键
   key_board_info_t        Q;                    //按键Q

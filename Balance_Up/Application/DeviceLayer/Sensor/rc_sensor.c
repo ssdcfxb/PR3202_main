@@ -125,6 +125,9 @@ void RC_ResetData(rc_sensor_t *rc)
 	rc->info->mouse_vx = 0;
 	rc->info->mouse_vy = 0;
 	rc->info->mouse_vz = 0;
+	rc->info->mouse_x = 0;
+	rc->info->mouse_y = 0;
+	rc->info->mouse_z = 0;
 	rc->info->mouse_btn_l.value = 0;
 	rc->info->mouse_btn_r.value = 0;
 	// ¼üÅÌ

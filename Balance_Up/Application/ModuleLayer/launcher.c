@@ -26,6 +26,7 @@ void Judge_AdaptFricSpeed(void);
 void Judge_AdaptDialSpeed(void);
 void Launcher_GetCtrlInfo(void);
 void Launcher_GetRcState(void);
+void Launcher_GetKeyState(void);
 void Get_LauncherStatus(void);
 void Fric_StatusCheck(void);
 void Dial_StatusCheck(void);
@@ -40,7 +41,6 @@ void Launcher_Stop(void);
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-//float      left_speed = 0, right_speed = 0;
 int16_t    launcher_out[3];
 
 // 发射机构设备
@@ -162,8 +162,6 @@ void Launcher_GetBaseInfo(void)
 	launcher.info->measure_dial_angle = RM_motor[DIAL].rx_info.angle_sum * M2006_ECD_TO_ANGLE;
 	
 	Judge_GetInfo();
-//	left_speed = RM_motor[FRIC_L].rx_info.speed;
-//	right_speed = RM_motor[FRIC_R].rx_info.speed;
 }
 
 
@@ -329,9 +327,13 @@ void Judge_AdaptDialSpeed(void)
   */
 void Launcher_GetCtrlInfo(void)
 {
-	launcher.info->remote_mode = RC;
-	
-	Launcher_GetRcState();
+	if (launcher.info->remote_mode == RC)
+	{
+		Launcher_GetRcState();
+	}
+	else if(launcher.info->remote_mode == KEY) {
+		Launcher_GetKeyState();
+	}
 }
 
 
@@ -440,6 +442,16 @@ void Launcher_GetRcState(void)
 	
 }
 
+
+/**
+  * @brief  读取键盘信息
+  * @param  
+  * @retval 
+  */
+void Launcher_GetKeyState(void)
+{
+	
+}
 
 
 /**

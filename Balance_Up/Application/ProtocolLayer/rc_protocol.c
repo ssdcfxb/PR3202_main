@@ -68,6 +68,27 @@ void keyboard_cnt_max_set(rc_sensor_t *rc_sen)
 }
 
 /**
+  * @brief  鼠标数据更新
+  */
+void rc_interrupt_update(rc_sensor_t *rc_sen)
+{
+	/* 鼠标速度均值滤波 */
+	static int16_t mouse_x[REMOTE_SMOOTH_TIMES], mouse_y[REMOTE_SMOOTH_TIMES];
+	static int16_t index = 0;
+	if(index == REMOTE_SMOOTH_TIMES)
+	{
+		index = 0;
+	}
+	rc_sen->info->mouse_x -= (float)mouse_x[index] / (float)REMOTE_SMOOTH_TIMES;
+	rc_sen->info->mouse_y -= (float)mouse_y[index] / (float)REMOTE_SMOOTH_TIMES;
+	mouse_x[index] = rc_sen->info->mouse_vx;
+	mouse_y[index] = rc_sen->info->mouse_vy;
+	rc_sen->info->mouse_x += (float)mouse_x[index] / (float)REMOTE_SMOOTH_TIMES;
+	rc_sen->info->mouse_y += (float)mouse_y[index] / (float)REMOTE_SMOOTH_TIMES;
+	
+	index++;
+}
+/**
  *	@brief	遥控器数据解析协议
  */
 void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)

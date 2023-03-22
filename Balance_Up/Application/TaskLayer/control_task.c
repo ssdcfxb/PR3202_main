@@ -6,7 +6,7 @@ void StartControlTask(void const * argument)
 	launcher.init();
   for(;;)
   {
-		if (flag.rc_update == 1)
+		if (symbal.rc_update == 1)
 		{
 			keyboard_update_interrupt(rc_sensor.info);
 		}

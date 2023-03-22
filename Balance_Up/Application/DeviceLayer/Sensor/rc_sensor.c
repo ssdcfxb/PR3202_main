@@ -51,7 +51,25 @@ rc_sensor_t	rc_sensor = {
 static void rc_sensor_check(rc_sensor_t *rc_sen)
 {
 	rc_sensor_info_t *rc_info = rc_sen->info;
-	
+
+	/*  ²¦ÂÖÌø±ä¼ì²â  */
+	rc_sensor.info->thumbwheel.status = RC_TB_MID;
+	if (rc_sensor.info->thumbwheel.value_last > WHEEL_JUMP_VALUE)
+	{
+		if (rc_sensor.info->thumbwheel.value < WHEEL_JUMP_VALUE)
+		{
+			rc_sensor.info->thumbwheel.status = RC_TB_DOWN;
+		}
+	}
+	else if (rc_sensor.info->thumbwheel.value_last < -WHEEL_JUMP_VALUE)
+	{
+		if (rc_sensor.info->thumbwheel.value > -WHEEL_JUMP_VALUE)
+		{
+			rc_sensor.info->thumbwheel.status = RC_TB_UP;
+		}
+	}
+	rc_sensor.info->thumbwheel.value_last = rc_sensor.info->thumbwheel.value;
+		
 	if(abs(rc_info->ch0) > 660 ||
 	   abs(rc_info->ch1) > 660 ||
 	   abs(rc_info->ch2) > 660 ||

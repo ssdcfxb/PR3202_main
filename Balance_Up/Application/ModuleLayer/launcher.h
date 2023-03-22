@@ -55,6 +55,8 @@ typedef enum
 typedef enum
 {
 	Fric_Toggle,    // 开关摩擦轮
+	Fric_Open,			// 开摩擦轮
+	Fric_Close,			// 关摩擦轮
 	Magz_Open,      // 开弹仓
 	Magz_Close,     // 关弹仓
 	Func_Reset,     // 功能复位

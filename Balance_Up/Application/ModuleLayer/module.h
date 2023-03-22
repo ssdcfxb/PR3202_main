@@ -20,11 +20,6 @@ typedef enum {
 	MODULE_STATE_RCLOST,	// 遥控失联
 	MODULE_STATE_NORMAL,	// 组件正常
 	MODULE_STATE_RCINIT,	// 遥控初始化
-//	MODULE_STATE_CHALOST,	// 底盘失联
-	MODULE_STATE_GIMLOST,	// 云台电机失联
-	MODULE_STATE_LCHLOST,	// 发射机构电机失联
-//	MODULE_STATE_JUGLOST,	// 裁判系统失联
-//	MODULE_STATE_VISLOST,	// 视觉失联
 	MODULE_STATE_WRONG,	  // 组件错误
 } module_state_t;
 
@@ -40,8 +35,8 @@ typedef enum {
 typedef struct __module_t
 {
 	remote_mode_t		remote_mode;	// 控制方式
-	module_state_t	state;			  // 系统状态
-	module_mode_t		mode;			    // 系统模式
+	module_state_t	state;	// 组件状态
+	module_mode_t		mode;	// 组件模式
 	
 	void (*heartbeat)(struct __module_t *module);
 } module_t;

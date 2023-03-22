@@ -546,6 +546,11 @@
               <FilePath>..\Application\DeviceLayer\Sensor\rc_sensor.c</FilePath>
             </File>
             <File>
+              <FileName>keyboard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\keyboard.c</FilePath>
+            </File>
+            <File>
               <FileName>judge.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DeviceLayer\judge.c</FilePath>

@@ -14,56 +14,40 @@
 /* Private function prototypes -----------------------------------------------*/
 void module_info_update(module_t *mod);
 void RC_StateCheck(void);
-void Motor_StateCheck(void);
+void Slave_StateCheck(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-module_t module = {
-	.heartbeat = module_info_update,
+symbal_t symbal = {
+	.gim_sym.reset_start = 1,
+	.gim_sym.reset_ok = 0,
+	.gim_sym.turn_start = 0,
+	.gim_sym.turn_ok = 2,
+	.rc_update = 0,
 };
 
-flag_t flag = {
-	.gimbal_flag.reset_start = 1,
-	.gimbal_flag.reset_ok = 0,
-	.gimbal_flag.turn_start = 0,
-	.gimbal_flag.turn_ok = 2,
-	.chassis_flag.stop_start = 0,
-	.chassis_flag.stop_ok = 0,
-	.rc_update = 0,
+module_t module = {
+	.heartbeat = module_info_update,
 };
 
 /* Private functions ---------------------------------------------------------*/
 void module_info_update(module_t *mod)
 {
 	RC_StateCheck();
+	Slave_StateCheck();
 	
 	if(module.state != MODULE_STATE_NORMAL) 
 	{
+		module.remote_mode = RC;
 		module.mode = MODULE_MODE_RESET;
 		gimbal.info->gimbal_mode = gim_keep;
 		launcher.info->launcher_mode = lch_keep;
+		symbal.gim_sym.reset_start = 1;
+		symbal.gim_sym.reset_ok = 0;
 	}
 	else 
 	{
-		/*  拨轮跳变检测  */
-		rc_sensor.info->thumbwheel.status = RC_TB_MID;
-		if (rc_sensor.info->thumbwheel.value_last > WHEEL_JUMP_VALUE)
-		{
-			if (rc_sensor.info->thumbwheel.value < WHEEL_JUMP_VALUE)
-			{
-				rc_sensor.info->thumbwheel.status = RC_TB_DOWN;
-			}
-		}
-		else if (rc_sensor.info->thumbwheel.value_last < -WHEEL_JUMP_VALUE)
-		{
-			if (rc_sensor.info->thumbwheel.value > -WHEEL_JUMP_VALUE)
-			{
-				rc_sensor.info->thumbwheel.status = RC_TB_UP;
-			}
-		}
-		rc_sensor.info->thumbwheel.value_last = rc_sensor.info->thumbwheel.value;
-			
 		/*  模式切换  */
 		if (rc_sensor.info->s1 == RC_SW_DOWN)
 		{
@@ -110,6 +94,7 @@ void module_info_update(module_t *mod)
 	{
 		gimbal.info->remote_mode = KEY;
 		launcher.info->remote_mode = KEY;
+		Key_StateCheck();
 	}
 	
 }
@@ -149,32 +134,65 @@ void RC_StateCheck(void)
 	}
 }
 
-void Motor_StateCheck(void)
+void Slave_StateCheck(void)
 {
-	uint16_t i = 0;
-	for ( ; i < DIAL; i++)
+	int16_t front, right;
+		
+	/*  1:遥控器状态标志位  */
+	slave.info->tx_info->status &= 0xFE;
+	if (rc_sensor.work_state == DEV_ONLINE)
+		slave.info->tx_info->status |= 0x01;
+	
+	/*  2:弹仓状态标志位  */
+	slave.info->tx_info->status &= 0xFD;
+	if (launcher.work_info->launcher_commond == Magz_Open)
+		slave.info->tx_info->status |= 0x02;
+	
+	/*  3:小陀螺状态标志位  */
+	if (rc_sensor.info->thumbwheel.status == RC_TB_DOWN)
 	{
-		if (RM_motor[i].state.work_state == M_OFFLINE)
+		if (slave.info->gyro_status == WaitCommond_Gyro)
 		{
-			module.state = MODULE_STATE_LCHLOST;
-			break;
+			slave.info->gyro_status = On_Gyro;
+			slave.info->tx_info->status |= 0x04;
 		}
-		else
+		else if (slave.info->gyro_status == On_Gyro)
 		{
-			module.state = MODULE_STATE_NORMAL;
+			slave.info->gyro_status = Off_Gyro;
+			slave.info->tx_info->status &= 0xFB;
+		}
+		else if (slave.info->gyro_status == Off_Gyro)
+		{
+			slave.info->gyro_status = On_Gyro;
+			slave.info->tx_info->status |= 0x04;
 		}
 	}
 	
-	for (i = DIAL; i < MOTOR_LIST; i++)
+	/*  5:换头状态标志位  */
+	slave.info->tx_info->status &= 0xEF;
+	if (symbal.gim_sym.reset_ok == 0)
+		slave.info->tx_info->status |= 0x10;
+	
+	/*  yaw轴电机角度数据  */
+	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
+	/*  yaw轴陀螺仪角度数据  */
+	slave.info->tx_info->imu_angle = imu_sensor.info->base_info.yaw;
+	
+	/*  底盘移动通道值  */
+	if (module.remote_mode == RC)
 	{
-		if (RM_motor[i].state.work_state == M_OFFLINE)
-		{
-			module.state = MODULE_STATE_GIMLOST;
-			break;
-		}
-		else
-		{
-			module.state = MODULE_STATE_NORMAL;
-		}
+		slave.info->tx_info->rc_ch_ws_val = rc_sensor.info->ch3;
+		slave.info->tx_info->rc_ch_ad_val = rc_sensor.info->ch2;
 	}
+	else if(module.remote_mode == KEY)
+	{
+		front = 0;
+		right = 0;
+		front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
+		front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
+		right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
+		right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
+	}
+	
 }
+

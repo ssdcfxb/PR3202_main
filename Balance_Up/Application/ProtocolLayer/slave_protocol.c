@@ -13,7 +13,6 @@ extern void judge_update(judge_t *self, slave_info_t *info);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t slave_txBuf[30];
-int16_t last_thumbwheel_value;
 /* Exported variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart3;
 extern slv_tx_info_t slave_tx_info;
@@ -30,31 +29,6 @@ void USART3_rxDataHandler(uint8_t *rxBuf)
 
 bool slave_send_data(slave_t *slef)
 {
-	/*  遥控器状态标志位  */
-	slave_tx_info.status &= 0xFE;
-	if(rc_sensor.work_state == DEV_ONLINE)
-		slave_tx_info.status |= 0x01;
-	
-	/*  小陀螺状态标志位  */
-	if (rc_sensor.info->thumbwheel.status == RC_TB_DOWN)
-	{
-		if (slave.info->gyro_status == WaitCommond_Gyro)
-		{
-			slave.info->gyro_status = On_Gyro;
-			slave_tx_info.status |= 0x04;
-		}
-		else if (slave.info->gyro_status == On_Gyro)
-		{
-			slave.info->gyro_status = Off_Gyro;
-			slave_tx_info.status &= 0xFB;
-		}
-		else if (slave.info->gyro_status == Off_Gyro)
-		{
-			slave.info->gyro_status = On_Gyro;
-			slave_tx_info.status |= 0x04;
-		}
-	}
-	
 	slave_tx_info.data_length = sizeof(slv_tx_info_t);
 	memcpy(slave_txBuf, &slave_tx_info, sizeof(slv_tx_info_t));
 	Append_CRC8_Check_Sum(slave_txBuf, 3);

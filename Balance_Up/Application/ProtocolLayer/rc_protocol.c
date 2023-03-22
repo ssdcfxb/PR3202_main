@@ -14,6 +14,7 @@
 
 #include "slave.h"
 #include "rc_sensor.h"
+#include "keyboard.h"
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -138,7 +139,7 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
   rc_info->B.value = 	KEY_PRESSED_B;
 	
 	rc_info->offline_cnt = 0;
-	flag.rc_update = 1;
+	symbal.rc_update = 1;
 }
 
 /**
@@ -269,8 +270,5 @@ void USART2_rxDataHandler(uint8_t *rxBuf)
 	// 更新遥控数据
 	rc_sensor.update(&rc_sensor, rxBuf);
 	rc_sensor.check(&rc_sensor);
-	
-	slave.info->tx_info->rc_ch_ws_val = rc_sensor.info->ch3;
-	slave.info->tx_info->rc_ch_ad_val = rc_sensor.info->ch2;
 	
 }

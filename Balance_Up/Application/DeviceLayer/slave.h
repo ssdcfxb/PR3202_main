@@ -24,7 +24,7 @@ typedef __packed struct slv_tx_info_struct {
 	
 	int16_t  rc_ch_ws_val;
 	int16_t  rc_ch_ad_val;
-	uint8_t  status;	//1:遥控器(0:关 1:开) 2:弹仓(0:关 1:开) 3:小陀螺(0:关 1:开) 4:换头(0:7191 1:3095)
+	uint8_t  status;	//1:遥控器(0:关 1:开) 2:弹仓(0:关 1:开) 3:小陀螺(0:关 1:开) 4:换头(0:7191 1:3095) 5:换头标志位(0:完成换头 1:开始换头)
 	float    imu_angle;
 	int16_t  motor_angle;
 	uint16_t CRC16;

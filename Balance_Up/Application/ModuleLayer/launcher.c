@@ -450,7 +450,45 @@ void Launcher_GetRcState(void)
   */
 void Launcher_GetKeyState(void)
 {
+	launcher.work_info->launcher_commond = Func_Reset;
+	/*  ²¦ÅÌÖ¸Áî  */
+	if (keyboard.lch_cmd.shoot_cmd == keep_shoot)
+	{
+		launcher.work_info->launcher_commond = Keep_Shoot;
+		if (keyboard.state.last_mouse_btn_l == short_press_K)
+		{
+			launcher.work_info->dial_status = Reload_Dial;
+		}
+	}
+	if (keyboard.lch_cmd.shoot_cmd == single_shoot)
+	{
+		launcher.work_info->launcher_commond = Single_Shoot;
+		if (keyboard.state.last_mouse_btn_l == down_K)
+		{
+			launcher.work_info->dial_status = Reload_Dial;
+			launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
+		}
+	}
 	
+	/*  Ä¦²ÁÂÖÖ¸Áî  */
+	if (keyboard.lch_cmd.fric_cmd == fric_on)
+	{
+		launcher.work_info->launcher_commond = Fric_Open;
+	}
+	else if (keyboard.lch_cmd.fric_cmd == fric_off)
+	{
+		launcher.work_info->launcher_commond = Fric_Close;
+	}
+	
+	/*  µ¯²ÖÖ¸Áî  */
+	if (keyboard.lch_state.magz_state == magz_open)
+	{
+		launcher.work_info->launcher_commond = Magz_Open;
+	}
+	else if (keyboard.lch_state.magz_state == magz_close)
+	{
+		launcher.work_info->launcher_commond = Magz_Close;
+	}
 }
 
 
@@ -479,6 +517,7 @@ void Get_LauncherStatus(void)
   */
 void Fric_StatusCheck(void)
 {
+	/*  Ò£¿ØÆ÷¿ª¹ØÄ¦²ÁÂÖ  */
 	if ((launcher.work_info->launcher_commond == Fric_Toggle) \
 		&& (launcher.info->last_s2 != rc_sensor.info->s2))
 	{
@@ -496,16 +535,25 @@ void Fric_StatusCheck(void)
 		}
 	}
 	
+	/*  ¼üÅÌ¿ª¹ØÄ¦²ÁÂÖ  */
+	if (launcher.work_info->launcher_commond == Fric_Open)
+	{
+		launcher.work_info->fric_status = On_Fric;
+	}
+	if (launcher.work_info->launcher_commond == Fric_Close)
+	{
+		launcher.work_info->fric_status = Off_Fric;
+	}
+	
+	/*  ¿ª¹Øµ¯²Ö  */
 	if (launcher.work_info->launcher_commond == Magz_Open)
 	{
 		Magazine_Open();
 		launcher.work_info->fric_status = Off_Fric;
-		slave.info->tx_info->status |= 0x02;
 	}
 	else
 	{
 		Magazine_Close();
-		slave.info->tx_info->status &= 0xFD;
 	}
 }
 

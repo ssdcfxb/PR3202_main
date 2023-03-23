@@ -501,6 +501,11 @@
               <FilePath>..\Application\ProtocolLayer\slave_protocol.c</FilePath>
             </File>
             <File>
+              <FileName>vision_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ProtocolLayer\vision_protocol.c</FilePath>
+            </File>
+            <File>
               <FileName>rm_protocol.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ProtocolLayer\rm_protocol.c</FilePath>
@@ -544,6 +549,11 @@
               <FileName>rc_sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DeviceLayer\Sensor\rc_sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>vision_sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\Sensor\vision_sensor.c</FilePath>
             </File>
             <File>
               <FileName>keyboard.c</FileName>

@@ -93,6 +93,8 @@ void Key_StateCheck(void)
 	/*  V:µôÍ·  */
 	if (keyboard.state.V == down_K)
 	{
+		symbal.gim_sym.turn_start = 1;
+		symbal.gim_sym.turn_ok = 0;
 		keyboard.gim_cmd = gim_turn;
 	}
 	

@@ -53,6 +53,7 @@ static void rc_sensor_check(rc_sensor_t *rc_sen)
 	rc_sensor_info_t *rc_info = rc_sen->info;
 
 	/*  ²¦ÂÖÌø±ä¼ì²â  */
+	rc_sensor.info->thumbwheel.status_last = rc_sensor.info->thumbwheel.status;
 	rc_sensor.info->thumbwheel.status = RC_TB_MID;
 	if (rc_sensor.info->thumbwheel.value_last > WHEEL_JUMP_VALUE)
 	{
@@ -85,6 +86,7 @@ static void rc_sensor_check(rc_sensor_t *rc_sen)
 		rc_info->thumbwheel.value = 0;
 		rc_info->thumbwheel.value_last = 0;
 		rc_info->thumbwheel.status = RC_TB_MID;
+		rc_info->thumbwheel.status_last = RC_TB_MID;
 	}
 	else
 	{
@@ -143,9 +145,9 @@ void RC_ResetData(rc_sensor_t *rc)
 	rc->info->mouse_vx = 0;
 	rc->info->mouse_vy = 0;
 	rc->info->mouse_vz = 0;
-	rc->info->mouse_x = 0;
-	rc->info->mouse_y = 0;
-	rc->info->mouse_z = 0;
+	rc->info->mouse_x = 0.f;
+	rc->info->mouse_y = 0.f;
+	rc->info->mouse_z = 0.f;
 	rc->info->mouse_btn_l.value = 0;
 	rc->info->mouse_btn_r.value = 0;
 	// ¼üÅÌ
@@ -170,4 +172,5 @@ void RC_ResetData(rc_sensor_t *rc)
 	rc->info->thumbwheel.value = 0;
 	rc->info->thumbwheel.value_last = 0;
 	rc->info->thumbwheel.status = RC_TB_MID;
+	rc->info->thumbwheel.status_last = RC_TB_MID;
 }

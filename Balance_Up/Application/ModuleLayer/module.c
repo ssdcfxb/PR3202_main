@@ -23,7 +23,7 @@ symbal_t symbal = {
 	.gim_sym.reset_start = 1,
 	.gim_sym.reset_ok = 0,
 	.gim_sym.turn_start = 0,
-	.gim_sym.turn_ok = 2,
+	.gim_sym.turn_ok = 1,
 	.rc_update = 0,
 };
 
@@ -137,6 +137,7 @@ void RC_StateCheck(void)
 void Slave_StateCheck(void)
 {
 	int16_t front, right;
+	static uint8_t last_status = 0;
 		
 	/*  1:遥控器状态标志位  */
 	slave.info->tx_info->status &= 0xFE;
@@ -149,28 +150,42 @@ void Slave_StateCheck(void)
 		slave.info->tx_info->status |= 0x02;
 	
 	/*  3:小陀螺状态标志位  */
-	if (rc_sensor.info->thumbwheel.status == RC_TB_DOWN)
+	if (rc_sensor.work_state == DEV_OFFLINE)
+		slave.info->gyro_status = WaitCommond_Gyro;
+	if ((rc_sensor.info->thumbwheel.status == RC_TB_DOWN) && (last_status != RC_TB_DOWN))
 	{
 		if (slave.info->gyro_status == WaitCommond_Gyro)
 		{
 			slave.info->gyro_status = On_Gyro;
-			slave.info->tx_info->status |= 0x04;
 		}
 		else if (slave.info->gyro_status == On_Gyro)
 		{
 			slave.info->gyro_status = Off_Gyro;
-			slave.info->tx_info->status &= 0xFB;
 		}
 		else if (slave.info->gyro_status == Off_Gyro)
 		{
 			slave.info->gyro_status = On_Gyro;
-			slave.info->tx_info->status |= 0x04;
 		}
+	}
+	slave.info->tx_info->status &= 0xFB;
+	if (slave.info->gyro_status == On_Gyro)
+		slave.info->tx_info->status |= 0x04;
+	
+	/*  4:头的朝向  */
+	slave.info->tx_info->status &= 0xF7;
+	if (gimbal.conf->restart_yaw_motor_angle != gimbal.conf->MID_VALUE)
+		slave.info->tx_info->status |= 0x08;
+	
+	// 遥控器换头
+	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (last_status == RC_TB_UP))
+	{
+		symbal.gim_sym.turn_start = 1;
+		symbal.gim_sym.turn_ok = 0;
 	}
 	
 	/*  5:换头状态标志位  */
 	slave.info->tx_info->status &= 0xEF;
-	if (symbal.gim_sym.reset_ok == 0)
+	if ((symbal.gim_sym.reset_ok == 0) || (symbal.gim_sym.turn_ok == 0))
 		slave.info->tx_info->status |= 0x10;
 	
 	/*  yaw轴电机角度数据  */
@@ -193,6 +208,6 @@ void Slave_StateCheck(void)
 		right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
 		right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
 	}
-	
+	last_status = rc_sensor.info->thumbwheel.status;
 }
 

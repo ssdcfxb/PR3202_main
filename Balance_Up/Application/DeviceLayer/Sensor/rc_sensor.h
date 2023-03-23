@@ -143,6 +143,7 @@ typedef struct
 {
   int16_t value_last;  //上一次值
   int16_t value;       //新值
+	uint8_t status_last; //上一次状态
   uint8_t status;      //状态
 }thumbwheel_info_t;
 
@@ -161,9 +162,9 @@ typedef struct rc_sensor_info_struct {
   int16_t                 mouse_vx;             //鼠标x轴速度
   int16_t                 mouse_vy;             //鼠标y轴速度
   int16_t                 mouse_vz;             //鼠标z轴速度
-  int16_t                 mouse_x;         	    //鼠标x轴滤波后速度
-  int16_t                 mouse_y;          	  //鼠标y轴滤波后速度
-  int16_t                 mouse_z;          	  //鼠标z轴滤波后速度
+  float                   mouse_x;         	    //鼠标x轴滤波后速度
+  float                   mouse_y;          	  //鼠标y轴滤波后速度
+  float                   mouse_z;          	  //鼠标z轴滤波后速度
   key_board_info_t        mouse_btn_l;          //鼠标左键
   key_board_info_t        mouse_btn_r;          //鼠标右键
   key_board_info_t        Q;                    //按键Q

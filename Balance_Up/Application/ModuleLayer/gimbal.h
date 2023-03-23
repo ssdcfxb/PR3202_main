@@ -12,6 +12,7 @@ typedef enum
 	gim_gyro,      // ÍÓÂİÒÇ
 	gim_gyro2,     // ÍÓÂİÒÇ2
 	gim_machine,   // »úĞµ
+	gim_back,			 // µôÍ·
 	gim_keep,      // ±£³Ö
 	gim_vision,    // ×ÔÃé
 } gimbal_mode_e;
@@ -72,9 +73,13 @@ typedef struct
 	int16_t  restart_pitch_motor_angle;
 	float    restart_pitch_imu_angle;
 	
+	int16_t  turn_angle;
+	
 	int16_t  rc_pitch_motor_offset;
 	float    rc_yaw_imu_offset;
 	float    rc_pitch_imu_offset;
+	float    key_yaw_imu_offset;
+	float    key_pitch_imu_offset;
 	
 	float    max_pitch_imu_angle; // ¸©
 	float    min_pitch_imu_angle; // Ñö

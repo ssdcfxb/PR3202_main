@@ -15,6 +15,7 @@
 void module_info_update(module_t *mod);
 void RC_StateCheck(void);
 void Slave_StateCheck(void);
+void Vision_StateCheck(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
@@ -34,8 +35,11 @@ module_t module = {
 /* Private functions ---------------------------------------------------------*/
 void module_info_update(module_t *mod)
 {
+	static uint8_t last_status = 0, vis_on = 0;
+	
 	RC_StateCheck();
 	Slave_StateCheck();
+	Vision_StateCheck();
 	
 	if(module.state != MODULE_STATE_NORMAL) 
 	{
@@ -82,6 +86,27 @@ void module_info_update(module_t *mod)
 			gimbal.info->gimbal_mode = gim_keep;
 			launcher.info->launcher_mode = lch_keep;
 		}
+		
+		// Ò£¿ØÆ÷ÊÓ¾õ
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (last_status == RC_TB_UP))
+		{
+			if (vision_sensor.work_state == DEV_ONLINE)
+			{
+				if (vis_on == 0)
+				{
+					vis_on = 1;
+				}
+				else
+				{
+					vis_on = 0;
+				}
+			}
+		}
+		if (vis_on == 1)
+		{
+			gimbal.info->gimbal_mode = gim_vision;
+		}
+	
 	}
 	
 	/*  ¿ØÖÆ·½Ê½ÇÐ»»  */
@@ -177,10 +202,13 @@ void Slave_StateCheck(void)
 		slave.info->tx_info->status |= 0x08;
 	
 	// Ò£¿ØÆ÷»»Í·
-	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (last_status == RC_TB_UP))
+	if (vision_sensor.work_state == DEV_OFFLINE)
 	{
-		symbal.gim_sym.turn_start = 1;
-		symbal.gim_sym.turn_ok = 0;
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (last_status == RC_TB_UP))
+		{
+			symbal.gim_sym.turn_start = 1;
+			symbal.gim_sym.turn_ok = 0;
+		}
 	}
 	
 	/*  5:»»Í·×´Ì¬±êÖ¾Î»  */
@@ -211,3 +239,15 @@ void Slave_StateCheck(void)
 	last_status = rc_sensor.info->thumbwheel.status;
 }
 
+void Vision_StateCheck(void)
+{
+	vision_sensor.info->measure_pitch_angle = imu_sensor.info->base_info.pitch;
+	vision_sensor.info->measure_yaw_angle = imu_sensor.info->base_info.yaw;
+	vision_sensor.info->measure_shoot_speed = launcher.conf->fric_mode;
+	
+	vision_sensor.info->tx_info->pitch_angle = vision_sensor.info->measure_pitch_angle;
+	vision_sensor.info->tx_info->yaw_angle = vision_sensor.info->measure_yaw_angle;
+	vision_sensor.info->tx_info->shoot_speed = vision_sensor.info->measure_shoot_speed;
+	vision_sensor.info->tx_info->mode = AIM_ON;
+	vision_sensor.info->tx_info->my_color = 0;
+}

@@ -18,13 +18,13 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+void keyboard_cnt_max_set(rc_sensor_t *rc_sen);
+void keyboard_status_update_interrupt(key_board_info_t *key);
+void keyboard_status_update(key_board_info_t *key);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-void keyboard_cnt_max_set(rc_sensor_t *rc_sen);
-void keyboard_status_update_interrupt(key_board_info_t *key);
-void keyboard_status_update(key_board_info_t *key);
 /* Exported functions --------------------------------------------------------*/
 void rc_sensor_init(rc_sensor_t *rc_sen)
 {

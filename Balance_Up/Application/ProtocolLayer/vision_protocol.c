@@ -1,13 +1,23 @@
+
+/* Includes ------------------------------------------------------------------*/
 #include "vision_protocol.h"
 
+/* Private macro -------------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+uint8_t vision_txBuf[30];
+
+/* Exported variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart1;
 
 vision_tx_info_t vision_tx_info = {
 	.SOF = 0xA5,
 };
 vision_rx_info_t vision_rx_info;
-uint8_t vision_txBuf[30];
 
+/* Private functions ---------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 bool vision_send_data(void)
 {
 	memcpy(vision_txBuf, &vision_tx_info, sizeof(vision_tx_info_t));
@@ -22,12 +32,6 @@ bool vision_send_data(void)
 			return true;
 	}
 	return false;
-}
-
-void USART1_rxDataHandler(uint8_t *rxBuf)
-{
-	vision_sensor.update(&vision_sensor, rxBuf);
-	vision_sensor.check(&vision_sensor);
 }
 
 void vision_update(vision_sensor_t *vis_sen, uint8_t *rxBuf)
@@ -60,7 +64,13 @@ void vision_check(vision_sensor_t *vis_sen)
 		memcpy(&info->target_pitch_angle, (void*)&rx_info->pitch_angle, 4);
 		memcpy(&info->target_yaw_angle, (void*)&rx_info->yaw_angle, 4);
 		memcpy(&info->is_find_target, &rx_info->is_find_target, 1);
-		memcpy(&info->is_find_defund, &rx_info->is_find_defund, 1);
+		memcpy(&info->is_find_buff, &rx_info->is_find_buff, 1);
 		memcpy(&info->is_hit_enable, &rx_info->is_hit_enable, 1);
 	}
+}
+
+void USART1_rxDataHandler(uint8_t *rxBuf)
+{
+	vision_sensor.update(&vision_sensor, rxBuf);
+	vision_sensor.check(&vision_sensor);
 }

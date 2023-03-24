@@ -13,7 +13,7 @@
 /* Exported types ------------------------------------------------------------*/
 typedef enum {
 	AIM_OFF 		    = 0x00,	// 不启动自瞄
-	AIM_AUTO		    = 0x01,	// 启动自瞄
+	AIM_ON			    = 0x01,	// 启动自瞄
 	AIM_SMALL_BUFF	= 0x02,	// 识别小符
 	AIM_BIG_BUFF	  = 0x03,	// 识别大符
 	AIM_ANTOP	   	  = 0x04,	// 击打哨兵
@@ -28,7 +28,7 @@ typedef __packed struct
 	float    			pitch_angle; // dataf_1
 	float    			yaw_angle;   // dataf_2
 	uint8_t  			shoot_speed; // datau8_2
- 	uint8_t  			my_color;    // datau8_3
+ 	uint8_t  			my_color;    // datau8_3	0:红	1:蓝
 	uint16_t 			CRC16;
 }vision_tx_info_t;
 
@@ -41,7 +41,7 @@ typedef __packed struct
 	float   			pitch_angle;    // dataf_1
 	float    			yaw_angle;      // dataf_2
 	uint8_t  			is_find_target; // datau8_2
-	uint8_t  			is_find_defund; // datau8_3
+	uint8_t  			is_find_buff; 	// datau8_3
 	uint8_t  			is_hit_enable;  // datau8_4
 	uint16_t 			CRC16;
 }vision_rx_info_t;
@@ -52,9 +52,9 @@ typedef struct
 	vision_tx_info_t  *tx_info;
 	vision_rx_info_t  *rx_info;
 	
-	uint8_t  mode;
-	uint8_t  cmd_mode;
-	uint8_t  color;
+	vision_cmd_e  mode;
+	vision_cmd_e  cmd_mode;
+	uint8_t  			color;
 	
 	float    measure_pitch_angle;
 	float    measure_yaw_angle;
@@ -62,7 +62,7 @@ typedef struct
 	float    target_pitch_angle;
 	float    target_yaw_angle;
 	uint8_t  is_find_target;
-	uint8_t  is_find_defund;
+	uint8_t  is_find_buff;
 	uint8_t  is_hit_enable;
 	
 	uint8_t  rx_flag;
@@ -87,6 +87,7 @@ extern vision_tx_info_t vision_tx_info;
 extern vision_rx_info_t vision_rx_info;
 extern vision_sensor_t vision_sensor;
 
+/* Exported functions --------------------------------------------------------*/
 extern bool vision_send_data(void);
 
 #endif

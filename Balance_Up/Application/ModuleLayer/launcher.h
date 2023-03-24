@@ -16,11 +16,11 @@
 #include "judge.h"
 
 /* Exported macro ------------------------------------------------------------*/
-#define Fric_15 4400.0f
-#define Fric_18 4700.0f
-#define Fric_20 4950.0f
-#define Fric_22 5200.0f
-#define Fric_30 7020.0f
+#define Fric_15_init 4400.0f
+#define Fric_18_init 4700.0f
+#define Fric_20_init 4950.0f
+#define Fric_22_init 5200.0f
+#define Fric_30_init 7020.0f
 
 /* Exported types ------------------------------------------------------------*/
 // 发射机构模式枚举
@@ -111,7 +111,13 @@ typedef struct
 
 typedef struct
 {
+	float 	 Fric_15;
+	float 	 Fric_18;
+	float 	 Fric_20;
+	float 	 Fric_22;
+	float 	 Fric_30;
 	float    fric_speed;
+	uint8_t  fric_mode;
 	float    dial_speed;
 	float    dial_torque_limit;
 	float    lock_angle_check;

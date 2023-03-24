@@ -74,7 +74,7 @@ gimbal_conf_t   gim_conf = {
 	.restart_yaw_motor_angle = 7191, // 双枪 2100  麦轮 4777
 	.restart_pitch_motor_angle = 7270, // 双枪 6600  麦轮 6900
 	.rc_pitch_motor_offset = 110,
-	.rc_yaw_imu_offset = 3300.0f,//3300
+	.rc_yaw_imu_offset = 660.0f,//3300
 	.rc_pitch_imu_offset = 3300.0f,
 	.key_yaw_imu_offset = 500.0f,//330
 	.key_pitch_imu_offset = 1000.0f,
@@ -295,6 +295,12 @@ void PID_ParamsInit(void)
 
 void Gimbal_GetRcInfo(void)
 {
+	if (symbal.gim_sym.turn_start == 1)
+	{
+		symbal.gim_sym.turn_start = 0;
+		gimbal.conf->turn_angle = (gimbal.info->measure_yaw_motor_angle + HALF_ECD_RANGE) % ECD_RANGE;
+	}
+	
 	if (gimbal.info->gimbal_mode == gim_machine)
 	{
 		gimbal.info->target_pitch_motor_deltaangle = -rc_sensor.info->ch1 / gim_conf.rc_pitch_motor_offset;
@@ -310,9 +316,15 @@ void Gimbal_GetRcInfo(void)
 	}
 	else if (gimbal.info->gimbal_mode == gim_vision)
 	{
-//		gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
-//		gimbal.info->target_pitch_imu_angle = vision_sensor.info->rx_info->pitch_angle * ECD_TO_ANGLE - 180.0f;
-//		gimbal.info->target_yaw_imu_angle = vision_sensor.info->rx_info->yaw_angle * ECD_TO_ANGLE;
+		gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
+		gimbal.info->target_pitch_imu_deltaangle = (float)rc_sensor.info->ch1 / gim_conf.rc_pitch_imu_offset;
+		gimbal.info->target_yaw_imu_deltaangle = -(float)rc_sensor.info->ch0 / gim_conf.rc_yaw_imu_offset;
+		if ((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))
+		{
+			gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
+			gimbal.info->target_pitch_imu_angle = vision_sensor.info->rx_info->pitch_angle * ECD_TO_ANGLE - 180.0f;
+			gimbal.info->target_yaw_imu_angle = vision_sensor.info->rx_info->yaw_angle * ECD_TO_ANGLE;
+		}
 	}
 	else
 	{
@@ -320,11 +332,6 @@ void Gimbal_GetRcInfo(void)
 		gimbal.info->target_yaw_imu_angle = gimbal.info->measure_yaw_imu_angle;
 	}
 	
-	if (symbal.gim_sym.turn_start == 1)
-	{
-		symbal.gim_sym.turn_start = 0;
-		gimbal.conf->turn_angle = (gimbal.info->measure_yaw_motor_angle + HALF_ECD_RANGE) % ECD_RANGE;
-	}
 }
 
 void Gimbal_GetKeyInfo(void)
@@ -349,9 +356,14 @@ void Gimbal_GetKeyInfo(void)
 	}
 	else if (gimbal.info->gimbal_mode == gim_vision)
 	{
-//		gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
-//		gimbal.info->target_pitch_imu_angle = vision_sensor.info->rx_info->pitch_angle * ECD_TO_ANGLE - 180.0f;
-//		gimbal.info->target_yaw_imu_angle = vision_sensor.info->rx_info->yaw_angle * ECD_TO_ANGLE;
+		gimbal.info->target_pitch_imu_deltaangle = rc_sensor.info->mouse_y / gim_conf.key_pitch_imu_offset;
+		gimbal.info->target_yaw_imu_deltaangle = rc_sensor.info->mouse_x / gim_conf.key_yaw_imu_offset;
+		if ((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))
+		{
+			gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
+			gimbal.info->target_pitch_imu_angle = vision_sensor.info->rx_info->pitch_angle * ECD_TO_ANGLE - 180.0f;
+			gimbal.info->target_yaw_imu_angle = vision_sensor.info->rx_info->yaw_angle * ECD_TO_ANGLE;
+		}
 	}
 	
 }
@@ -494,9 +506,8 @@ void Gimbal_MotorCtrl(void)
 	// 云台换头
 	if (symbal.gim_sym.turn_ok == 0)
 	{
-		gimbal.info->target_yaw_motor_angle = gimbal.conf->turn_angle;
 		/*  yaw轴电机error过零点处理  */
-		gimbal.info->yaw_motor_angle_err = gim_conf.turn_angle - gimbal.info->measure_yaw_motor_angle;
+		gimbal.info->yaw_motor_angle_err = gim_conf.turn_angle - gimbal.info->measure_yaw_motor_angle - 1;
 		if (gimbal.info->yaw_motor_angle_err > HALF_ECD_RANGE)
 		{
 			gimbal.info->yaw_motor_angle_err -= ECD_RANGE;
@@ -505,42 +516,16 @@ void Gimbal_MotorCtrl(void)
 		{
 			gimbal.info->yaw_motor_angle_err += ECD_RANGE;
 		}
+		
+		gimbal.info->target_yaw_motor_angle = gimbal.conf->turn_angle;
 		gimbal.info->target_yaw_imu_angle = gimbal.info->measure_yaw_imu_angle \
 																			+ (float)gimbal.info->yaw_motor_angle_err * ECD_TO_ANGLE;
+		
 		if (abs(gim_conf.turn_angle - gimbal.info->measure_yaw_motor_angle) < 25)
 		{
 			symbal.gim_sym.turn_ok = 1;
 		}
 	}
-	
-//	if (symbal.gim_sym.turn_start == 1)
-//	{
-//		if (gimbal.conf->restart_yaw_motor_angle > HALF_ECD_RANGE)
-//		{
-//			gimbal.conf->restart_yaw_motor_angle = gimbal.conf->MID_VALUE - HALF_ECD_RANGE;
-//			symbal.chassis_symbal.forward = 0;
-//		}
-//		else
-//		{
-//			gimbal.conf->restart_yaw_motor_angle = gimbal.conf->MID_VALUE;
-//			symbal.chassis_symbal.forward = 1;
-//		}
-//		
-//		if (gimbal.info->measure_yaw_imu_angle > 0)
-//		{
-//			gimbal.info->target_yaw_imu_angle = gimbal.info->measure_yaw_imu_angle - 180.0f;
-//		}
-//		else
-//		{
-//			gimbal.info->target_yaw_imu_angle = gimbal.info->measure_yaw_imu_angle + 180.0f;
-//		}
-//		symbal.gim_sym.turn_start = 0;
-//	}
-//	
-//	if (abs(gimbal.info->measure_yaw_imu_angle - gimbal.info->target_yaw_imu_angle) < 5.0f)
-//	{
-//		symbal.gim_sym.turn_ok = 1;
-//	}
 	
 	Gimbal_Yaw_Angle_PidCalc();
 	Gimbal_Pitch_Angle_PidCalc();

@@ -6,6 +6,7 @@
 
 #include "imu_sensor.h"
 #include "rc_sensor.h"
+#include "vision_sensor.h"
 #include "keyboard.h"
 #include "judge.h"
 #include "slave.h"

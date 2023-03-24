@@ -65,7 +65,11 @@ launcher_work_info_t  launcher_work_info = {
 };
 
 launcher_conf_t   launcher_conf = {
-	.fric_speed = Fric_15,
+	.Fric_15 = Fric_15_init,
+	.Fric_18 = Fric_18_init,
+	.Fric_20 = Fric_20_init,
+	.Fric_22 = Fric_22_init,
+	.Fric_30 = Fric_30_init,
 	.dial_speed = -1500.0f,
 	.dial_torque_limit = 2000.0f,
 	.lock_angle_check = 1.5f,
@@ -102,7 +106,11 @@ void Launcher_Init(void)
 		launcher.info->last_s2 = rc_sensor.info->s2;
 	}
 	
+	launcher.conf->fric_speed = launcher.conf->Fric_15;
+	launcher.conf->fric_mode = 15;
+	
 	launcher.info->rc_work_state = rc_sensor.work_state;
+	
 }
 
 
@@ -193,7 +201,8 @@ void Judge_GetSpeedInfo(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->fric_speed = Fric_15;
+		launcher.conf->fric_speed = launcher.conf->Fric_15;
+		launcher.conf->fric_mode = 15;
 	}
 	else
 	{
@@ -201,24 +210,31 @@ void Judge_GetSpeedInfo(void)
 		{
 			case 0:
 				launcher.conf->fric_speed = 0;
+				launcher.conf->fric_mode = 0;
 				break;
 			case 15:
-				launcher.conf->fric_speed = Fric_15;
+				launcher.conf->fric_speed = launcher.conf->Fric_15;
+				launcher.conf->fric_mode = 15;
 				break;
 			case 18:
-				launcher.conf->fric_speed = Fric_18;
-				break;		
+				launcher.conf->fric_speed = launcher.conf->Fric_18;
+				launcher.conf->fric_mode = 18;
+				break;
 			case 20:
-				launcher.conf->fric_speed = Fric_20;
-				break;	
+				launcher.conf->fric_speed = launcher.conf->Fric_20;
+				launcher.conf->fric_mode = 20;
+				break;
 			case 22:
-				launcher.conf->fric_speed = Fric_22;
-				break;			
+				launcher.conf->fric_speed = launcher.conf->Fric_22;
+				launcher.conf->fric_mode = 22;
+				break;
 			case 30:
-				launcher.conf->fric_speed = Fric_30;
-				break;	
+				launcher.conf->fric_speed = launcher.conf->Fric_30;
+				launcher.conf->fric_mode = 30;
+				break;
 			default:
 				launcher.conf->fric_speed = 0;
+				launcher.conf->fric_mode = 0;
 				break;
 		}
 	}
@@ -245,7 +261,7 @@ void Judge_AdaptFricSpeed(void)
 				speed_adapt = -1;
 			}
 		}
-		else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.95f))
+		else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.5f))
 		{
 			cnt--;
 			if (cnt < -2)

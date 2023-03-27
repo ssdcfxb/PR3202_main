@@ -56,7 +56,6 @@ void slave_init(slave_t *slef)
 	rx_info->shooter_cooling_heat = 0;
 	rx_info->bullet_speed = 0.f;
 	
-	slef->info->gyro_status = WaitCommond_Gyro;
 	slef->info->rx_flag = 0;
 	
 }

@@ -1,11 +1,15 @@
 #ifndef __GIMBAL_H
 #define __GIMBAL_H
 
+/* Includes ------------------------------------------------------------------*/
 #include "rp_math.h"
 #include "rm_protocol.h"
 
 #include "device.h"
+#include "module.h"
 
+/* Exported macro ------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
 // 云台模式枚举
 typedef enum
 {
@@ -73,8 +77,6 @@ typedef struct
 	int16_t  restart_pitch_motor_angle;
 	float    restart_pitch_imu_angle;
 	
-	int16_t  turn_angle;
-	
 	int16_t  rc_pitch_motor_offset;
 	float    rc_yaw_imu_offset;
 	float    rc_pitch_imu_offset;
@@ -98,5 +100,7 @@ typedef struct
 } gimbal_t;
 
 extern gimbal_t gimbal;
+
+/* Exported functions --------------------------------------------------------*/
 
 #endif

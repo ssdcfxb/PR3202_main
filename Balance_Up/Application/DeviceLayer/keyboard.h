@@ -33,56 +33,55 @@ typedef struct keyboard_state_struct {
   key_board_status_e        Ctrl;                 //按键Ctrl
 }keyboard_state_t;
 
-/*  发射机构指令枚举  */
+/*  摩擦轮指令枚举  */
 typedef enum {
-	lch_reset,  	  // 功能复位
+	fric_reset,  	  // 功能复位
 	fric_on,   		  // 开摩擦轮
 	fric_off,   		// 关摩擦轮
+} fric_cmd_e;
+
+/*  弹仓指令枚举  */
+typedef enum {
+	magz_reset,  	  // 功能复位
 	magz_open,      // 开弹仓
 	magz_close,     // 关弹仓
+} magz_cmd_e;
+
+/*  拨盘指令枚举  */
+typedef enum {
+	shoot_reset,  	// 功能复位
 	single_shoot,   // 单发
 	keep_shoot      // 连发
-}lch_cmd_e;
-
-/*  发射机构状态  */
-typedef struct launcher_state_struct {
-	lch_cmd_e		fric_state;
-	lch_cmd_e		magz_state;
-	lch_cmd_e		shoot_state;
-}launcher_state_t;
+} dial_cmd_e;
 
 /*  发射机构指令  */
 typedef struct launcher_command_struct {
-	lch_cmd_e		fric_cmd;
-	lch_cmd_e		magz_cmd;
-	lch_cmd_e		shoot_cmd;
-}lch_cmd_t;
+	fric_cmd_e		fric_cmd;
+	magz_cmd_e		magz_cmd;
+	dial_cmd_e		shoot_cmd;
+} lch_cmd_t;
 
 /*  云台指令  */
 typedef enum {
 	gim_reset,   		// 功能复位
 	gim_turn,	 	    // 掉头
-}gim_cmd_e;
+} gim_cmd_e;
 
 /*  云台模式  */
 typedef enum {
 	gyro,	 	    // 陀螺仪模式
 	vision,   	// 自瞄模式
 	keep,				// 保持
-}gim_mode_e;
+} gim_mode_e;
 
 typedef struct keyboard_struct {
 	keyboard_state_t	state;
-	launcher_state_t	lch_state;
-	lch_cmd_t					lch_cmd;
-	gim_cmd_e					gim_cmd;
-	gim_mode_e				gim_mode;
-}keyboard_t;
+} keyboard_t;
 
 extern keyboard_t keyboard;
 
 /* Exported functions --------------------------------------------------------*/
-void Key_StateCheck(void);
+void Key_StateUpdate(void);
 
 
 #endif

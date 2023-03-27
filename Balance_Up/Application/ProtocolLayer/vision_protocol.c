@@ -6,8 +6,11 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+extern uint32_t micros(void);
+
 uint8_t vision_txBuf[30];
 
+uint32_t t1, t2, tmp;
 /* Exported variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart1;
 
@@ -44,6 +47,9 @@ void vision_update(vision_sensor_t *vis_sen, uint8_t *rxBuf)
 			{
 				memcpy(&vision_rx_info, rxBuf, sizeof(vision_rx_info_t));
 				vis_sen->info->rx_flag = 1;
+				t1 = t2;
+				t2 = micros();
+				tmp = t2 - t1;
 				return;
 			}
 		}
@@ -60,7 +66,7 @@ void vision_check(vision_sensor_t *vis_sen)
 	
 	if (info->rx_flag == 1)
 	{
-		memcpy(&info->cmd_mode, &rx_info->mode, 1);
+		memcpy(&info->mode, &rx_info->mode, 1);
 		memcpy(&info->target_pitch_angle, (void*)&rx_info->pitch_angle, 4);
 		memcpy(&info->target_yaw_angle, (void*)&rx_info->yaw_angle, 4);
 		memcpy(&info->is_find_target, &rx_info->is_find_target, 1);

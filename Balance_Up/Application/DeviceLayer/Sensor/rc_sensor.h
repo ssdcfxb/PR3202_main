@@ -155,8 +155,6 @@ typedef struct rc_sensor_info_struct {
 	int16_t 	ch3;
 	uint8_t  	s1;
 	uint8_t  	s2;
-	uint8_t  	last_s1;
-	uint8_t  	last_s2;
 	thumbwheel_info_t 			thumbwheel;						//²¦ÂÖ
 	/* ¼üÊó */
   int16_t                 mouse_vx;             //Êó±êxÖáËÙ¶È

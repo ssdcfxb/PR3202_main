@@ -10,12 +10,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include "module.h"
 
+#include "launcher.h"
+#include "gimbal.h"
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 void module_info_update(module_t *mod);
 void RC_StateCheck(void);
-void Slave_StateCheck(void);
-void Vision_StateCheck(void);
+void Slave_TxInfoUpdate(void);
+void Vision_TxInfoUpdate(void);
+void Rc_RxInfoCheck(void);
+void Key_RxInfoCheck(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
@@ -28,18 +32,28 @@ symbal_t symbal = {
 	.rc_update = 0,
 };
 
+status_t status = {
+	.lch_state.fric_state = fric_reset,
+	.lch_state.magz_state = magz_reset,
+	.lch_state.shoot_state = shoot_reset,
+	.gim_state = gim_reset,
+	.chas_state = gyro_reset,
+	.gim_mode = gyro,
+	.tw_last_state = 0,
+};
+
 module_t module = {
+	.symbal = &symbal,
+	.status = &status,
 	.heartbeat = module_info_update,
 };
 
 /* Private functions ---------------------------------------------------------*/
 void module_info_update(module_t *mod)
 {
-	static uint8_t last_status = 0, vis_on = 0;
-	
 	RC_StateCheck();
-	Slave_StateCheck();
-	Vision_StateCheck();
+	Slave_TxInfoUpdate();
+	Vision_TxInfoUpdate();
 	
 	if(module.state != MODULE_STATE_NORMAL) 
 	{
@@ -73,7 +87,7 @@ void module_info_update(module_t *mod)
 			gimbal.info->gimbal_mode = gim_gyro;
 			launcher.info->launcher_mode = lch_gyro;
 		}
-		else if ((rc_sensor.info->s1 == RC_SW_UP) && (rc_sensor.info->last_s1 == RC_SW_MID))
+		else if (rc_sensor.info->s1 == RC_SW_UP)
 		{
 			module.remote_mode = KEY;
 			module.mode = MODULE_MODE_GYRO;
@@ -88,23 +102,16 @@ void module_info_update(module_t *mod)
 		}
 		
 		// 遥控器视觉
-		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (last_status == RC_TB_UP))
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
 		{
+			status.gim_mode = gyro;
 			if (vision_sensor.work_state == DEV_ONLINE)
 			{
-				if (vis_on == 0)
+				if (status.gim_mode != vision)
 				{
-					vis_on = 1;
-				}
-				else
-				{
-					vis_on = 0;
+					status.gim_mode = vision;
 				}
 			}
-		}
-		if (vis_on == 1)
-		{
-			gimbal.info->gimbal_mode = gim_vision;
 		}
 	
 	}
@@ -114,14 +121,16 @@ void module_info_update(module_t *mod)
 	{
 		gimbal.info->remote_mode = RC;
 		launcher.info->remote_mode = RC;
+		Rc_RxInfoCheck();
 	}
 	else if (module.remote_mode == KEY)
 	{
 		gimbal.info->remote_mode = KEY;
 		launcher.info->remote_mode = KEY;
-		Key_StateCheck();
+		Key_RxInfoCheck();
 	}
 	
+	status.tw_last_state = rc_sensor.info->thumbwheel.status;
 }
 
 void RC_StateCheck(void)
@@ -143,26 +152,17 @@ void RC_StateCheck(void)
 				// 可在此处同步云台复位标志位					
 				// 系统参数复位
 				module.remote_mode = RC;
-				module.state = MODULE_STATE_RCINIT;
+				module.state = MODULE_STATE_NORMAL;
+				module.mode = MODULE_MODE_RESET;
 			}
 			
-			/* 失联恢复初始化 */
-			if(module.state == MODULE_STATE_RCINIT) 
-			{
-				if(RC_IsChannelReset())
-				{
-					module.state = MODULE_STATE_NORMAL;
-					module.mode = MODULE_MODE_RESET;
-				}
-			}
 		}
 	}
 }
 
-void Slave_StateCheck(void)
+void Slave_TxInfoUpdate(void)
 {
 	int16_t front, right;
-	static uint8_t last_status = 0;
 		
 	/*  1:遥控器状态标志位  */
 	slave.info->tx_info->status &= 0xFE;
@@ -176,40 +176,30 @@ void Slave_StateCheck(void)
 	
 	/*  3:小陀螺状态标志位  */
 	if (rc_sensor.work_state == DEV_OFFLINE)
-		slave.info->gyro_status = WaitCommond_Gyro;
-	if ((rc_sensor.info->thumbwheel.status == RC_TB_DOWN) && (last_status != RC_TB_DOWN))
+		status.chas_state = gyro_reset;
+	if ((rc_sensor.info->thumbwheel.status == RC_TB_DOWN) && (status.tw_last_state != RC_TB_DOWN))
 	{
-		if (slave.info->gyro_status == WaitCommond_Gyro)
+		if (status.chas_state == gyro_on)
 		{
-			slave.info->gyro_status = On_Gyro;
+			status.chas_state = gyro_off;
 		}
-		else if (slave.info->gyro_status == On_Gyro)
+		else
 		{
-			slave.info->gyro_status = Off_Gyro;
-		}
-		else if (slave.info->gyro_status == Off_Gyro)
-		{
-			slave.info->gyro_status = On_Gyro;
+			status.chas_state = gyro_on;
 		}
 	}
+	if (status.lch_state.magz_state == magz_open)
+	{
+		status.chas_state = gyro_off;
+	}
 	slave.info->tx_info->status &= 0xFB;
-	if (slave.info->gyro_status == On_Gyro)
+	if (status.chas_state == gyro_on)
 		slave.info->tx_info->status |= 0x04;
 	
 	/*  4:头的朝向  */
 	slave.info->tx_info->status &= 0xF7;
 	if (gimbal.conf->restart_yaw_motor_angle != gimbal.conf->MID_VALUE)
 		slave.info->tx_info->status |= 0x08;
-	
-	// 遥控器换头
-	if (vision_sensor.work_state == DEV_OFFLINE)
-	{
-		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (last_status == RC_TB_UP))
-		{
-			symbal.gim_sym.turn_start = 1;
-			symbal.gim_sym.turn_ok = 0;
-		}
-	}
 	
 	/*  5:换头状态标志位  */
 	slave.info->tx_info->status &= 0xEF;
@@ -236,10 +226,9 @@ void Slave_StateCheck(void)
 		right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
 		right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
 	}
-	last_status = rc_sensor.info->thumbwheel.status;
 }
 
-void Vision_StateCheck(void)
+void Vision_TxInfoUpdate(void)
 {
 	vision_sensor.info->measure_pitch_angle = imu_sensor.info->base_info.pitch;
 	vision_sensor.info->measure_yaw_angle = imu_sensor.info->base_info.yaw;
@@ -249,5 +238,105 @@ void Vision_StateCheck(void)
 	vision_sensor.info->tx_info->yaw_angle = vision_sensor.info->measure_yaw_angle;
 	vision_sensor.info->tx_info->shoot_speed = vision_sensor.info->measure_shoot_speed;
 	vision_sensor.info->tx_info->mode = AIM_ON;
+	vision_sensor.info->cmd_mode = vision_sensor.info->tx_info->mode;
 	vision_sensor.info->tx_info->my_color = 0;
 }
+
+void Rc_RxInfoCheck(void)
+{
+	/*  遥控器换头  */
+	if (vision_sensor.work_state == DEV_OFFLINE)
+	{
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+		{
+			if (status.lch_state.magz_state == magz_close)
+			{
+				symbal.gim_sym.turn_start = 1;
+				symbal.gim_sym.turn_ok = 0;
+				status.gim_cmd = gim_turn;
+			}
+		}
+	}
+	/*  关弹仓  */
+	if (status.chas_state == gyro_on)
+	{
+		status.lch_cmd.magz_cmd = magz_close;
+	}
+}
+
+void Key_RxInfoCheck(void)
+{
+	Key_StateUpdate();
+	
+	status.lch_cmd.fric_cmd = fric_reset;
+//	keyboard.lch_cmd.magz_cmd = lch_reset;
+	status.lch_cmd.shoot_cmd = shoot_reset;
+	/*  Ctrl(优先级顺序):关弹仓 关摩擦轮 关小陀螺  */
+	if (keyboard.state.Ctrl == down_K)
+	{
+		if (status.lch_state.magz_state == magz_open)
+		{
+			status.lch_cmd.magz_cmd = magz_close;
+		}
+		else if (status.lch_state.fric_state == fric_on)
+		{
+			status.lch_cmd.fric_cmd = fric_off;
+		}
+		if (status.chas_state == gyro_on) 
+		{
+			status.chas_state = gyro_off;
+		}
+	}
+	/*  R:开摩擦轮  */
+	if (keyboard.state.R == down_K)
+	{
+		status.lch_cmd.fric_cmd = fric_on;
+	}
+	/*  G:开弹仓  */
+	if (keyboard.state.G == down_K)
+	{
+		status.lch_cmd.magz_cmd = magz_open;
+	}
+	/*  B:关弹仓  */
+	if (keyboard.state.B == down_K)
+	{
+		status.lch_cmd.magz_cmd = magz_close;
+	}
+	if (status.chas_state == gyro_on)
+	{
+		status.lch_cmd.magz_cmd = magz_close;
+	}
+	
+	/*  mouse_btn_l  */
+	if (keyboard.state.mouse_btn_l == up_K)
+	{
+		status.lch_cmd.fric_cmd = fric_on;
+	}
+	if ((keyboard.state.mouse_btn_l == short_press_K) && (status.lch_state.fric_state == fric_on))
+	{
+		status.lch_cmd.shoot_cmd = single_shoot;
+	}
+	if (keyboard.state.mouse_btn_l == long_press_K)
+	{
+		status.lch_cmd.shoot_cmd = keep_shoot;
+	}
+	
+	
+	status.gim_cmd = gim_reset;
+	/*  V:掉头  */
+	if ((keyboard.state.V == down_K) && (status.lch_state.magz_state == magz_close))
+	{
+		symbal.gim_sym.turn_start = 1;
+		symbal.gim_sym.turn_ok = 0;
+		status.gim_cmd = gim_turn;
+	}
+	
+	
+	status.gim_mode = gyro;
+	/*  mouse_btn_r:自瞄  */
+	if ((keyboard.state.mouse_btn_r == short_press_K) || (keyboard.state.mouse_btn_r == long_press_K))
+	{
+		status.gim_mode = vision;
+	}
+}
+

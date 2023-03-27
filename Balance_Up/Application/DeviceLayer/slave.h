@@ -8,14 +8,6 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 
-// 小陀螺状态枚举
-typedef enum
-{
-	On_Gyro,        // 开启
-	Off_Gyro,       // 关闭
-	WaitCommond_Gyro // 等待指令
-} gyro_status_e;
-
 typedef __packed struct slv_tx_info_struct {
 
 	uint8_t SOF;
@@ -56,7 +48,6 @@ typedef struct slave_info_struct {
 	float    bullet_speed;
 	
 	uint8_t  			rx_flag;
-	gyro_status_e	gyro_status;
 	
 	int16_t	 offline_cnt;
 	int16_t	 offline_max_cnt;

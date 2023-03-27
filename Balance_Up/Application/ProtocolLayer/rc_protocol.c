@@ -21,6 +21,9 @@
 void keyboard_cnt_max_set(rc_sensor_t *rc_sen);
 void keyboard_status_update_interrupt(key_board_info_t *key);
 void keyboard_status_update(key_board_info_t *key);
+
+extern uint32_t micros(void);
+uint32_t tt1, tt2, ttp1;
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
@@ -88,6 +91,8 @@ void rc_interrupt_update(rc_sensor_t *rc_sen)
 	rc_sen->info->mouse_y += (float)mouse_y[index] / (float)REMOTE_SMOOTH_TIMES;
 	
 	index++;
+	symbal.rc_update = 1;
+	
 }
 /**
  *	@brief	遥控器数据解析协议
@@ -108,8 +113,6 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
 	rc_info->thumbwheel.value = ((int16_t)rxBuf[16] | ((int16_t)rxBuf[17] << 8)) & 0x07ff;
 	rc_info->thumbwheel.value -= 1024;
 
-	rc_info->last_s1 = rc_info->s1;
-	rc_info->last_s2 = rc_info->s2;
 	rc_info->s1 = ((rxBuf[5] >> 4) & 0x000C) >> 2;
 	rc_info->s2 = (rxBuf[5] >> 4) & 0x0003;	
 	
@@ -139,7 +142,10 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
   rc_info->B.value = 	KEY_PRESSED_B;
 	
 	rc_info->offline_cnt = 0;
-	symbal.rc_update = 1;
+	tt1 = tt2;
+	tt2 = micros();
+	ttp1 = tt2 - tt1;
+	
 }
 
 /**
@@ -270,5 +276,7 @@ void USART2_rxDataHandler(uint8_t *rxBuf)
 	// 更新遥控数据
 	rc_sensor.update(&rc_sensor, rxBuf);
 	rc_sensor.check(&rc_sensor);
+	
+	rc_interrupt_update(&rc_sensor);
 	
 }

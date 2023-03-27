@@ -139,8 +139,6 @@ void RC_ResetData(rc_sensor_t *rc)
 	// 左右开关选择强行设置成中间值状态
 	rc->info->s1 = RC_SW_MID;
 	rc->info->s2 = RC_SW_MID;
-	rc->info->last_s1 = RC_SW_MID;
-	rc->info->last_s2 = RC_SW_MID;
 	// 鼠标
 	rc->info->mouse_vx = 0;
 	rc->info->mouse_vy = 0;

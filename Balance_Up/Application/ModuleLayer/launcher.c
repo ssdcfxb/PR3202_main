@@ -10,7 +10,6 @@
 #include "launcher.h"
 
 #include "rp_math.h"
-#include "rm_protocol.h"
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -201,8 +200,8 @@ void Judge_GetSpeedInfo(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->fric_speed = launcher.conf->Fric_15;
-		launcher.conf->fric_mode = 15;
+		launcher.conf->fric_speed = launcher.conf->Fric_30;
+		launcher.conf->fric_mode = 30;
 	}
 	else
 	{
@@ -275,9 +274,9 @@ void Judge_AdaptFricSpeed(void)
 			cnt = 0;
 			speed_adapt = 0;
 		}
+		launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
 	}
 	
-	launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
 }
 
 
@@ -399,6 +398,7 @@ void Launcher_GetRcState(void)
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
 					launcher.work_info->launcher_commond = Keep_Shoot;
+					status.lch_state.shoot_state = keep_shoot;
 					if (launcher.info->last_s2 != rc_sensor.info->s2)
 					{
 						launcher.work_info->dial_status = Reload_Dial;
@@ -420,6 +420,7 @@ void Launcher_GetRcState(void)
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
 					launcher.work_info->launcher_commond = Single_Shoot;
+					status.lch_state.shoot_state = single_shoot;
 					if (launcher.info->last_s2 != rc_sensor.info->s2)
 					{
 						launcher.work_info->dial_status = Reload_Dial;
@@ -440,6 +441,11 @@ void Launcher_GetRcState(void)
 				launcher.work_info->dial_status = WaitCommond_Dial;
 			}
 		}
+		
+//		if (status.lch_cmd.magz_cmd == magz_close)
+//		{
+//			launcher.work_info->launcher_commond = Magz_Close;
+//		}
 	}
 	else if(launcher.info->rc_work_state == DEV_ONLINE)
 	{
@@ -468,17 +474,19 @@ void Launcher_GetKeyState(void)
 {
 	launcher.work_info->launcher_commond = Func_Reset;
 	/*  ²¦ÅÌÖ¸Áî  */
-	if (keyboard.lch_cmd.shoot_cmd == keep_shoot)
+	if (status.lch_cmd.shoot_cmd == keep_shoot)
 	{
 		launcher.work_info->launcher_commond = Keep_Shoot;
+		status.lch_state.shoot_state = keep_shoot;
 		if (keyboard.state.last_mouse_btn_l == short_press_K)
 		{
 			launcher.work_info->dial_status = Reload_Dial;
 		}
 	}
-	if (keyboard.lch_cmd.shoot_cmd == single_shoot)
+	if (status.lch_cmd.shoot_cmd == single_shoot)
 	{
 		launcher.work_info->launcher_commond = Single_Shoot;
+		status.lch_state.shoot_state = single_shoot;
 		if (keyboard.state.last_mouse_btn_l == down_K)
 		{
 			launcher.work_info->dial_status = Reload_Dial;
@@ -486,25 +494,26 @@ void Launcher_GetKeyState(void)
 		}
 	}
 	
+	/*  µ¯²ÖÖ¸Áî  */
+	if (status.lch_cmd.magz_cmd == magz_open)
+	{
+		launcher.work_info->launcher_commond = Magz_Open;
+	}
+	else if (status.lch_cmd.magz_cmd == magz_close)
+	{
+		launcher.work_info->launcher_commond = Magz_Close;
+	}
+	
 	/*  Ä¦²ÁÂÖÖ¸Áî  */
-	if (keyboard.lch_cmd.fric_cmd == fric_on)
+	if (status.lch_cmd.fric_cmd == fric_on)
 	{
 		launcher.work_info->launcher_commond = Fric_Open;
 	}
-	else if (keyboard.lch_cmd.fric_cmd == fric_off)
+	else if (status.lch_cmd.fric_cmd == fric_off)
 	{
 		launcher.work_info->launcher_commond = Fric_Close;
 	}
 	
-	/*  µ¯²ÖÖ¸Áî  */
-	if (keyboard.lch_state.magz_state == magz_open)
-	{
-		launcher.work_info->launcher_commond = Magz_Open;
-	}
-	else if (keyboard.lch_state.magz_state == magz_close)
-	{
-		launcher.work_info->launcher_commond = Magz_Close;
-	}
 }
 
 
@@ -537,17 +546,15 @@ void Fric_StatusCheck(void)
 	if ((launcher.work_info->launcher_commond == Fric_Toggle) \
 		&& (launcher.info->last_s2 != rc_sensor.info->s2))
 	{
-		if (launcher.work_info->fric_status == WaitCommond_Fric)
-		{
-			launcher.work_info->fric_status = On_Fric;
-		}
-		else if (launcher.work_info->fric_status == On_Fric)
+		if (launcher.work_info->fric_status == On_Fric)
 		{
 			launcher.work_info->fric_status = Off_Fric;
+			status.lch_state.fric_state = fric_off;
 		}
-		else if (launcher.work_info->fric_status == Off_Fric)
+		else
 		{
 			launcher.work_info->fric_status = On_Fric;
+			status.lch_state.fric_state = fric_on;
 		}
 	}
 	
@@ -555,21 +562,34 @@ void Fric_StatusCheck(void)
 	if (launcher.work_info->launcher_commond == Fric_Open)
 	{
 		launcher.work_info->fric_status = On_Fric;
+		status.lch_state.fric_state = fric_on;
 	}
 	if (launcher.work_info->launcher_commond == Fric_Close)
 	{
 		launcher.work_info->fric_status = Off_Fric;
+		status.lch_state.fric_state = fric_off;
 	}
+	
 	
 	/*  ¿ª¹Øµ¯²Ö  */
 	if (launcher.work_info->launcher_commond == Magz_Open)
 	{
 		Magazine_Open();
 		launcher.work_info->fric_status = Off_Fric;
+		status.lch_state.magz_state = magz_open;
+		status.lch_cmd.fric_cmd = fric_off;
 	}
 	else
 	{
 		Magazine_Close();
+		status.lch_state.magz_state = magz_close;
+	}
+	
+	/*  µ¯²ÖÐ¶Á¦  */
+	if (rc_sensor.work_state == DEV_OFFLINE)
+	{
+		Magazine_Sleep();
+		status.lch_state.magz_state = magz_reset;
 	}
 }
 

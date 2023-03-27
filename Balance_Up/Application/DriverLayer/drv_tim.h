@@ -14,4 +14,6 @@ void TIM4_Init(void);
 /* Servo functions */
 void Magazine_Open(void);
 void Magazine_Close(void);
+void Magazine_Sleep(void);
+
 #endif

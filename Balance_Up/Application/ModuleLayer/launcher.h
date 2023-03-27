@@ -11,9 +11,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
+#include "rm_protocol.h"
 
 #include "device.h"
-#include "judge.h"
+#include "module.h"
 
 /* Exported macro ------------------------------------------------------------*/
 #define Fric_15_init 4400.0f

@@ -31,5 +31,6 @@ void DEVICE_Init(void);
 /* Servo functions */
 extern void Magazine_Open(void);
 extern void Magazine_Close(void);
+extern void Magazine_Sleep(void);
 
 #endif

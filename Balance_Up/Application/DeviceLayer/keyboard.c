@@ -8,14 +8,9 @@ void Key_StateUpdate(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
-keyboard_t keyboard = {
-	.lch_cmd.fric_cmd = lch_reset,
-	.lch_cmd.magz_cmd = lch_reset,
-	.lch_cmd.shoot_cmd = lch_reset,
-	.gim_cmd = gim_reset,
-	.gim_mode = gyro,
-};
+keyboard_t keyboard;
 /* Private functions ---------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 void Key_StateUpdate(void)
 {
 	keyboard.state.last_mouse_btn_l = keyboard.state.mouse_btn_l;
@@ -38,72 +33,3 @@ void Key_StateUpdate(void)
 	keyboard.state.Shift = rc_sensor.info->Shift.status;
 	keyboard.state.Ctrl = rc_sensor.info->Ctrl.status;	
 }
-/* Exported functions --------------------------------------------------------*/
-void Key_StateCheck(void)
-{
-	Key_StateUpdate();
-	
-	keyboard.lch_cmd.fric_cmd = lch_reset;
-	keyboard.lch_cmd.magz_cmd = lch_reset;
-	keyboard.lch_cmd.shoot_cmd = lch_reset;
-	/*  Ctrl(优先级顺序):关弹仓 关摩擦轮  */
-	if (keyboard.state.Ctrl == down_K)
-	{
-		if (keyboard.lch_state.magz_state == magz_open)
-		{
-			keyboard.lch_cmd.magz_cmd = magz_close;
-		}
-		if (keyboard.lch_state.fric_state == fric_on)
-		{
-			keyboard.lch_cmd.fric_cmd = fric_off;
-		}
-	}
-	/*  R:开摩擦轮  */
-	if (keyboard.state.R == down_K)
-	{
-		keyboard.lch_cmd.fric_cmd = fric_on;
-	}
-	/*  G:开弹仓  */
-	if (keyboard.state.G == down_K)
-	{
-		keyboard.lch_cmd.magz_cmd = magz_open;
-	}
-	/*  B:关弹仓  */
-	if (keyboard.state.B == down_K)
-	{
-		keyboard.lch_cmd.magz_cmd = magz_close;
-	}
-	
-	/*  mouse_btn_l  */
-	if (keyboard.state.mouse_btn_l == up_K)
-	{
-		keyboard.lch_cmd.fric_cmd = fric_on;
-	}
-	if ((keyboard.state.mouse_btn_l == short_press_K) && (keyboard.lch_state.fric_state == fric_on))
-	{
-		keyboard.lch_cmd.shoot_cmd = single_shoot;
-	}
-	if (keyboard.state.mouse_btn_l == long_press_K)
-	{
-		keyboard.lch_cmd.shoot_cmd = keep_shoot;
-	}
-	
-	
-	keyboard.gim_cmd = gim_reset;
-	/*  V:掉头  */
-	if (keyboard.state.V == down_K)
-	{
-		symbal.gim_sym.turn_start = 1;
-		symbal.gim_sym.turn_ok = 0;
-		keyboard.gim_cmd = gim_turn;
-	}
-	
-	
-	keyboard.gim_mode = gyro;
-	/*  mouse_btn_r:自瞄  */
-	if ((keyboard.state.mouse_btn_l == short_press_K) || (keyboard.state.mouse_btn_l == long_press_K))
-	{
-		keyboard.gim_mode = vision;
-	}
-}
-

@@ -74,11 +74,15 @@ float fric_r_speed_pid_param[7] = {15.f, 0.5f, 0.f, 0.f, 6000.f, 6000.f, 12000.f
 float fric_l_speed_pid_param[7] = {15.f, 0.5f, 0.f, 0.f, 6000.f, 6000.f, 12000.f};
 float dial_position_in_pid_param[7] = {17.f, 1.2f, 0.f, 0.f, 6000.f, 6000.f, 12000.f};
 float dial_position_pid_param[7] = {0.24414f, 0.f, 0.f, 0.f, 0.f, 0.f, 10000.f};
-float gim_p_position_in_pid_param[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
-float gim_p_position_pid_param[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
-float gim_y_position_in_pid_param[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
-float gim_y_position_pid_param[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+float gim_p_position_in_pid_param[7] = {80.f, 0.04f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
+float gim_p_position_pid_param[7] = {40.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+float gim_y_position_in_pid_param[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
+float gim_y_position_pid_param[7] = {20.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
 
+//float yaw_gyro_position[7] = {20.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+//float yaw_gyro_position_in[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
+//float pitch_gyro_position[7] = {60.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+//float pitch_gyro_position_in[7] = {80.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
 /* Exported variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;

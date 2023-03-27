@@ -11,15 +11,13 @@
 #define __MODULE_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "launcher.h"
-#include "gimbal.h"
+#include "device.h"
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 typedef enum {
 	MODULE_STATE_RCLOST,	// 遥控失联
 	MODULE_STATE_NORMAL,	// 组件正常
-	MODULE_STATE_RCINIT,	// 遥控初始化
 	MODULE_STATE_WRONG,	  // 组件错误
 } module_state_t;
 
@@ -28,21 +26,48 @@ typedef enum {
 	MODULE_MODE_MACHINE,	// 机械模式
 	MODULE_MODE_GYRO,			// 陀螺仪模式
 	MODULE_MODE_GYRO2,		// 陀螺仪模式2
-//	MODULE_MODE_KEY,			// 键盘模式
 	MODULE_MODE_CNT,
 } module_mode_t;
+
+/*  发射机构状态  */
+typedef struct launcher_state_struct {
+	fric_cmd_e		fric_state;
+	magz_cmd_e		magz_state;
+	dial_cmd_e		shoot_state;
+} launcher_state_t;
+
+/*  小陀螺状态  */
+typedef enum
+{
+	gyro_reset, 			// 功能复位
+	gyro_on,        	// 开启
+	gyro_off,       	// 关闭
+} chas_cmd_e;
+
+typedef struct {
+	launcher_state_t	lch_state;
+	gim_cmd_e					gim_state;
+	chas_cmd_e				chas_state;
+	lch_cmd_t					lch_cmd;
+	gim_cmd_e					gim_cmd;
+	gim_mode_e				gim_mode;
+	uint8_t						tw_last_state;
+} status_t;
 
 typedef struct __module_t
 {
 	remote_mode_t		remote_mode;	// 控制方式
 	module_state_t	state;	// 组件状态
 	module_mode_t		mode;	// 组件模式
+	symbal_t				*symbal;
+	status_t				*status;
 	
 	void (*heartbeat)(struct __module_t *module);
 } module_t;
 
-/* Exported functions --------------------------------------------------------*/
-
+extern status_t status;
 extern module_t module;
+
+/* Exported functions --------------------------------------------------------*/
 
 #endif

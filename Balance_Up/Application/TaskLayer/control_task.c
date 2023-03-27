@@ -6,17 +6,20 @@ void StartControlTask(void const * argument)
 	launcher.init();
   for(;;)
   {
-		if (symbal.rc_update == 1)
-		{
-			keyboard_update_interrupt(rc_sensor.info);
-		}
-		else
-		{
-			keyboard_update(rc_sensor.info);
-		}
-		
 		if(module.state == MODULE_STATE_NORMAL) 
 		{
+			if (module.remote_mode == KEY)
+			{
+				if (symbal.rc_update == 1)
+				{
+					keyboard_update_interrupt(rc_sensor.info);
+					symbal.rc_update = 0;
+				}
+				else
+				{
+					keyboard_update(rc_sensor.info);
+				}
+			}
 			gimbal.ctrl();
 			launcher.ctrl();
 		} 
@@ -27,6 +30,7 @@ void StartControlTask(void const * argument)
 		}
 		
 		slave.tx(&slave);
+		vision_send_data();
 		CAN_SendAll();
 		
     osDelay(1);

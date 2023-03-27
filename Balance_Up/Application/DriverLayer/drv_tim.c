@@ -8,8 +8,9 @@ extern TIM_HandleTypeDef htim4;
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint16_t val_open = 110;
-uint16_t val_clse = 75;
+uint16_t val_open = 40;
+uint16_t val_clse = 77;
+uint16_t val_slep = 0;
 /* Exported variables --------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -35,5 +36,10 @@ void Magazine_Open(void)
 void Magazine_Close(void)
 {
 	__HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_1, val_clse);
+}
+
+void Magazine_Sleep(void)
+{
+	__HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_1, val_slep);
 }
 

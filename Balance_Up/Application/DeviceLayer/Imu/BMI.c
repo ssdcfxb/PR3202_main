@@ -224,6 +224,37 @@ float inVSqrt(float x)
 	return y;
 }
 
+void MPU_Read_Temperature(uint8_t reg,uint8_t *buff,uint8_t len)
+{
+	BMI_CS_LOW();
+	reg |= 0x80;
+	HAL_SPI_Transmit(&hspi2, &reg,  1, 1000);
+	HAL_SPI_Receive(&hspi2, buff, len+1, 1000);
+	BMI_CS_HIG();
+}
+
+void BMI_Get_Temperature(float *temp)
+{
+	uint8_t data[3];
+	int16_t buff;
+	int16_t tmp16;
+	MPU_Read_Temperature(TEMPERATURE_0, data, 2);
+//	MPU_Read_Temperature(TEMPERATURE_1, data2, 2);
+	
+	buff = (int16_t)data[1] | ( (int16_t)data[2] << 8);
+	
+	if (data[2] & 0x80)
+	{
+		tmp16 = buff & 0x7FFF;
+		*temp = -41.f + (float)tmp16 * TEMP_RATIO;
+	}
+	else
+	{
+		tmp16 = ((~buff) & 0x7FFF) + 1;
+		*temp = 87.f - (float)tmp16 * TEMP_RATIO;
+	}
+}
+
 void EX_MPU_Read_all(uint8_t reg,uint8_t *buff,uint8_t len)
 {
 	EX_BMI_CS_LOW();

@@ -14,6 +14,8 @@ ave_filter_t imu_yaw_dif_speed_ave_filter;
 short ggx, ggy, ggz;
 short aax, aay, aaz;
 
+float temp;
+
 //ÁÙÊ±±äÁ¿
 float pitch, roll, yaw;
 
@@ -38,6 +40,7 @@ void imu_update(imu_sensor_t *imu_sen)
 	{
 		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
 	}
+	BMI_Get_Temperature(&temp);
 	imu_info->raw_info.acc_x = aax;
 	imu_info->raw_info.acc_y = aay;
 	imu_info->raw_info.acc_z = aaz;

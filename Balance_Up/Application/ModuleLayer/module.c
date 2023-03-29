@@ -152,8 +152,16 @@ void RC_StateCheck(void)
 				// 可在此处同步云台复位标志位					
 				// 系统参数复位
 				module.remote_mode = RC;
-				module.state = MODULE_STATE_NORMAL;
+				module.state = MODULE_STATE_RCINIT;
 				module.mode = MODULE_MODE_RESET;
+			}
+			
+			if(module.state == MODULE_STATE_RCINIT)
+			{
+				if (RC_IsChannelReset())
+				{
+					module.state = MODULE_STATE_NORMAL;
+				}
 			}
 			
 		}
@@ -212,19 +220,22 @@ void Slave_TxInfoUpdate(void)
 	slave.info->tx_info->imu_angle = imu_sensor.info->base_info.yaw;
 	
 	/*  底盘移动通道值  */
-	if (module.remote_mode == RC)
+	if (module.state == MODULE_STATE_NORMAL)
 	{
-		slave.info->tx_info->rc_ch_ws_val = rc_sensor.info->ch3;
-		slave.info->tx_info->rc_ch_ad_val = rc_sensor.info->ch2;
-	}
-	else if(module.remote_mode == KEY)
-	{
-		front = 0;
-		right = 0;
-		front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
-		front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
-		right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
-		right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
+		if (module.remote_mode == RC)
+		{
+			slave.info->tx_info->rc_ch_ws_val = rc_sensor.info->ch3;
+			slave.info->tx_info->rc_ch_ad_val = rc_sensor.info->ch2;
+		}
+		else if(module.remote_mode == KEY)
+		{
+			front = 0;
+			right = 0;
+			front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
+			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
+			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
+			right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
+		}
 	}
 }
 

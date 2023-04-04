@@ -12,7 +12,7 @@ extern void vision_check(vision_sensor_t *vis_sen);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 drv_uart_t	vision_sensor_driver = {
-	.id = DRV_UART1,
+	.id = DRV_UART6,
 };
 
 vision_info_t 	vision_sensor_info = {

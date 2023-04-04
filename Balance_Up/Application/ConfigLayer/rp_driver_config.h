@@ -64,7 +64,8 @@ typedef enum {
     DRV_UART2,
     DRV_UART3,
     DRV_UART4,
-    DRV_UART5
+    DRV_UART5,
+		DRV_UART6,
 } uart_id_t;
 
 /**

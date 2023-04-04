@@ -239,7 +239,6 @@ void BMI_Get_Temperature(float *temp)
 	int16_t buff;
 	int16_t tmp16;
 	MPU_Read_Temperature(TEMPERATURE_0, data, 2);
-//	MPU_Read_Temperature(TEMPERATURE_1, data2, 2);
 	
 	buff = (int16_t)data[1] | ( (int16_t)data[2] << 8);
 	
@@ -280,7 +279,7 @@ void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int
 	MPU_Read_all(ACCD_X_LSB, data, 13);
 	
 	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
-	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);
+	buff[1] = (int16_t)data[3] | ( (int16_t)data[4] << 8);
 	buff[2] = (int16_t)data[5] | ( (int16_t)data[6] << 8);
 	
 	buff[3] = (int16_t)data[7] | ( (int16_t)data[8] << 8);
@@ -302,7 +301,7 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
 	EX_MPU_Read_all(ACCD_X_LSB, data, 13);
 	
 	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
-	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);
+	buff[1] = (int16_t)data[3] | ( (int16_t)data[4] << 8);
 	buff[2] = (int16_t)data[5] | ( (int16_t)data[6] << 8);
 	
 	buff[3] = (int16_t)data[7] | ( (int16_t)data[8] << 8);

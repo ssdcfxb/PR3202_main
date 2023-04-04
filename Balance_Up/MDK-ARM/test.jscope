@@ -8,7 +8,7 @@
             </JLink>
             <ScriptFile Name="C:\Users\86183\Desktop\2023RP_main\Balance_Up\MDK-ARM\test.jscope\unspecified" />
             <ElfFile Name="C:\Users\86183\Desktop\2023RP_main\Balance_Up\MDK-ARM\Balance_Up\Balance_Up.axf" />
-            <DataFile Name="..\g_test.csv" />
+            <DataFile Name="..\temp_test5.csv" />
             <RawFile Name="..\test.csv" />
             <Scope>
                 <Options TimeResolutionUs="100000" />
@@ -23,22 +23,25 @@
         </Windows>
         <SelectedSymbols>
             <Symbol>
-                <Options Name="accx" Address="0x20000118" Type="float" TypeID="1" Size="4" GraphColorRed="255" GraphColorGreen="215" GraphColorBlue="0" YMinSampled="-32743" YMaxSampled="32733" YAvgSampled="1703" Offset="4" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="20000" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
+                <Options Name="accx" Address="0x2000011C" Type="float" TypeID="1" Size="4" GraphColorRed="255" GraphColorGreen="215" GraphColorBlue="0" YMinSampled="-1911" YMaxSampled="3838" YAvgSampled="794" Offset="4" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="200" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
             </Symbol>
             <Symbol>
-                <Options Name="accy" Address="0x2000011C" Type="float" TypeID="1" Size="4" GraphColorRed="0" GraphColorGreen="255" GraphColorBlue="0" YMinSampled="-32769" YMaxSampled="32770" YAvgSampled="-354" Offset="8" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="20000" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
+                <Options Name="accy" Address="0x20000120" Type="float" TypeID="1" Size="4" GraphColorRed="0" GraphColorGreen="255" GraphColorBlue="0" YMinSampled="-2360" YMaxSampled="2864" YAvgSampled="61" Offset="8" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="200" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
             </Symbol>
             <Symbol>
-                <Options Name="accz" Address="0x20000120" Type="float" TypeID="1" Size="4" GraphColorRed="102" GraphColorGreen="102" GraphColorBlue="178" YMinSampled="-32768" YMaxSampled="-2147483648" YAvgSampled="-2147483648" Offset="12" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="20000" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
+                <Options Name="accz" Address="0x20000124" Type="float" TypeID="1" Size="4" GraphColorRed="102" GraphColorGreen="102" GraphColorBlue="178" YMinSampled="-19605" YMaxSampled="-13246" YAvgSampled="-16536" Offset="12" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="200" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
             </Symbol>
             <Symbol>
-                <Options Name="gyrox" Address="0x2000010C" Type="float" TypeID="1" Size="4" GraphColorRed="160" GraphColorGreen="32" GraphColorBlue="240" YMinSampled="-2147483648" YMaxSampled="13480" YAvgSampled="-2147483648" Offset="16" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="5000" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
+                <Options Name="gyrox" Address="0x20000110" Type="float" TypeID="1" Size="4" GraphColorRed="160" GraphColorGreen="32" GraphColorBlue="240" YMinSampled="-186" YMaxSampled="164" YAvgSampled="1" Offset="16" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="50" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
             </Symbol>
             <Symbol>
-                <Options Name="gyroy" Address="0x20000110" Type="float" TypeID="1" Size="4" GraphColorRed="255" GraphColorGreen="0" GraphColorBlue="0" YMinSampled="-15957" YMaxSampled="-2147483648" YAvgSampled="-2147483648" Offset="20" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="5000" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
+                <Options Name="gyroy" Address="0x20000114" Type="float" TypeID="1" Size="4" GraphColorRed="255" GraphColorGreen="0" GraphColorBlue="0" YMinSampled="-174" YMaxSampled="209" YAvgSampled="0" Offset="20" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="50" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
             </Symbol>
             <Symbol>
-                <Options Name="gyroz" Address="0x20000114" Type="float" TypeID="1" Size="4" GraphColorRed="0" GraphColorGreen="191" GraphColorBlue="255" YMinSampled="-6388" YMaxSampled="16418" YAvgSampled="-2147483648" Offset="24" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="5000" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
+                <Options Name="gyroz" Address="0x20000118" Type="float" TypeID="1" Size="4" GraphColorRed="0" GraphColorGreen="191" GraphColorBlue="255" YMinSampled="-84" YMaxSampled="80" YAvgSampled="-3" Offset="24" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="50" MaxValue="-2147483648" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
+            </Symbol>
+            <Symbol>
+                <Options Name="temp" Address="0x20000100" Type="float" TypeID="1" Size="4" GraphColorRed="0" GraphColorGreen="100" GraphColorBlue="0" YMinSampled="27" YMaxSampled="60" YAvgSampled="40" Offset="28" ShowInGraph="1" ACCoupling="0" YOffset="200" IsAutoConfig="0" YResolution="10" MaxValue="40" File="..\Application\ProtocolLayer\imu_protocol.c" Scope="0" DrawStyle="0" />
             </Symbol>
         </SelectedSymbols>
     </Project>

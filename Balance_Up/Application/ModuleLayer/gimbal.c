@@ -70,7 +70,7 @@ gimbal_info_t 	gim_info = {
 gimbal_conf_t   gim_conf = {
 	.restart_yaw_imu_angle = 0.0f,
 	.restart_pitch_imu_angle = 0.0f,
-	.MID_VALUE = 7191,//  前 7191 后 3095
+	.MID_VALUE = 5290,//  前 7191 后 3095
 	.restart_yaw_motor_angle = 7191, // 双枪 2100  麦轮 4777
 	.restart_pitch_motor_angle = 7270, // 双枪 6600  麦轮 6900
 	.rc_pitch_motor_offset = 110,
@@ -80,8 +80,8 @@ gimbal_conf_t   gim_conf = {
 	.key_pitch_imu_offset = 1000.0f,
 	.max_pitch_imu_angle = 23.0f,
 	.min_pitch_imu_angle = -40.0f,
-	.max_pitch_motor_angle = 8180, // 双枪、麦轮 7200  mid 7250
-	.min_pitch_motor_angle = 6790, // 双枪、麦轮 6100
+	.max_pitch_motor_angle = 6190, // 双枪、麦轮 7200  mid 7250
+	.min_pitch_motor_angle = 4775, // 双枪、麦轮 6100
 };
 
 /* Exported variables --------------------------------------------------------*/
@@ -275,9 +275,6 @@ void Gimbal_YawResetCheck(void)
 
 void Gimbal_GetRcInfo(void)
 {
-	if (status.gim_mode == vision)
-		gimbal.info->gimbal_mode = gim_vision;
-	
 	if (gimbal.info->gimbal_mode == gim_machine)
 	{
 		gimbal.info->target_pitch_motor_deltaangle = -rc_sensor.info->ch1 / gim_conf.rc_pitch_motor_offset;
@@ -298,9 +295,11 @@ void Gimbal_GetRcInfo(void)
 		gimbal.info->target_yaw_imu_deltaangle = -(float)rc_sensor.info->ch0 / gim_conf.rc_yaw_imu_offset;
 		if ((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))
 		{
+			gimbal.info->target_pitch_imu_deltaangle = 0.f;
+			gimbal.info->target_yaw_imu_deltaangle = 0.f;
 			gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
-			gimbal.info->target_pitch_imu_angle = vision_sensor.info->rx_info->pitch_angle * ECD_TO_ANGLE - 180.0f;
-			gimbal.info->target_yaw_imu_angle = vision_sensor.info->rx_info->yaw_angle * ECD_TO_ANGLE;
+			gimbal.info->target_pitch_imu_angle = (vision_sensor.info->target_pitch_angle - (float)HALF_ECD_RANGE) * ECD_TO_ANGLE;
+			gimbal.info->target_yaw_imu_angle = vision_sensor.info->target_yaw_angle * ECD_TO_ANGLE - 180.f;
 		}
 	}
 	else
@@ -322,9 +321,6 @@ void Gimbal_GetRcInfo(void)
 
 void Gimbal_GetKeyInfo(void)
 {
-	gimbal.info->gimbal_mode = gim_gyro;
-	if (status.gim_mode == vision)
-		gimbal.info->gimbal_mode = gim_vision;
 	
 	if (gimbal.info->gimbal_mode == gim_gyro)
 	{
@@ -340,8 +336,8 @@ void Gimbal_GetKeyInfo(void)
 			gimbal.info->target_pitch_imu_deltaangle = 0.f;
 			gimbal.info->target_yaw_imu_deltaangle = 0.f;
 			gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
-			gimbal.info->target_pitch_imu_angle = vision_sensor.info->rx_info->pitch_angle * ECD_TO_ANGLE - 180.0f;
-			gimbal.info->target_yaw_imu_angle = vision_sensor.info->rx_info->yaw_angle * ECD_TO_ANGLE;
+			gimbal.info->target_pitch_imu_angle = (vision_sensor.info->target_pitch_angle - (float)HALF_ECD_RANGE) * ECD_TO_ANGLE;
+			gimbal.info->target_yaw_imu_angle = vision_sensor.info->target_yaw_angle * ECD_TO_ANGLE - 180.f;
 		}
 	}
 	
@@ -460,7 +456,7 @@ void Gimbal_MotorCtrl(void)
 //																					+ gimbal.info->target_yaw_global_angle * arm_cos_f32(angle2rad(gimbal.info->measure_roll_imu_angle));
 			
 			
-			// pitch轴电机限位（陀螺仪模式下需要修改）
+			// pitch轴电机限位
 			if (gimbal.info->target_pitch_imu_angle > gim_conf.max_pitch_imu_angle)
 			{
 				gimbal.info->target_pitch_imu_angle = gim_conf.max_pitch_imu_angle;
@@ -483,8 +479,10 @@ void Gimbal_MotorCtrl(void)
 	}
 	else if (gimbal.info->gimbal_mode == gim_vision)
 	{
+			gimbal.info->target_pitch_imu_angle += gimbal.info->target_pitch_imu_deltaangle;
+			gimbal.info->target_yaw_imu_angle += gimbal.info->target_yaw_imu_deltaangle;
 		
-			// pitch轴电机限位（陀螺仪模式下需要修改）
+			// pitch轴电机限位
 			if (gimbal.info->target_pitch_imu_angle > gim_conf.max_pitch_imu_angle)
 			{
 				gimbal.info->target_pitch_imu_angle = gim_conf.max_pitch_imu_angle;
@@ -549,7 +547,7 @@ void Gimbal_Yaw_Angle_PidCalc(void)
 																																	0);
 		gim_out[RM_motor[GIM_Y].id.buff_p] = RM_motor[GIM_Y].base_info.motor_out;
 	}
-	else if ((gimbal.info->gimbal_mode == gim_gyro) || (gimbal.info->gimbal_mode == gim_gyro2))
+	else if ((gimbal.info->gimbal_mode == gim_gyro) || (gimbal.info->gimbal_mode == gim_gyro2) || (gimbal.info->gimbal_mode == gim_vision))
 	{
 		// yaw轴电机error过零点处理
 		if (gimbal.info->target_yaw_imu_angle - gimbal.info->measure_yaw_imu_angle > 180.0f)
@@ -587,9 +585,9 @@ void Gimbal_Pitch_Angle_PidCalc(void)
 																																	0);
 		gim_out[RM_motor[GIM_P].id.buff_p] = RM_motor[GIM_P].base_info.motor_out;
 	}
-	else if ((gimbal.info->gimbal_mode == gim_gyro) || (gimbal.info->gimbal_mode == gim_gyro2))
+	else if ((gimbal.info->gimbal_mode == gim_gyro) || (gimbal.info->gimbal_mode == gim_gyro2) || (gimbal.info->gimbal_mode == gim_vision))
 	{
-		// pitch轴增量与电机增量方向不同
+		// pitch轴陀螺仪增量与电机增量方向不同
 		RM_motor[GIM_P].base_info.motor_out = -RM_motor[GIM_P].ctr_pid2(&RM_motor[GIM_P].pid.position, 
 																																	&RM_motor[GIM_P].pid.position_in,
 																																	gimbal.info->measure_pitch_imu_angle,

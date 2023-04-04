@@ -101,15 +101,25 @@ void module_info_update(module_t *mod)
 			launcher.info->launcher_mode = lch_keep;
 		}
 		
+		if (status.gim_mode == vision)
+		{
+			gimbal.info->gimbal_mode = gim_vision;
+		}
+		
 		// Ò£¿ØÆ÷ÊÓ¾õ
 		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
 		{
-			status.gim_mode = gyro;
 			if (vision_sensor.work_state == DEV_ONLINE)
 			{
 				if (status.gim_mode != vision)
 				{
 					status.gim_mode = vision;
+					gimbal.info->gimbal_mode = gim_vision;
+				}
+				else
+				{
+					status.gim_mode = gyro;
+					gimbal.info->gimbal_mode = gim_gyro;
 				}
 			}
 		}
@@ -185,7 +195,7 @@ void Slave_TxInfoUpdate(void)
 	/*  3:Ð¡ÍÓÂÝ×´Ì¬±êÖ¾Î»  */
 	if (rc_sensor.work_state == DEV_OFFLINE)
 		status.chas_state = gyro_reset;
-	if ((rc_sensor.info->thumbwheel.status == RC_TB_DOWN) && (status.tw_last_state != RC_TB_DOWN))
+	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 	{
 		if (status.chas_state == gyro_on)
 		{
@@ -241,8 +251,8 @@ void Slave_TxInfoUpdate(void)
 
 void Vision_TxInfoUpdate(void)
 {
-	vision_sensor.info->measure_pitch_angle = imu_sensor.info->base_info.pitch;
-	vision_sensor.info->measure_yaw_angle = imu_sensor.info->base_info.yaw;
+	vision_sensor.info->measure_pitch_angle = imu_sensor.info->base_info.pitch * ANGLE_TO_ECD + (float)HALF_ECD_RANGE;
+	vision_sensor.info->measure_yaw_angle = (imu_sensor.info->base_info.yaw + 180.f) * ANGLE_TO_ECD;
 	vision_sensor.info->measure_shoot_speed = launcher.conf->fric_mode;
 	
 	vision_sensor.info->tx_info->pitch_angle = vision_sensor.info->measure_pitch_angle;
@@ -256,18 +266,18 @@ void Vision_TxInfoUpdate(void)
 void Rc_RxInfoCheck(void)
 {
 	/*  Ò£¿ØÆ÷»»Í·  */
-	if (vision_sensor.work_state == DEV_OFFLINE)
-	{
-		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
-		{
-			if (status.lch_state.magz_state == magz_close)
-			{
-				symbal.gim_sym.turn_start = 1;
-				symbal.gim_sym.turn_ok = 0;
-				status.gim_cmd = gim_turn;
-			}
-		}
-	}
+//	if (vision_sensor.work_state == DEV_OFFLINE)
+//	{
+//		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+//		{
+//			if (status.lch_state.magz_state == magz_close)
+//			{
+//				symbal.gim_sym.turn_start = 1;
+//				symbal.gim_sym.turn_ok = 0;
+//				status.gim_cmd = gim_turn;
+//			}
+//		}
+//	}
 	/*  ¹Øµ¯²Ö  */
 	if (status.chas_state == gyro_on)
 	{

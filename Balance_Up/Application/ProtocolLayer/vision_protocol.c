@@ -12,7 +12,7 @@ uint8_t vision_txBuf[30];
 
 uint32_t t1, t2, tmp;
 /* Exported variables --------------------------------------------------------*/
-extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart6;
 
 vision_tx_info_t vision_tx_info = {
 	.SOF = 0xA5,
@@ -30,7 +30,7 @@ bool vision_send_data(void)
 	vision_tx_info.CRC16 = (uint16_t)((vision_txBuf[sizeof(vision_tx_info_t)-2] << 8)
                                    | vision_txBuf[sizeof(vision_tx_info_t)-1]);
 	
-	if(HAL_UART_Transmit_DMA(&huart1,vision_txBuf,sizeof(vision_tx_info_t)) == HAL_OK)
+	if(HAL_UART_Transmit_DMA(&huart6,vision_txBuf,sizeof(vision_tx_info_t)) == HAL_OK)
 	{
 			return true;
 	}
@@ -75,7 +75,7 @@ void vision_check(vision_sensor_t *vis_sen)
 	}
 }
 
-void USART1_rxDataHandler(uint8_t *rxBuf)
+void USART6_rxDataHandler(uint8_t *rxBuf)
 {
 	vision_sensor.update(&vision_sensor, rxBuf);
 	vision_sensor.check(&vision_sensor);

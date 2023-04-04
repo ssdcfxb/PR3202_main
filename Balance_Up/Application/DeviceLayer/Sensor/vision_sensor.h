@@ -25,8 +25,8 @@ typedef __packed struct
 	uint8_t  			SOF;
 	vision_cmd_e  mode;        // datau8_1
 	uint8_t  			CRC8;
-	float    			pitch_angle; // dataf_1
-	float    			yaw_angle;   // dataf_2
+	float    			yaw_angle;	 // dataf_1
+	float    			pitch_angle; // dataf_2
 	uint8_t  			shoot_speed; // datau8_2
  	uint8_t  			my_color;    // datau8_3	0:ºì	1:À¶
 	uint16_t 			CRC16;

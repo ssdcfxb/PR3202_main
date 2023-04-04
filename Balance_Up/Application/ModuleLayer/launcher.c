@@ -200,8 +200,8 @@ void Judge_GetSpeedInfo(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->fric_speed = launcher.conf->Fric_30;
-		launcher.conf->fric_mode = 30;
+		launcher.conf->fric_speed = launcher.conf->Fric_15;
+		launcher.conf->fric_mode = 15;
 	}
 	else
 	{

@@ -4,10 +4,6 @@
  * @Version     V1.0
  * @date        20-November-2022
  * @brief       Launcher Control Center
- * @update
- *              v1.0(18-November-2022)
- *              v1.1(20-November-2022)
- *                  1.修改速射连发模式，闭角度环->闭速度环
  */
 
 #ifndef __LAUNCHER_H
@@ -15,18 +11,28 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
+#include "rm_protocol.h"
 
-#include "rc_sensor.h"
-#include "user_motor.h"
+#include "device.h"
+#include "module.h"
 
 /* Exported macro ------------------------------------------------------------*/
-#define Fric_15 4400.0f
-#define Fric_18 4700.0f
-#define Fric_20 4950.0f
-#define Fric_22 5200.0f
-#define Fric_30 7020.0f
+#define Fric_15_init 4400.0f
+#define Fric_18_init 4700.0f
+#define Fric_20_init 4950.0f
+#define Fric_22_init 5200.0f
+#define Fric_30_init 7020.0f
 
 /* Exported types ------------------------------------------------------------*/
+// 发射机构模式枚举
+typedef enum
+{
+	lch_gyro,      // 陀螺仪
+	lch_gyro2,     // 陀螺仪
+	lch_machine,   // 机械
+	lch_keep,      // 保持
+} launcher_mode_e;
+
 // 摩擦轮状态枚举
 typedef enum
 {
@@ -50,23 +56,29 @@ typedef enum
 typedef enum
 {
 	Fric_Toggle,    // 开关摩擦轮
+	Fric_Open,			// 开摩擦轮
+	Fric_Close,			// 关摩擦轮
+	Magz_Open,      // 开弹仓
+	Magz_Close,     // 关弹仓
 	Func_Reset,     // 功能复位
-	Adjust_Speed,   // 调整摩擦轮转速
-	Sweep_Shoot,    // 快速连发
 	Single_Shoot,   // 单发
 	Keep_Shoot,     // 连发
-	WaitCommond_L // 等待指令
+	WaitCommond_L   // 等待指令
 } launcher_commond_e;
 
 typedef struct 
 {
-	RM_motor_t  *user_motor;
+	RM_motor_t    *fricl_motor;
+	RM_motor_t    *fricr_motor;
+	RM_motor_t    *dial_motor;
 	rc_sensor_t		*rc_sensor;
 } launcher_dev_t;
 
 typedef struct
 {
-	remote_mode_t	 remote_mode;
+	remote_mode_t	 	remote_mode;
+	launcher_mode_e launcher_mode;
+	
 	int16_t  measure_left_speed;
 	int16_t  measure_right_speed;
 	int16_t  measure_dial_speed;
@@ -82,6 +94,7 @@ typedef struct
 	float  target_dial_speed;
 	float  target_dial_angle;
 	
+	uint8_t  last_s1;
 	uint8_t  init_s2;
 	uint8_t  last_s2;
 	
@@ -99,7 +112,13 @@ typedef struct
 
 typedef struct
 {
+	float 	 Fric_15;
+	float 	 Fric_18;
+	float 	 Fric_20;
+	float 	 Fric_22;
+	float 	 Fric_30;
 	float    fric_speed;
+	uint8_t  fric_mode;
 	float    dial_speed;
 	float    dial_torque_limit;
 	float    lock_angle_check;

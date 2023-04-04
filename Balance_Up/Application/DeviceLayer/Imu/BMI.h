@@ -3,6 +3,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
+#include "bmi_t.h"
 #include "bmi2.h"
 #include "bmi270.h"
 #include "common.h"
@@ -21,30 +22,19 @@
 #define GYR_Y_MSB 0x15
 #define GYR_Z_LSB 0x16
 #define GYR_Z_MSB 0x17
+#define TEMPERATURE_0 0x22
+#define TEMPERATURE_1 0x23
+#define TEMP_RATIO (0.001953125f)
 
 
 /* Exported types ------------------------------------------------------------*/
-typedef struct bmi_struct {
-
-	struct bmi2_dev *dev;
-	
-	uint8_t drive_type;
-	
-	uint8_t device_aces;
-	
-	int8_t (*init)(struct bmi2_dev *bmi,uint8_t intf, uint8_t aces);
-	
-	int8_t (*read)(uint8_t reg_addr, uint8_t *data, uint16_t len, struct bmi2_dev *dev);
-	int8_t (*write)(uint8_t reg_addr, const uint8_t *data, uint16_t len, struct bmi2_dev *dev);
-
-} bmi_t;
-
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi2;
 
 
 /* Exported functions --------------------------------------------------------*/
 int8_t bmi_init(struct bmi2_dev *bmi2_dev, uint8_t intf, uint8_t aces);
+void BMI_Get_Temperature(float *temp);
 void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz);
 void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int16_t *aay, int16_t *aaz);
 void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
@@ -58,6 +48,10 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 													 
 
 
+uint8_t EX_BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
+                           float *pitch_,float *roll_,float *yaw_,\
+													 float *ggx,float *ggy,float *ggz,\
+													 float *aax,float *aay,float *aaz);
 
 
 #endif

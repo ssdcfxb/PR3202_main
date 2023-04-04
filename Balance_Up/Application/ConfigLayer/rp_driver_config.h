@@ -64,7 +64,8 @@ typedef enum {
     DRV_UART2,
     DRV_UART3,
     DRV_UART4,
-    DRV_UART5
+    DRV_UART5,
+		DRV_UART6,
 } uart_id_t;
 
 /**
@@ -83,7 +84,9 @@ typedef struct drv_iic {
 typedef struct 
 {
 	CAN_HandleTypeDef *hcan;
-	uint32_t rx_id;
+	drv_type_t	type;
+	can_id_t    id;
+	uint32_t 		rx_id;
 } drv_can_t;
 
 /**

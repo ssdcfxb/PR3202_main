@@ -3,8 +3,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
-#include "BMI.h"
-#include "drv_tick.h"
+#include "bmi_t.h"
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
@@ -84,6 +83,7 @@ typedef struct imu_info_struct {
 typedef struct imu_struct {
 	
   bmi_t       *bmi;	
+	bmi_t       *ex_bmi;	
 	imu_info_t	*info;
 	driver_t	  driver;
 	

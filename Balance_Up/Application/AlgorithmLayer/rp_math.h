@@ -36,6 +36,7 @@ typedef enum jugde_logical_e    //逻辑判断
 #define one(x)					((x)>0? (1):(-1))
 #define within_or_not(x, min, max)     (x>max)?Flase:((x<min)?Flase:True)  //在规定范围外返回0
 
+#define angle2rad(ANGLE)         ((ANGLE) * ANGLE_TO_RAD)
 
 
 /* 斜坡函数 */

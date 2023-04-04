@@ -92,13 +92,14 @@
 
 
 // 电机码盘值相关参数
-#define M2006_ECD_TO_ANGLE 0.001220703125f
-#define M3508_ECD_TO_ANGLE 0.00231319355647f
-#define GM6020_ECD_TO_ANGLE 0.0439453125f
+#define M2006_ECD_TO_ANGLE (0.001220703125f)
+#define M3508_ECD_TO_ANGLE (0.00231319355647f)
+#define GM6020_ECD_TO_ANGLE (0.0439453125f)
 
-#define ECD_TO_ANGLE 0.0439453125f
-#define HALF_ECD_RANGE 4096
-#define ECD_RANGE 8191
+#define ECD_TO_ANGLE (0.0439453125f)
+#define ANGLE_TO_ECD (22.7555556f)
+#define HALF_ECD_RANGE (4096)
+#define ECD_RANGE (8191)
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/

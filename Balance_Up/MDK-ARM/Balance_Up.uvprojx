@@ -10,20 +10,21 @@
       <TargetName>Balance_Up</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
-      <uAC6>0</uAC6>
+      <uAC6>8</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F407VETx</Device>
           <Vendor>STMicroelectronics</Vendor>
           <PackID>Keil.STM32F4xx_DFP.2.16.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IRAM(0x20000000-0x2001BFFF) IRAM2(0x2001C000-0x2001FFFF) IROM(0x8000000-0x807FFFF) CLOCK(25000000) FPU2 CPUTYPE("Cortex-M4") TZ</Cpu>
+          <Cpu>IROM(0x08000000,0x00080000) IRAM(0x20000000,0x00020000) IRAM2(0x10000000,0x00010000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll></FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_512 -FS08000000 -FL080000 -FP0($$Device:STM32F407VETx$CMSIS\Flash\STM32F4xx_512.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile></RegisterFile>
+          <RegisterFile>$$Device:STM32F407VETx$Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -134,11 +135,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4101</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2V8M.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash2>BIN\UL2CM3.DLL</Flash2>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -190,12 +191,12 @@
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
-            <RwSelD>4</RwSelD>
+            <RwSelD>3</RwSelD>
             <CodeSel>0</CodeSel>
             <OptFeed>0</OptFeed>
             <NoZi1>0</NoZi1>
@@ -212,7 +213,7 @@
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
             <Im1Chk>1</Im1Chk>
-            <Im2Chk>1</Im2Chk>
+            <Im2Chk>0</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -247,7 +248,7 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x1c000</Size>
+                <Size>0x20000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
@@ -302,19 +303,19 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x1c000</Size>
+                <Size>0x20000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x2001c000</StartAddress>
-                <Size>0x4000</Size>
+                <StartAddress>0x10000000</StartAddress>
+                <Size>0x10000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>2</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -323,14 +324,14 @@
             <PlainCh>0</PlainCh>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
-            <wLevel>3</wLevel>
+            <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
-            <v6Lang>5</v6Lang>
-            <v6LangP>3</v6LangP>
+            <v6Lang>3</v6Lang>
+            <v6LangP>5</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -338,9 +339,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_HAL_DRIVER,STM32F407xx</Define>
+              <Define>USE_HAL_DRIVER,STM32F407xx,__CC_ARM,ARM_MATH_CM4,__TARGET_FPU_VFP,__FPU_PRESENT=1U</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\Application\AlgorithmLayer;..\Application\ConfigLayer;..\Application\DeviceLayer;..\Application\DriverLayer;..\Application\DeviceLayer\Imu;..\Application\DeviceLayer\Sensor;..\Application\ModuleLayer;..\Application\HardwareLayer;..\Application\ProtocolLayer;..\Application\TaskLayer;..\Application\UserLayer</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Application/AlgorithmLayer;../Application/ConfigLayer;../Application/DeviceLayer;../Application/DriverLayer;../Application/DeviceLayer/Imu;../Application/DeviceLayer/Sensor;../Application/ModuleLayer;../Application/HardwareLayer;../Application/ProtocolLayer;../Application/TaskLayer;../Application/UserLayer</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -394,6 +395,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\TaskLayer\heartbeat_task.c</FilePath>
             </File>
+            <File>
+              <FileName>led_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\TaskLayer\led_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -408,6 +414,11 @@
               <FileName>rp_math.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\AlgorithmLayer\rp_math.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\AlgorithmLayer\crc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -445,14 +456,19 @@
           <GroupName>Module</GroupName>
           <Files>
             <File>
+              <FileName>gimbal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ModuleLayer\gimbal.c</FilePath>
+            </File>
+            <File>
               <FileName>launcher.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ModuleLayer\launcher.c</FilePath>
             </File>
             <File>
-              <FileName>module.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\ModuleLayer\module.h</FilePath>
+              <FileName>module.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ModuleLayer\module.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -473,6 +489,21 @@
               <FileName>rc_protocol.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ProtocolLayer\rc_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>judge_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ProtocolLayer\judge_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>slave_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ProtocolLayer\slave_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>vision_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ProtocolLayer\vision_protocol.c</FilePath>
             </File>
             <File>
               <FileName>rm_protocol.c</FileName>
@@ -520,6 +551,26 @@
               <FilePath>..\Application\DeviceLayer\Sensor\rc_sensor.c</FilePath>
             </File>
             <File>
+              <FileName>vision_sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\Sensor\vision_sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>keyboard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\keyboard.c</FilePath>
+            </File>
+            <File>
+              <FileName>judge.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\judge.c</FilePath>
+            </File>
+            <File>
+              <FileName>slave.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\slave.c</FilePath>
+            </File>
+            <File>
               <FileName>user_motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DeviceLayer\user_motor.c</FilePath>
@@ -550,11 +601,6 @@
           <GroupName>Driver</GroupName>
           <Files>
             <File>
-              <FileName>driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\DriverLayer\driver.c</FilePath>
-            </File>
-            <File>
               <FileName>drv_can.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DriverLayer\drv_can.c</FilePath>
@@ -578,6 +624,11 @@
               <FileName>drv_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DriverLayer\drv_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DriverLayer\driver.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -827,8 +878,8 @@
           <targetInfo name="Balance_Up"/>
         </targetInfos>
       </component>
-      <component Cclass="CMSIS" Cgroup="DSP" Cvariant="Source" Cvendor="ARM" Cversion="1.10.0" condition="CMSIS DSP">
-        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
+      <component Cclass="CMSIS" Cgroup="DSP" Cvariant="Source" Cvendor="ARM" Cversion="1.14.2" condition="CMSISCORE">
+        <package name="CMSIS-DSP" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="ARM" version="1.14.2"/>
         <targetInfos>
           <targetInfo name="Balance_Up"/>
         </targetInfos>

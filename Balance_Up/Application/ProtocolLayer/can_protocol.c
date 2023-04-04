@@ -1,5 +1,21 @@
 #include "can_protocol.h"
 
+int16_t can1_send_buf[8], can2_send_buf[8];
+
+void CAN_SendAll(void)
+{
+	if (rc_sensor.work_state == DEV_OFFLINE)
+	{
+		memset(can1_send_buf, 0, 16);
+		memset(can2_send_buf, 0, 16);
+	}
+	
+	CAN1_Send_With_int16_to_uint8(RM_motor[FRIC_L].id.tx_id, can1_send_buf);
+	CAN2_Send_With_int16_to_uint8(RM_motor[GIM_P].id.tx_id, can2_send_buf);
+	
+	memset(can1_send_buf, 0, 16);
+	memset(can2_send_buf, 0, 16);
+}	
 
 void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
 {

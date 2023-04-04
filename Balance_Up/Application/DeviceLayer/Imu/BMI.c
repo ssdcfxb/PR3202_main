@@ -224,6 +224,36 @@ float inVSqrt(float x)
 	return y;
 }
 
+void MPU_Read_Temperature(uint8_t reg,uint8_t *buff,uint8_t len)
+{
+	BMI_CS_LOW();
+	reg |= 0x80;
+	HAL_SPI_Transmit(&hspi2, &reg,  1, 1000);
+	HAL_SPI_Receive(&hspi2, buff, len+1, 1000);
+	BMI_CS_HIG();
+}
+
+void BMI_Get_Temperature(float *temp)
+{
+	uint8_t data[3];
+	int16_t buff;
+	int16_t tmp16;
+	MPU_Read_Temperature(TEMPERATURE_0, data, 2);
+	
+	buff = (int16_t)data[1] | ( (int16_t)data[2] << 8);
+	
+	if (data[2] & 0x80)
+	{
+		tmp16 = buff & 0x7FFF;
+		*temp = -41.f + (float)tmp16 * TEMP_RATIO;
+	}
+	else
+	{
+		tmp16 = ((~buff) & 0x7FFF) + 1;
+		*temp = 87.f - (float)tmp16 * TEMP_RATIO;
+	}
+}
+
 void EX_MPU_Read_all(uint8_t reg,uint8_t *buff,uint8_t len)
 {
 	EX_BMI_CS_LOW();
@@ -249,7 +279,7 @@ void BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, int
 	MPU_Read_all(ACCD_X_LSB, data, 13);
 	
 	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
-	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);
+	buff[1] = (int16_t)data[3] | ( (int16_t)data[4] << 8);
 	buff[2] = (int16_t)data[5] | ( (int16_t)data[6] << 8);
 	
 	buff[3] = (int16_t)data[7] | ( (int16_t)data[8] << 8);
@@ -271,7 +301,7 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
 	EX_MPU_Read_all(ACCD_X_LSB, data, 13);
 	
 	buff[0] = (int16_t)data[1] | ( (int16_t)data[2] << 8);
-	buff[1] = (int16_t)data[2] | ( (int16_t)data[4] << 8);
+	buff[1] = (int16_t)data[3] | ( (int16_t)data[4] << 8);
 	buff[2] = (int16_t)data[5] | ( (int16_t)data[6] << 8);
 	
 	buff[3] = (int16_t)data[7] | ( (int16_t)data[8] << 8);
@@ -301,10 +331,11 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
     @param[in]  (int16_t) gx,  gy,  gz,  ax,  ay,  az
     @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
 */
-float q0_init = 0.0f, q1_init = 1.0f, q2_init = 0.0f, q3_init = 0.0f;
-//float arz = -90.0f;
-//float ary = 0.0f;
-//float arx = 0.0f;
+//float q0_init = 0.0f, q1_init = 1.0f, q2_init = 0.0f, q3_init = 0.0f;
+float arz_ = -90.0f;
+float ary_ = 0.0f;
+float arx_ = 180.0f;
+float arz, ary, arx;
 arm_matrix_instance_f32 Trans;
 arm_matrix_instance_f32 Src;
 arm_matrix_instance_f32 Dst;
@@ -321,31 +352,31 @@ float acc_out[3];
 void transform_init(void)
 {
 	/* 角度单位转换（to弧度） */
-//	arz = arz * (double)0.017453;
-//	ary = ary * (double)0.017453;
-//	arx = arx * (double)0.017453;
+	arz = arz_ * (double)0.017453;
+	ary = ary_ * (double)0.017453;
+	arx = arx_ * (double)0.017453;
 
 	/* 旋转矩阵赋值（三个旋转矩阵叠加） */
-//	trans[0] =  arm_cos_f32(arz)*arm_cos_f32(ary);
-//	trans[1] =  arm_sin_f32(arz)*arm_cos_f32(ary);
-//	trans[2] =  arm_sin_f32(ary);
-//	trans[3] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) - arm_sin_f32(arz)*arm_cos_f32(arx);
-//	trans[4] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) + arm_cos_f32(arz)*arm_cos_f32(arx);
-//	trans[5] =  arm_cos_f32(ary)*arm_sin_f32(arx);
-//	trans[6] = -arm_cos_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) + arm_sin_f32(arz)*arm_sin_f32(arx);
-//	trans[7] = -arm_sin_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) - arm_cos_f32(arz)*arm_sin_f32(arx);
-//	trans[8] =  arm_cos_f32(ary)*arm_cos_f32(arx);
+	trans[0] = arm_cos_f32(arz)*arm_cos_f32(ary);
+	trans[1] = arm_cos_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) - arm_sin_f32(arz)*arm_cos_f32(arx);
+	trans[2] = arm_cos_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) + arm_sin_f32(arz)*arm_sin_f32(arx);
+	trans[3] = arm_sin_f32(arz)*arm_cos_f32(ary);
+	trans[4] = arm_sin_f32(arz)*arm_sin_f32(ary)*arm_sin_f32(arx) + arm_cos_f32(arz)*arm_cos_f32(arx);
+	trans[5] = arm_sin_f32(arz)*arm_sin_f32(ary)*arm_cos_f32(arx) - arm_cos_f32(arz)*arm_sin_f32(arx);
+	trans[6] = -arm_sin_f32(ary);
+	trans[7] = arm_cos_f32(ary)*arm_sin_f32(arx);
+	trans[8] = arm_cos_f32(ary)*arm_cos_f32(arx);
 	
 	/* 四元数旋转矩阵 */
-	trans[0] = q0_init*q0_init + q1_init*q1_init - q2_init*q2_init - q3_init*q3_init;
-	trans[1] = 2*(q1_init * q2_init - q0_init * q3_init);
-	trans[2] = 2*(q1_init * q3_init - q0_init * q2_init);
-	trans[3] = 2*(q1_init * q2_init - q0_init * q3_init);
-	trans[4] = q0_init*q0_init - q1_init*q1_init + q2_init*q2_init - q3_init*q3_init;
-	trans[5] = 2*(q2_init * q3_init - q0_init * q1_init);
-	trans[6] = 2*(q1_init * q3_init - q0_init * q2_init);
-	trans[7] = 2*(q2_init * q3_init - q0_init * q1_init);
-	trans[8] = q0_init*q0_init - q1_init*q1_init - q2_init*q2_init + q3_init*q3_init;
+//	trans[0] = q0_init*q0_init + q1_init*q1_init - q2_init*q2_init - q3_init*q3_init;
+//	trans[1] = 2*(q1_init * q2_init - q0_init * q3_init);
+//	trans[2] = 2*(q0_init * q2_init + q1_init * q3_init);
+//	trans[3] = 2*(q0_init * q3_init + q1_init * q2_init);
+//	trans[4] = q0_init*q0_init - q1_init*q1_init + q2_init*q2_init - q3_init*q3_init;
+//	trans[5] = 2*(q2_init * q3_init - q0_init * q1_init);
+//	trans[6] = 2*(q1_init * q3_init - q0_init * q2_init);
+//	trans[7] = 2*(q0_init * q1_init + q2_init * q3_init);
+//	trans[8] = q0_init*q0_init - q1_init*q1_init - q2_init*q2_init + q3_init*q3_init;
 
 	arm_mat_init_f32(&Trans, 3, 3, (float *)trans); //3x3变换矩阵初始化
 }
@@ -367,21 +398,22 @@ void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
 	acc_in[0] = (float)ax, acc_in[1] = (float)ay, acc_in[2] = (float)az;
 	
 	/* 陀螺仪坐标变换 */
-	arm_mat_init_f32(&Src, 3, 1, gyro_in);
-	arm_mat_init_f32(&Dst, 3, 1, gyro_out);
-	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	arm_mat_init_f32(&Src, 1, 3, gyro_in);
+	arm_mat_init_f32(&Dst, 1, 3, gyro_out);
+	arm_mat_mult_f32(&Src, &Trans, &Dst);
 	*ggx = gyro_out[0], *ggy = gyro_out[1], *ggz = gyro_out[2];
 	
 	/* 加速度计坐标变换 */
-	arm_mat_init_f32(&Src, 3, 1, acc_in);
-	arm_mat_init_f32(&Dst, 3, 1, acc_out);
-	arm_mat_mult_f32(&Trans, &Src, &Dst);
+	arm_mat_init_f32(&Src, 1, 3, acc_in);
+	arm_mat_init_f32(&Dst, 1, 3, acc_out);
+	arm_mat_mult_f32(&Src, &Trans, &Dst);
 	*aax = acc_out[0], *aay = acc_out[1], *aaz = acc_out[2];
 	
 }
 
 
 extern struct bmi2_dev bmi270;
+extern struct bmi2_dev ex_bmi270;
 
 /**
     @param
@@ -399,6 +431,7 @@ extern struct bmi2_dev bmi270;
 float Kp = 0.5f;//4
 float norm;
 float halfT = 0.00025f;
+//float halfT = 0.0005f;
 float lp = 0.0f, ly = 0.0f;
 float wx, wy, wz;
 float afx, afy, afz;
@@ -406,13 +439,8 @@ float thr, thp, thy, cosr, cosp, cosy;
 float vx, vy, vz;
 float ex, ey, ez;
 float gx,gy,gz,ax,ay,az;
-//float q0_init = 1.0f, q1_init = 0.0f, q2_init = 0.0f, q3_init = 0.0f;  //将云台摆到yaw、pitch都为零时即初始值
 float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;  //将云台摆到yaw、pitch都为零时即初始值
 float q0temp,q1temp,q2temp,q3temp;
-//float gx_, gy_, gz_;
-//float q0_, q1_, q2_, q3_;
-//float q0temp_,q1temp_,q2temp_,q3temp_;
-//float a_sum;
 float sintemp, sintemp_, costemp, costemp_;
 /**
   * @brief  不带_的为涉及加速度计的，带_的为不涉及加速度计的，用于差分计算速度
@@ -448,64 +476,15 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	gy = gy * (double)0.017453;
 	gz = gz * (double)0.017453;
 	
-	/* 备份给速度解算用 */
-//	gx_ = gx;
-//	gy_ = gy;
-//	gz_ = gz;
-	
-	/* 速度解算begin */
-//	q0temp_ = q0_init;
-//	q1temp_ = q1_init;
-//	q2temp_ = q2_init;
-//	q3temp_ = q3_init;
-//	
-//	q0_ = q0temp_ + (-q1temp_*gx_ - q2temp_*gy_ -q3temp_*gz_)*halfT;
-//	q1_ = q1temp_ + ( q0temp_*gx_ + q2temp_*gz_ -q3temp_*gy_)*halfT;
-//	q2_ = q2temp_ + ( q0temp_*gy_ - q1temp_*gz_ +q3temp_*gx_)*halfT;
-//	q3_ = q3temp_ + ( q0temp_*gz_ + q1temp_*gy_ -q2temp_*gx_)*halfT;
-//	
-//	norm = inVSqrt(q0_*q0_ + q1_*q1_ + q2_*q2_ + q3_*q3_);
-//	q0_ = q0_ * norm;
-//	q1_ = q1_ * norm;
-//	q2_ = q2_ * norm;
-//	q3_ = q3_ * norm;
-//	
-//	//*roll_ = atan2(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_)* 57.295773f;
-//	arm_atan2_f32(2 * q2_ * q3_ + 2 * q0_ * q1_,q0_*q0_ - q1_ * q1_ -  q2_ * q2_ + q3_ *q3_, roll_);
-//	*roll_ *= 57.295773f;
-//	
-//  //*pitch_ = -asin( 2 * q1_ * q3_ -2 * q0_ * q2_)*57.295773f;
-//  //asin(x) = atan(x/sqrt(1-x*x))
-//	sintemp_ = 2 * q1_ * q3_ -2 * q0_ * q2_;
-//	arm_sqrt_f32(1 - sintemp_ * sintemp_, &costemp_);
-//	arm_atan2_f32(sintemp_, costemp_, pitch_);
-//	*pitch_ *= -57.295773f;
-//	
-//	//*yaw_ =  atan2(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_)*57.295773f;
-//	arm_atan2_f32(2*(q1_*q2_ + q0_*q3_),q0_*q0_ +q1_*q1_-q2_*q2_ -q3_*q3_, yaw_);
-//	*yaw_  *= 57.295773f;
-//	
-//	/* 过零点处理 */
-//	if (abs(*roll_) > 180.0f)
-//		*roll_ = *roll_ - one(*roll_) * 360.0f;
-//	if (abs(*pitch_) > 180.0f)
-//		*pitch_ = *pitch_ - one(*pitch_) * 360.0f;
-//	if (abs(*yaw_) > 180.0f)
-//		*yaw_ = *yaw_ - one(*yaw_) * 360.0f;
-//	
-//	*roll_  = *roll_  / (halfT * 2);
-//	*pitch_ = *pitch_ / (halfT * 2);
-//	*yaw_   = *yaw_   / (halfT * 2);
-	
 	/* 角加速度计算 */
-	afx = (gx - wx)/(halfT * 2);
-	afy = (gy - wy)/(halfT * 2);
-	afz = (gz - wz)/(halfT * 2);
+//	afx = (gx - wx)/(halfT * 2);
+//	afy = (gy - wy)/(halfT * 2);
+//	afz = (gz - wz)/(halfT * 2);
 	
-	wx = gx;
-	wy = gy;
-	wz = gz;
-	/* 速度解算end */
+	/* 角速度赋值 */
+//	wx = gx;
+//	wy = gy;
+//	wz = gz;
 	
 	/* 角度解算start */
 	/* 加速度计数据检查 */
@@ -517,12 +496,12 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		az = lsb_to_mps2(az,2,bmi270.resolution);
 		
 		/* 利用角速度修正重力加速度测量值 */
-		ax = ax - afy * lp;
-		az = az - wy * wy * lp;
-		
-		cosp = arm_cos_f32(thp);
-		ax = ax - wz* wz * ly * cosp;
-		ay = ay - afz * ly * cosp;
+//		ax = ax - afy * lp;
+//		az = az - wy * wy * lp;
+//		
+//		cosp = arm_cos_f32(thp);
+//		ax = ax - wz* wz * ly * cosp;
+//		ay = ay - afz * ly * cosp;
 
 		norm = inVSqrt(ax*ax + ay*ay + az*az);
 		ax = ax *norm;
@@ -531,7 +510,7 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		
 		vx = -2*(q1*q3 - q0*q2);//-sin(Pitch) cos(K,i)
 		vy = -2*(q0*q1 + q2*q3);//sin(Roll)cos(Pitch) cos(K,j)
-		vz = -q0*q0 - q1*q1 - q2*q2 + q3*q3;//cos(Roll)cos(Pitch) cos(K,k)
+		vz = -(q0*q0 - q1*q1 - q2*q2 + q3*q3);//cos(Roll)cos(Pitch) cos(K,k)
 		
 		ex = (az*vy - ay*vz) ;
 		ey = (ax*vz - az*vx) ;//切线方向加速度
@@ -571,9 +550,9 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	arm_atan2_f32(2 * (q1*q2 + q0*q3), q0*q0 +q1*q1-q2*q2 -q3*q3, yaw);
 	
 	
-	thr =  *roll;
-	thp = -*pitch;
-	thy =  *yaw;
+//	thr =  *roll;
+//	thp = -*pitch;
+//	thy =  *yaw;
 	*roll  *=  57.295773f;
 	*pitch *= -57.295773f;
 	*yaw   *=  57.295773f;
@@ -581,6 +560,3 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	
 	return 0;
 }
-
-
-

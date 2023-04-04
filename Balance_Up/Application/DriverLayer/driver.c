@@ -21,8 +21,8 @@ void DRIVER_Init(void)
   USART1_Init();
 	USART2_Init();
 	USART3_Init();
-	USART4_Init();
-	USART5_Init();
-	SPI2_Init();
+	USART6_Init();
+	TIM5_Init();
 	SPI1_Init();
+	SPI2_Init();
 }

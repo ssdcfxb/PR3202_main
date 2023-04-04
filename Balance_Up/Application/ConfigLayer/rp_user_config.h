@@ -16,29 +16,9 @@
 /* Exported macro ------------------------------------------------------------*/
 #define EVENT_SEND_CAN1_MAILBOX (0x1UL << 0)
 #define EVENT_SEND_CAN2_MAILBOX (0x1UL << 1)
+#define USE_MACHINE_MODE (0)
 /* Exported types ------------------------------------------------------------*/
 /* 应用层 --------------------------------------------------------------------*/
-/**
- *	@brief	pid控制器
- *	@class	controller
- */
-typedef struct pid_ctrl {
-	float		target;
-	float		measure;
-	float 	err;
-	float 	last_err;
-	float		kp;
-	float 	ki;
-	float 	kd;
-	float 	pout;
-	float 	iout;
-	float 	dout;
-	float 	out;
-	float		integral;
-	float 	integral_max;
-	float 	out_max;
-} pid_ctrl_t;
-
 /* Remote Mode Enum */
 typedef enum {
 	RC = 0,
@@ -59,24 +39,18 @@ typedef enum {
 } sys_mode_t;
 
 typedef struct {
-	uint8_t stop_start;
-	uint8_t stop_ok;
-	uint8_t forward; // 1:头为正 0:尾为正
-} chassis_flag_t;
-
-typedef struct {
 	uint8_t reset_start;
 	uint8_t reset_ok;
 	uint8_t turn_start;
 	uint8_t turn_ok;
-} gimbal_flag_t;
+	uint8_t forward; // 1:头为正 0:尾为正
+} gimbal_symbal_t;
 
-typedef struct __flag
+typedef struct __symbal_struct
 {
-	gimbal_flag_t   gimbal_flag;
-	chassis_flag_t  chassis_flag;
-	uint8_t rc_init;
-} flag_t;
+	gimbal_symbal_t   gim_sym;
+	uint8_t 					rc_update;
+} symbal_t;
 
 typedef struct {
 	remote_mode_t		remote_mode;	// 控制方式
@@ -84,7 +58,7 @@ typedef struct {
 	sys_mode_t			mode;			// 系统模式
 } system_t;
 
-extern flag_t	flag;
+extern symbal_t	symbal;
 extern system_t sys;
 
 #endif

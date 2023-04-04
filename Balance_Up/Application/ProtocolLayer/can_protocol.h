@@ -5,6 +5,9 @@
 #include "device.h"
 #include "motor_def.h"
 
+#define SLAVE_TX_ID 0x100
+#define SLAVE_RX_ID 0x101
+
 /*µ×ÅÌµç»ú3508Ê±*/
 #define CHASSIS_CAN_ID_LF			 RM3508_CAN_ID_201
 #define CHASSIS_CAN_ID_RF			 RM3508_CAN_ID_202
@@ -21,6 +24,7 @@
 #define MOMENTUM_CAN_ID_L      GM6020_CAN_ID_205 
 #define MOMENTUM_CAN_ID_R 		 GM6020_CAN_ID_206
 
+void CAN_SendAll(void);
 void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 

@@ -30,4 +30,6 @@ void DEVICE_Init(void)
 	dev_list.imu_sen->init(dev_list.imu_sen);
 	
 	RM_motor_init();
+	
+	slave.init(&slave);
 }

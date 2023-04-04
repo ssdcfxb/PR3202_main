@@ -4,6 +4,8 @@
 #include "cmsis_os.h"
 #include "main.h"
 
+#include "module.h"
+
 void StartHeartBeatTask(void const * argument);
 
 #endif

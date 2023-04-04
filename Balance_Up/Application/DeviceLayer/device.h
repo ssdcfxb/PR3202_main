@@ -6,6 +6,10 @@
 
 #include "imu_sensor.h"
 #include "rc_sensor.h"
+#include "vision_sensor.h"
+#include "keyboard.h"
+#include "judge.h"
+#include "slave.h"
 #include "user_motor.h"
 
 
@@ -23,5 +27,10 @@ extern dev_list_t dev_list;
 
 /* Exported functions --------------------------------------------------------*/
 void DEVICE_Init(void);
+
+/* Servo functions */
+extern void Magazine_Open(void);
+extern void Magazine_Close(void);
+extern void Magazine_Sleep(void);
 
 #endif

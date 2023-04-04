@@ -13,6 +13,12 @@ ave_filter_t imu_yaw_dif_speed_ave_filter;
 
 short ggx, ggy, ggz;
 short aax, aay, aaz;
+
+float temp;
+
+//临时变量
+float pitch, roll, yaw;
+
 float gyrox, gyroy, gyroz;
 float accx, accy, accz;
 float gyrox_, gyroy_, gyroz_;
@@ -34,7 +40,7 @@ void imu_update(imu_sensor_t *imu_sen)
 	{
 		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
 	}
-	
+	BMI_Get_Temperature(&temp);
 	imu_info->raw_info.acc_x = aax;
 	imu_info->raw_info.acc_y = aay;
 	imu_info->raw_info.acc_z = aaz;
@@ -45,6 +51,7 @@ void imu_update(imu_sensor_t *imu_sen)
 	/* 坐标系变换 */
 	Vector_Transform(ggx, ggy, ggz, aax, aay, aaz,\
 	                 &gyrox, &gyroy, &gyroz, &accx, &accy, &accz);
+	
 	
 	/* 原始数据低通滤波 */
 	gyrox_ = lowpass(gyrox_, gyrox, 0.3);
@@ -59,7 +66,8 @@ void imu_update(imu_sensor_t *imu_sen)
 										 &pitch_, &roll_, &yaw_, \
 										 &gyrox_, &gyroy_, &gyroz_, \
 										 &accx_, &accy_, &accz_);
-    
+										 
+	pitch = imu_info->base_info.pitch, roll = imu_info->base_info.roll, yaw = imu_info->base_info.yaw;
 	/* 计算陀螺仪数据 */
 	//pitch
 	imu_info->base_info.rate_pitch = pitch_;

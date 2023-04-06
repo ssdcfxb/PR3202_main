@@ -63,6 +63,7 @@ void module_info_update(module_t *mod)
 		launcher.info->launcher_mode = lch_keep;
 		symbal.gim_sym.reset_start = 1;
 		symbal.gim_sym.reset_ok = 0;
+		status.gim_mode = gyro;
 	}
 	else 
 	{
@@ -121,6 +122,11 @@ void module_info_update(module_t *mod)
 					status.gim_mode = gyro;
 					gimbal.info->gimbal_mode = gim_gyro;
 				}
+			}
+			else
+			{
+				status.gim_mode = gyro;
+				gimbal.info->gimbal_mode = gim_gyro;
 			}
 		}
 	

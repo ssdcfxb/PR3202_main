@@ -8,8 +8,8 @@ extern TIM_HandleTypeDef htim4;
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint16_t val_open = 40;
-uint16_t val_clse = 77;
+uint16_t val_open = 70;
+uint16_t val_clse = 106;
 uint16_t val_slep = 0;
 /* Exported variables --------------------------------------------------------*/
 

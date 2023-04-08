@@ -293,13 +293,16 @@ void Gimbal_GetRcInfo(void)
 		gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
 		gimbal.info->target_pitch_imu_deltaangle = (float)rc_sensor.info->ch1 / gim_conf.rc_pitch_imu_offset;
 		gimbal.info->target_yaw_imu_deltaangle = -(float)rc_sensor.info->ch0 / gim_conf.rc_yaw_imu_offset;
-		if ((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))
+		if (vision_sensor.work_state == DEV_ONLINE)
 		{
-			gimbal.info->target_pitch_imu_deltaangle = 0.f;
-			gimbal.info->target_yaw_imu_deltaangle = 0.f;
-			gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
-			gimbal.info->target_pitch_imu_angle = (vision_sensor.info->target_pitch_angle - (float)HALF_ECD_RANGE) * ECD_TO_ANGLE;
-			gimbal.info->target_yaw_imu_angle = vision_sensor.info->target_yaw_angle * ECD_TO_ANGLE - 180.f;
+			if ((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))
+			{
+				gimbal.info->target_pitch_imu_deltaangle = 0.f;
+				gimbal.info->target_yaw_imu_deltaangle = 0.f;
+				gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
+				gimbal.info->target_pitch_imu_angle = (vision_sensor.info->target_pitch_angle - (float)HALF_ECD_RANGE) * ECD_TO_ANGLE;
+				gimbal.info->target_yaw_imu_angle = vision_sensor.info->target_yaw_angle * ECD_TO_ANGLE - 180.f;
+			}
 		}
 	}
 	else
@@ -331,13 +334,16 @@ void Gimbal_GetKeyInfo(void)
 	{
 		gimbal.info->target_pitch_imu_deltaangle = rc_sensor.info->mouse_y / gim_conf.key_pitch_imu_offset;
 		gimbal.info->target_yaw_imu_deltaangle = rc_sensor.info->mouse_x / gim_conf.key_yaw_imu_offset;
-		if ((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))
+		if (vision_sensor.work_state == DEV_ONLINE)
 		{
-			gimbal.info->target_pitch_imu_deltaangle = 0.f;
-			gimbal.info->target_yaw_imu_deltaangle = 0.f;
-			gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
-			gimbal.info->target_pitch_imu_angle = (vision_sensor.info->target_pitch_angle - (float)HALF_ECD_RANGE) * ECD_TO_ANGLE;
-			gimbal.info->target_yaw_imu_angle = vision_sensor.info->target_yaw_angle * ECD_TO_ANGLE - 180.f;
+			if ((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))
+			{
+				gimbal.info->target_pitch_imu_deltaangle = 0.f;
+				gimbal.info->target_yaw_imu_deltaangle = 0.f;
+				gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
+				gimbal.info->target_pitch_imu_angle = (vision_sensor.info->target_pitch_angle - (float)HALF_ECD_RANGE) * ECD_TO_ANGLE;
+				gimbal.info->target_yaw_imu_angle = vision_sensor.info->target_yaw_angle * ECD_TO_ANGLE - 180.f;
+			}
 		}
 	}
 	

@@ -1,7 +1,10 @@
 #include "control_task.h"
 
+uint16_t fps = 5;
+
 void StartControlTask(void const * argument)
 {
+	uint16_t i = 0;
 	gimbal.init();
 	launcher.init();
   for(;;)
@@ -30,8 +33,16 @@ void StartControlTask(void const * argument)
 		}
 		
 		slave.tx(&slave);
-		vision_send_data();
 		CAN_SendAll();
+		
+		if (++i == 60000)
+		{
+			i = 0;
+		}
+		if (i % fps == 0)
+		{
+			vision_send_data();
+		}
 		
     osDelay(1);
   }

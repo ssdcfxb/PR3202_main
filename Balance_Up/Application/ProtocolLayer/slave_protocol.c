@@ -74,6 +74,7 @@ void slave_receive_data(slave_t *slef, uint8_t *rxBuf)
 		memcpy(&info->shooter_speed_limit, (const void*)&rx_info->shooter_speed_limit, 2);
 		memcpy(&info->shooter_cooling_heat, (const void*)&rx_info->shooter_cooling_heat, 2);
 		memcpy(&info->bullet_speed, (void*)&rx_info->bullet_speed, 4);
+		memcpy(&info->my_color, (void*)&rx_info->my_color, 1);
 		
 		judge_update(&judge, info);
 	}

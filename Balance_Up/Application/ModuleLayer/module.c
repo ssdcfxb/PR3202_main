@@ -112,22 +112,19 @@ void module_info_update(module_t *mod)
 		{
 			if (vision_sensor.work_state == DEV_ONLINE)
 			{
-				if (status.gim_mode != vision)
-				{
 					status.gim_mode = vision;
 					gimbal.info->gimbal_mode = gim_vision;
-				}
-				else
-				{
-					status.gim_mode = gyro;
-					gimbal.info->gimbal_mode = gim_gyro;
-				}
 			}
 			else
 			{
 				status.gim_mode = gyro;
 				gimbal.info->gimbal_mode = gim_gyro;
 			}
+		}
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
+		{
+			status.gim_mode = gyro;
+			gimbal.info->gimbal_mode = gim_gyro;
 		}
 	
 	}
@@ -201,17 +198,17 @@ void Slave_TxInfoUpdate(void)
 	/*  3:小陀螺状态标志位  */
 	if (rc_sensor.work_state == DEV_OFFLINE)
 		status.chas_state = gyro_reset;
-	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
-	{
-		if (status.chas_state == gyro_on)
-		{
-			status.chas_state = gyro_off;
-		}
-		else
-		{
-			status.chas_state = gyro_on;
-		}
-	}
+//	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
+//	{
+//		if (status.chas_state == gyro_on)
+//		{
+//			status.chas_state = gyro_off;
+//		}
+//		else
+//		{
+//			status.chas_state = gyro_on;
+//		}
+//	}
 	if (status.lch_state.magz_state == magz_open)
 	{
 		status.chas_state = gyro_off;
@@ -266,7 +263,7 @@ void Vision_TxInfoUpdate(void)
 	vision_sensor.info->tx_info->shoot_speed = vision_sensor.info->measure_shoot_speed;
 	vision_sensor.info->tx_info->mode = AIM_ON;
 	vision_sensor.info->cmd_mode = vision_sensor.info->tx_info->mode;
-	vision_sensor.info->tx_info->my_color = 0;
+	vision_sensor.info->tx_info->my_color = slave.info->my_color;
 }
 
 void Rc_RxInfoCheck(void)

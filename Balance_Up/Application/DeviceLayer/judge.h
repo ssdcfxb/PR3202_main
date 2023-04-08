@@ -17,6 +17,7 @@ typedef struct
 	ext_power_heat_data_t power_heat_data;
 	ext_shoot_data_t shoot_data;
 	ext_robot_hurt_t ext_robot_hurt;
+	uint8_t	my_color;
 	
 	int16_t	 offline_cnt;
 	int16_t	 offline_max_cnt;

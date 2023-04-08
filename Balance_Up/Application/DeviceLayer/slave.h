@@ -33,6 +33,7 @@ typedef __packed struct slv_rx_info_struct {
 	uint16_t shooter_speed_limit;
 	uint16_t shooter_cooling_heat;
 	float    bullet_speed;
+	uint8_t  my_color; //ºì:0 À¶:1
 	uint16_t CRC16;
 
 } slv_rx_info_t;
@@ -46,6 +47,7 @@ typedef struct slave_info_struct {
 	uint16_t shooter_speed_limit;
 	uint16_t shooter_cooling_heat;
 	float    bullet_speed;
+	uint8_t  my_color; //ºì:0 À¶:1
 	
 	uint8_t  			rx_flag;
 	

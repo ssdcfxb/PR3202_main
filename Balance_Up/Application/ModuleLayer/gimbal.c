@@ -85,7 +85,7 @@ gimbal_conf_t   gim_conf = {
 };
 
 /* Exported variables --------------------------------------------------------*/
-extern int16_t can2_send_buf[8];
+extern int16_t can1_send_buf[8];
 
 gimbal_t gimbal = {
 	.dev = &gim_dev,
@@ -623,21 +623,21 @@ void Gimbal_SendOut(void)
 	// yaw轴电机离线保护
 	if (RM_motor[GIM_Y].state.work_state == M_ONLINE)
 	{
-		can2_send_buf[RM_motor[GIM_Y].id.buff_p] = gim_out[RM_motor[GIM_Y].id.buff_p];
+		can1_send_buf[RM_motor[GIM_Y].id.buff_p] = gim_out[RM_motor[GIM_Y].id.buff_p];
 	}
 	else
 	{
-		can2_send_buf[RM_motor[GIM_Y].id.buff_p] = 0;
+		can1_send_buf[RM_motor[GIM_Y].id.buff_p] = 0;
 	}
 	
 	// pitch轴电机离线保护
 	if (RM_motor[GIM_P].state.work_state == M_ONLINE)
 	{
-		can2_send_buf[RM_motor[GIM_P].id.buff_p] = gim_out[RM_motor[GIM_P].id.buff_p];
+		can1_send_buf[RM_motor[GIM_P].id.buff_p] = gim_out[RM_motor[GIM_P].id.buff_p];
 	}
 	else
 	{
-		can2_send_buf[RM_motor[GIM_P].id.buff_p] = 0;
+		can1_send_buf[RM_motor[GIM_P].id.buff_p] = 0;
 	}
 }
 
@@ -650,8 +650,8 @@ void Gimbal_Stop()
 	gim_out[0] = (int16_t)RM_motor[GIM_P].pid.position_in.info.out;
 	gim_out[1] = (int16_t)RM_motor[GIM_Y].pid.position_in.info.out;
 	
-	can2_send_buf[0] = gim_out[0];
-	can2_send_buf[1] = gim_out[1];
+	can1_send_buf[0] = gim_out[0];
+	can1_send_buf[1] = gim_out[1];
 }
 
 

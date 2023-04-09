@@ -10,14 +10,14 @@ void CAN_SendAll(void)
 		memset(can2_send_buf, 0, 16);
 	}
 	
-	CAN1_Send_With_int16_to_uint8(RM_motor[FRIC_L].id.tx_id, can1_send_buf);
-	CAN2_Send_With_int16_to_uint8(RM_motor[GIM_P].id.tx_id, can2_send_buf);
+	CAN2_Send_With_int16_to_uint8(RM_motor[FRIC_L].id.tx_id, can2_send_buf);
+	CAN1_Send_With_int16_to_uint8(RM_motor[GIM_P].id.tx_id, can1_send_buf);
 	
 	memset(can1_send_buf, 0, 16);
 	memset(can2_send_buf, 0, 16);
 }	
 
-void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
+void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
 {
 	switch(canId)
 	{
@@ -35,7 +35,7 @@ void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
 	}
 
 }
-void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
+void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf)
 {
 	switch(canId)
 	{

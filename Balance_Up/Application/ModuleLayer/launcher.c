@@ -79,7 +79,7 @@ launcher_conf_t   launcher_conf = {
 };
 
 /* Exported variables --------------------------------------------------------*/
-extern int16_t can1_send_buf[8];
+extern int16_t can2_send_buf[8];
 
 launcher_t launcher = {
 	.dev = &launcher_dev,
@@ -801,19 +801,19 @@ void Dial_Ctrl(void)
 void Launcher_SendOut(void)
 {
 	if(RM_motor[FRIC_L].state.work_state == M_ONLINE)
-		can1_send_buf[RM_motor[FRIC_L].id.buff_p] = launcher_out[RM_motor[FRIC_L].id.buff_p];
+		can2_send_buf[RM_motor[FRIC_L].id.buff_p] = launcher_out[RM_motor[FRIC_L].id.buff_p];
 	else
-		can1_send_buf[RM_motor[FRIC_L].id.buff_p] = 0;
+		can2_send_buf[RM_motor[FRIC_L].id.buff_p] = 0;
 	
 	if(RM_motor[FRIC_R].state.work_state == M_ONLINE)
-		can1_send_buf[RM_motor[FRIC_R].id.buff_p] = launcher_out[RM_motor[FRIC_R].id.buff_p];
+		can2_send_buf[RM_motor[FRIC_R].id.buff_p] = launcher_out[RM_motor[FRIC_R].id.buff_p];
 	else
-		can1_send_buf[RM_motor[FRIC_R].id.buff_p] = 0;
+		can2_send_buf[RM_motor[FRIC_R].id.buff_p] = 0;
 	
 	if(RM_motor[DIAL].state.work_state == M_ONLINE)
-		can1_send_buf[RM_motor[DIAL].id.buff_p] = launcher_out[RM_motor[DIAL].id.buff_p];
+		can2_send_buf[RM_motor[DIAL].id.buff_p] = launcher_out[RM_motor[DIAL].id.buff_p];
 	else
-		can1_send_buf[RM_motor[DIAL].id.buff_p] = 0;
+		can2_send_buf[RM_motor[DIAL].id.buff_p] = 0;
 }
 
 
@@ -829,7 +829,7 @@ void Launcher_Stop(void)
 	launcher_out[1] = 0;
 	launcher_out[2] = 0;
 	
-	can1_send_buf[0] = launcher_out[0];
-	can1_send_buf[1] = launcher_out[1];
-	can1_send_buf[2] = launcher_out[2];
+	can2_send_buf[0] = launcher_out[0];
+	can2_send_buf[1] = launcher_out[1];
+	can2_send_buf[2] = launcher_out[2];
 }

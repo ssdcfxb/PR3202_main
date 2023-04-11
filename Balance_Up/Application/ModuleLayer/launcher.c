@@ -58,7 +58,9 @@ launcher_info_t 	launcher_info = {
 launcher_work_info_t  launcher_work_info = {
 	.fric_status = WaitCommond_Fric,
 	.dial_status = WaitCommond_Dial,
-	.launcher_commond = WaitCommond_L,
+	.launcher_commond.Fric_cmd = Fric_Reset,
+	.launcher_commond.Magz_cmd = Magz_Reset,
+	.launcher_commond.Dial_cmd = Shoot_Reset,
 	.lock_cnt = 0,
 	.shoot_cnt = 0,
 };
@@ -69,7 +71,8 @@ launcher_conf_t   launcher_conf = {
 	.Fric_20 = Fric_20_init,
 	.Fric_22 = Fric_22_init,
 	.Fric_30 = Fric_30_init,
-	.dial_speed = -1500.0f,
+	.dial_speed = -4000.0f,
+	.dial_swiftspeed = -6000.0f,
 	.dial_torque_limit = 2000.0f,
 	.lock_angle_check = 1.5f,
 	.lock_cnt = 50,
@@ -312,25 +315,36 @@ void Judge_AdaptDialSpeed(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->dial_speed = -1500.0f;
+		launcher.conf->dial_speed = -4000.0f;
+		launcher.conf->dial_swiftspeed = -6000.f;
 	}
 	else
 	{
-		if (heat_low == 1)
+		if (status.heat_mode == heat_limit_on)
 		{
-			launcher.conf->dial_speed = -1500.0f;
+			if (heat_low == 1)
+			{
+				launcher.conf->dial_speed = -5000.0f;
+			}
+			else
+			{
+				launcher.conf->dial_speed = -4000.0f;
+			}
+			if (heat_high == 1)
+			{
+				launcher.conf->dial_speed = -0.0f;
+				launcher.conf->dial_swiftspeed = -0.f;
+			}
+			else
+			{
+				launcher.conf->dial_speed = -4000.0f;
+				launcher.conf->dial_swiftspeed = -6000.f;
+			}
 		}
 		else
 		{
-			launcher.conf->dial_speed = -1000.0f;
-		}
-		if (heat_high == 1)
-		{
-			launcher.conf->dial_speed = -0.0f;
-		}
-		else
-		{
-			launcher.conf->dial_speed = -1000.0f;
+			launcher.conf->dial_speed = -4000.0f;
+			launcher.conf->dial_swiftspeed = -6000.f;
 		}
 	}
 }
@@ -379,7 +393,9 @@ void Launcher_GetRcState(void)
 		/**    遥控器上电保护    **/
 		if (launcher.info->init_s2 == rc_sensor.info->s2)
 		{
-			launcher.work_info->launcher_commond = WaitCommond_L;
+			launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
+			launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
+			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 		}
 		else
 		{
@@ -391,13 +407,14 @@ void Launcher_GetRcState(void)
 				
 				if (rc_sensor.info->s2 == RC_SW_MID)
 				{
-					launcher.work_info->launcher_commond = Func_Reset;
+					launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
+					launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 					if (launcher.info->last_s2 == RC_SW_DOWN)
-						launcher.work_info->launcher_commond = Fric_Toggle;
+						launcher.work_info->launcher_commond.Fric_cmd = Fric_Toggle;
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
-					launcher.work_info->launcher_commond = Keep_Shoot;
+					launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
 					status.lch_state.shoot_state = keep_shoot;
 					if (launcher.info->last_s2 != rc_sensor.info->s2)
 					{
@@ -406,7 +423,7 @@ void Launcher_GetRcState(void)
 				}
 				else if (rc_sensor.info->s2 == RC_SW_DOWN)
 				{
-					launcher.work_info->launcher_commond = Func_Reset;
+					launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 				}
 				
 			}
@@ -415,11 +432,12 @@ void Launcher_GetRcState(void)
 				
 				if (rc_sensor.info->s2 == RC_SW_MID)
 				{
-					launcher.work_info->launcher_commond = Func_Reset;
+					launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
+					launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
-					launcher.work_info->launcher_commond = Single_Shoot;
+					launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
 					status.lch_state.shoot_state = single_shoot;
 					if (launcher.info->last_s2 != rc_sensor.info->s2)
 					{
@@ -429,14 +447,16 @@ void Launcher_GetRcState(void)
 				}
 				else if (rc_sensor.info->s2 == RC_SW_DOWN)
 				{
-					launcher.work_info->launcher_commond = Magz_Open;
+					launcher.work_info->launcher_commond.Magz_cmd = Magz_Open;
 				}
 				
 			}
 			else 
 			{
 				/**    遥控器离线信息    **/
-				launcher.work_info->launcher_commond = WaitCommond_L;
+				launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
+				launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
+				launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 				launcher.work_info->fric_status = WaitCommond_Fric;
 				launcher.work_info->dial_status = WaitCommond_Dial;
 			}
@@ -450,14 +470,18 @@ void Launcher_GetRcState(void)
 	else if(launcher.info->rc_work_state == DEV_ONLINE)
 	{
 		/**    遥控器离线跳变信息    **/
-		launcher.work_info->launcher_commond = WaitCommond_L;
+		launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
+		launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
+		launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 		launcher.work_info->fric_status = Off_Fric;
 		launcher.work_info->dial_status = WaitCommond_Dial;
 	}
 	else 
 	{
 		/**    遥控器离线信息    **/
-		launcher.work_info->launcher_commond = WaitCommond_L;
+		launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
+		launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
+		launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 		launcher.work_info->fric_status = WaitCommond_Fric;
 		launcher.work_info->dial_status = WaitCommond_Dial;
 	}
@@ -472,46 +496,65 @@ void Launcher_GetRcState(void)
   */
 void Launcher_GetKeyState(void)
 {
-	launcher.work_info->launcher_commond = Func_Reset;
+	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
+	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
+//	launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 	/*  拨盘指令  */
 	if (status.lch_cmd.shoot_cmd == keep_shoot)
 	{
-		launcher.work_info->launcher_commond = Keep_Shoot;
-		status.lch_state.shoot_state = keep_shoot;
-		if (keyboard.state.last_mouse_btn_l == short_press_K)
+		launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
+		if (status.lch_state.shoot_state != keep_shoot)
 		{
+			status.lch_state.shoot_state = keep_shoot;
 			launcher.work_info->dial_status = Reload_Dial;
 		}
 	}
 	if (status.lch_cmd.shoot_cmd == single_shoot)
 	{
-		launcher.work_info->launcher_commond = Single_Shoot;
-		status.lch_state.shoot_state = single_shoot;
-		if (keyboard.state.last_mouse_btn_l == down_K)
+		launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
+		if (status.lch_state.shoot_state != single_shoot)
 		{
+			status.lch_state.shoot_state = single_shoot;
 			launcher.work_info->dial_status = Reload_Dial;
 			launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
+		}
+	}
+	if (status.lch_cmd.shoot_cmd == swift_shoot)
+	{
+		launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+		if (status.lch_state.shoot_state != swift_shoot)
+		{
+			status.lch_state.shoot_state = swift_shoot;
+			launcher.work_info->dial_status = Reload_Dial;
+		}
+	}
+	if (status.lch_cmd.shoot_cmd == shoot_reset)
+	{
+		if (status.lch_state.shoot_state != single_shoot)
+		{
+			status.lch_state.shoot_state = shoot_reset;
+			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 		}
 	}
 	
 	/*  弹仓指令  */
 	if (status.lch_cmd.magz_cmd == magz_open)
 	{
-		launcher.work_info->launcher_commond = Magz_Open;
+		launcher.work_info->launcher_commond.Magz_cmd = Magz_Open;
 	}
 	else if (status.lch_cmd.magz_cmd == magz_close)
 	{
-		launcher.work_info->launcher_commond = Magz_Close;
+		launcher.work_info->launcher_commond.Magz_cmd = Magz_Close;
 	}
 	
 	/*  摩擦轮指令  */
 	if (status.lch_cmd.fric_cmd == fric_on)
 	{
-		launcher.work_info->launcher_commond = Fric_Open;
+		launcher.work_info->launcher_commond.Fric_cmd = Fric_Open;
 	}
 	else if (status.lch_cmd.fric_cmd == fric_off)
 	{
-		launcher.work_info->launcher_commond = Fric_Close;
+		launcher.work_info->launcher_commond.Fric_cmd = Fric_Close;
 	}
 	
 }
@@ -543,7 +586,7 @@ void Get_LauncherStatus(void)
 void Fric_StatusCheck(void)
 {
 	/*  遥控器开关摩擦轮  */
-	if ((launcher.work_info->launcher_commond == Fric_Toggle) \
+	if ((launcher.work_info->launcher_commond.Fric_cmd == Fric_Toggle) \
 		&& (launcher.info->last_s2 != rc_sensor.info->s2))
 	{
 		if (launcher.work_info->fric_status == On_Fric)
@@ -554,25 +597,31 @@ void Fric_StatusCheck(void)
 		else
 		{
 			launcher.work_info->fric_status = On_Fric;
-			status.lch_state.fric_state = fric_on;
 		}
 	}
 	
 	/*  键盘开关摩擦轮  */
-	if (launcher.work_info->launcher_commond == Fric_Open)
+	if (launcher.work_info->launcher_commond.Fric_cmd == Fric_Open)
 	{
 		launcher.work_info->fric_status = On_Fric;
-		status.lch_state.fric_state = fric_on;
 	}
-	if (launcher.work_info->launcher_commond == Fric_Close)
+	if (launcher.work_info->launcher_commond.Fric_cmd == Fric_Close)
 	{
 		launcher.work_info->fric_status = Off_Fric;
 		status.lch_state.fric_state = fric_off;
 	}
 	
+	if (launcher.work_info->fric_status == On_Fric)
+	{
+		if(((uint16_t)launcher.conf->fric_speed - launcher.info->measure_right_speed) < 200)
+		{
+			status.lch_state.fric_state = fric_on;
+		}
+	}
+	
 	
 	/*  开关弹仓  */
-	if (launcher.work_info->launcher_commond == Magz_Open)
+	if (launcher.work_info->launcher_commond.Magz_cmd == Magz_Open)
 	{
 		Magazine_Open();
 		launcher.work_info->fric_status = Off_Fric;
@@ -602,7 +651,7 @@ void Fric_StatusCheck(void)
 void Dial_StatusCheck(void)
 {
 	/**    拨盘功能复位    **/
-	if ((launcher.work_info->launcher_commond == Func_Reset) || (launcher.work_info->launcher_commond == WaitCommond_L))
+	if (launcher.work_info->launcher_commond.Dial_cmd == Shoot_Reset)
 	{
 		launcher.work_info->dial_status = WaitCommond_Dial;
 	}
@@ -618,15 +667,22 @@ void Dial_StatusCheck(void)
 	{
 		if (launcher.info->measure_dial_angle < launcher.info->target_dial_angle + launcher.conf->lock_angle_check)
 		{
-			if (launcher.work_info->launcher_commond == Single_Shoot)
+			if (launcher.work_info->launcher_commond.Dial_cmd == Single_Shoot)
 			{
 				/**    单发    **/
 				launcher.work_info->dial_status = WaitCommond_Dial;
+				launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+				status.lch_state.shoot_state = shoot_reset;
 			}
-			else if (launcher.work_info->launcher_commond == Keep_Shoot)
+			else if (launcher.work_info->launcher_commond.Dial_cmd == Keep_Shoot)
 			{
 				/**    连发    **/
 				launcher.work_info->dial_status = SpeedKeep_Dial;
+			}
+			else if (launcher.work_info->launcher_commond.Dial_cmd == Swift_Shoot)
+			{
+				/**    速射    **/
+				launcher.work_info->dial_status = SwiftKeep_Dial;
 			}
 		}
 		else 
@@ -659,6 +715,19 @@ void Dial_StatusCheck(void)
 		else
 		{
 			launcher.info->target_dial_speed = launcher.conf->dial_speed;
+		}
+	}
+	else if (launcher.work_info->dial_status == SwiftKeep_Dial)
+	{
+		/**    拨盘速度堵转检测    **/
+		if (RM_motor[DIAL].ctr_stuck_flag(&RM_motor[DIAL], launcher.conf->dial_torque_limit))
+		{
+			launcher.work_info->dial_status = F_Lock_Dial;
+			launcher.info->target_dial_angle = launcher.conf->Back_Angle + launcher.info->measure_dial_angle;
+		}
+		else
+		{
+			launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
 		}
 	}
 	else if (launcher.work_info->dial_status == F_Lock_Dial)
@@ -748,7 +817,7 @@ void Fric_Ctrl(void)
   */
 void Dial_Ctrl(void)
 {
-	if (launcher.work_info->dial_status == SpeedKeep_Dial)
+	if ((launcher.work_info->dial_status == SpeedKeep_Dial) || (launcher.work_info->dial_status == SwiftKeep_Dial))
 	{
 		
 		launcher_out[RM_motor[DIAL].id.buff_p] = RM_motor[DIAL].ctr_pid1(&RM_motor[DIAL].pid.position_in, 

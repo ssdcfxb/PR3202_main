@@ -39,6 +39,7 @@ status_t status = {
 	.gim_state = gim_reset,
 	.chas_state = gyro_reset,
 	.gim_mode = gyro,
+	.heat_mode = heat_limit_on,
 	.tw_last_state = 0,
 };
 
@@ -200,7 +201,7 @@ void Slave_TxInfoUpdate(void)
 	
 	/*  2:弹仓状态标志位  */
 	slave.info->tx_info->status &= 0xFD;
-	if (launcher.work_info->launcher_commond == Magz_Open)
+	if (launcher.work_info->launcher_commond.Magz_cmd == Magz_Open)
 		slave.info->tx_info->status |= 0x02;
 	
 	/*  3:小陀螺状态标志位  */
@@ -256,6 +257,8 @@ void Slave_TxInfoUpdate(void)
 			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
 			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
 			right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
+			slave.info->tx_info->rc_ch_ws_val = front;
+			slave.info->tx_info->rc_ch_ad_val = right;
 		}
 	}
 }
@@ -272,6 +275,10 @@ void Vision_TxInfoUpdate(void)
 	vision_sensor.info->tx_info->mode = AIM_ON;
 	vision_sensor.info->cmd_mode = vision_sensor.info->tx_info->mode;
 	vision_sensor.info->tx_info->my_color = slave.info->my_color;
+	
+	// 反陀螺
+	if (vision_sensor.info->is_hit_enable == 1)
+	status.lch_cmd.shoot_cmd = keep_shoot;
 }
 
 void Rc_RxInfoCheck(void)
@@ -303,6 +310,7 @@ void Key_RxInfoCheck(void)
 	status.lch_cmd.fric_cmd = fric_reset;
 //	keyboard.lch_cmd.magz_cmd = lch_reset;
 	status.lch_cmd.shoot_cmd = shoot_reset;
+	status.heat_mode = heat_limit_on;
 	/*  Ctrl(优先级顺序):关弹仓 关摩擦轮 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
 	{
@@ -319,18 +327,39 @@ void Key_RxInfoCheck(void)
 			status.chas_state = gyro_off;
 		}
 	}
-	/*  R:开摩擦轮  */
+	/*  R:速射  */
 	if (keyboard.state.R == down_K)
 	{
 		status.lch_cmd.fric_cmd = fric_on;
+		status.lch_cmd.magz_cmd = magz_close;
 	}
-	/*  G:开弹仓  */
-	if (keyboard.state.G == down_K)
+	if (((keyboard.state.R == short_press_K) || (keyboard.state.R == long_press_K)) \
+			 && (status.lch_state.fric_state == fric_on))
+	{
+		status.lch_cmd.shoot_cmd = swift_shoot;
+	}
+	/*  Q:热量解锁  */
+	if ((keyboard.state.Q == short_press_K) || (keyboard.state.Q == long_press_K))
+	{
+		status.heat_mode = heat_limit_off;
+	}
+	/*  F:小陀螺  */
+	if (keyboard.state.F == down_K)
+	{
+		status.chas_state = gyro_on;
+	}
+	/*  B:开弹仓  */
+	if (keyboard.state.B == down_K)
 	{
 		status.lch_cmd.magz_cmd = magz_open;
+		status.lch_cmd.fric_cmd = fric_off;
 	}
-	/*  B:关弹仓  */
-	if (keyboard.state.B == down_K)
+	/*  长按B:关弹仓  */
+	if (keyboard.state.B == long_press_K)
+	{
+		status.lch_cmd.magz_cmd = magz_close;
+	}
+	if (status.lch_state.fric_state == fric_on)
 	{
 		status.lch_cmd.magz_cmd = magz_close;
 	}
@@ -340,17 +369,22 @@ void Key_RxInfoCheck(void)
 	}
 	
 	/*  mouse_btn_l  */
-	if (keyboard.state.mouse_btn_l == up_K)
+	if (keyboard.state.mouse_btn_l == down_K)
 	{
 		status.lch_cmd.fric_cmd = fric_on;
+		status.lch_cmd.magz_cmd = magz_close;
 	}
-	if ((keyboard.state.mouse_btn_l == short_press_K) && (status.lch_state.fric_state == fric_on))
+	if ((keyboard.state.mouse_btn_l == down_K) && (status.lch_state.fric_state == fric_on))
 	{
 		status.lch_cmd.shoot_cmd = single_shoot;
 	}
-	if (keyboard.state.mouse_btn_l == long_press_K)
+	if ((keyboard.state.mouse_btn_l == long_press_K) && (status.lch_state.fric_state == fric_on))
 	{
 		status.lch_cmd.shoot_cmd = keep_shoot;
+	}
+	if ((keyboard.state.mouse_btn_l == relax_K) && (status.lch_cmd.shoot_cmd != swift_shoot))
+	{
+		status.lch_cmd.shoot_cmd = shoot_reset;
 	}
 	
 	
@@ -370,5 +404,6 @@ void Key_RxInfoCheck(void)
 	{
 		status.gim_mode = vision;
 	}
+	
 }
 

@@ -47,24 +47,63 @@ typedef enum
 	Reload_Dial,     // 补弹
 	F_Lock_Dial,     // 正向卡弹
 	SpeedKeep_Dial,  // 速度保持
+	SwiftKeep_Dial,  // 速射保持
 //	Unload_Dial,   // 退弹
 //	B_Lock_Dial ,  // 反向卡弹
 	WaitCommond_Dial // 等待指令
 } dial_status_e;
 
-// 发射机构指令枚举
-typedef enum
-{
-	Fric_Toggle,    // 开关摩擦轮
-	Fric_Open,			// 开摩擦轮
-	Fric_Close,			// 关摩擦轮
+/*  摩擦轮指令枚举  */
+typedef enum {
+	Fric_Reset,  	  // 功能复位
+	Fric_Open,   		// 开摩擦轮
+	Fric_Close,   	// 关摩擦轮
+	Fric_Toggle,		// 开关摩擦轮
+} Fric_cmd_e;
+
+/*  弹仓指令枚举  */
+typedef enum {
+	Magz_Reset,  	  // 功能复位
 	Magz_Open,      // 开弹仓
 	Magz_Close,     // 关弹仓
-	Func_Reset,     // 功能复位
+} Magz_cmd_e;
+
+/*  拨盘指令枚举  */
+typedef enum {
+	Shoot_Reset,  	// 功能复位
 	Single_Shoot,   // 单发
 	Keep_Shoot,     // 连发
-	WaitCommond_L   // 等待指令
-} launcher_commond_e;
+	Swift_Shoot,		// 速射
+} Dial_cmd_e;
+
+///*  发射机构指令  */
+//typedef struct {
+//	fric_cmd_e		fric_cmd;
+//	magz_cmd_e		magz_cmd;
+//	dial_cmd_e		shoot_cmd;
+//} lch_cmd_t;
+
+//// 发射机构指令枚举
+//typedef enum
+//{
+//	Fric_Toggle,    // 开关摩擦轮
+//	Fric_Open,			// 开摩擦轮
+//	Fric_Close,			// 关摩擦轮
+//	Magz_Open,      // 开弹仓
+//	Magz_Close,     // 关弹仓
+//	Func_Reset,     // 功能复位
+//	Single_Shoot,   // 单发
+//	Keep_Shoot,     // 连发
+//	WaitCommond_L   // 等待指令
+//} launcher_commond_e;
+
+// 发射机构指令枚举
+typedef struct
+{
+	Fric_cmd_e  Fric_cmd;
+	Magz_cmd_e	Magz_cmd;
+	Dial_cmd_e	Dial_cmd;
+} launcher_commond_t;
 
 typedef struct 
 {
@@ -103,7 +142,7 @@ typedef struct
 
 typedef struct
 {
- 	launcher_commond_e  launcher_commond;
+ 	launcher_commond_t  launcher_commond;
 	fric_status_e       fric_status;
 	dial_status_e       dial_status;
 	uint16_t            lock_cnt;
@@ -120,6 +159,7 @@ typedef struct
 	float    fric_speed;
 	uint8_t  fric_mode;
 	float    dial_speed;
+	float    dial_swiftspeed;
 	float    dial_torque_limit;
 	float    lock_angle_check;
 	int16_t  lock_cnt;

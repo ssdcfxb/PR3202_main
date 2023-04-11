@@ -51,7 +51,8 @@ typedef enum {
 typedef enum {
 	shoot_reset,  	// 功能复位
 	single_shoot,   // 单发
-	keep_shoot      // 连发
+	keep_shoot,     // 连发
+	swift_shoot,		// 速射
 } dial_cmd_e;
 
 /*  发射机构指令  */

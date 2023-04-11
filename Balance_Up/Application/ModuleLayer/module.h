@@ -45,6 +45,13 @@ typedef enum
 	gyro_off,       	// 关闭
 } chas_cmd_e;
 
+/*  热量限制状态  */
+typedef enum
+{
+	heat_limit_on,     // 开启热量限制
+	heat_limit_off,    // 关闭热量限制
+} heat_cmd_e;
+
 typedef struct {
 	launcher_state_t	lch_state;
 	gim_cmd_e					gim_state;
@@ -52,6 +59,7 @@ typedef struct {
 	lch_cmd_t					lch_cmd;
 	gim_cmd_e					gim_cmd;
 	gim_mode_e				gim_mode;
+	heat_cmd_e				heat_mode;
 	uint8_t						tw_last_state;
 } status_t;
 

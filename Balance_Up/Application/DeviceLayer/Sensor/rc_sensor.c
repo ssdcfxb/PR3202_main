@@ -121,8 +121,7 @@ bool RC_IsChannelReset(void)
 	if(  (DeathZoom(rc_sensor_info.ch0, 0, 50) == 0) && 
 		 (DeathZoom(rc_sensor_info.ch1, 0, 50) == 0) && 
 		 (DeathZoom(rc_sensor_info.ch2, 0, 50) == 0) && 
-		 (DeathZoom(rc_sensor_info.ch3, 0, 50) == 0) &&
-		 (rc_sensor_info.s1 != RC_SW_UP))	
+		 (DeathZoom(rc_sensor_info.ch3, 0, 50) == 0))	
 	{
 		return true;
 	}

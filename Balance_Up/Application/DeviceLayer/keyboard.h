@@ -12,7 +12,6 @@
 
 /*  ¼üÅÌ×´Ì¬  */
 typedef struct keyboard_state_struct {
-  key_board_status_e        last_mouse_btn_l;     //ÉÏÒ»¿ÌÊó±ê×ó¼ü
   key_board_status_e        mouse_btn_l;          //Êó±ê×ó¼ü
   key_board_status_e        mouse_btn_r;          //Êó±êÓÒ¼ü
   key_board_status_e        Q;                    //°´¼üQ
@@ -77,6 +76,7 @@ typedef enum {
 
 typedef struct keyboard_struct {
 	keyboard_state_t	state;
+	keyboard_state_t	last_state;
 } keyboard_t;
 
 extern keyboard_t keyboard;

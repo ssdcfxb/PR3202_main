@@ -52,6 +52,7 @@ typedef struct __symbal_struct
 {
 	gimbal_symbal_t   gim_sym;
 	uint8_t 					rc_update;
+	uint8_t						slave_reset;
 } symbal_t;
 
 typedef struct {

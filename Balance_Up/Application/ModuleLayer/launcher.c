@@ -336,6 +336,7 @@ void Judge_AdaptDialSpeed(void)
 			{
 				launcher.conf->dial_speed = -0.0f;
 				launcher.conf->dial_swiftspeed = -0.f;
+				status.lch_cmd.shoot_cmd = shoot_reset;
 			}
 			else
 			{

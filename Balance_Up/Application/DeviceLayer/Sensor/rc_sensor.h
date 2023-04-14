@@ -49,12 +49,12 @@
 #define MOUSE_BTN_L_CNT_MAX     500         //ms 鼠标左键
 #define MOUSE_BTN_R_CNT_MAX     500         //ms 鼠标右键
 #define KEY_Q_CNT_MAX           500         //ms Q键
-#define KEY_W_CNT_MAX           1000        //ms W键
+#define KEY_W_CNT_MAX           700	        //ms W键
 #define KEY_E_CNT_MAX           500         //ms E键
 #define KEY_R_CNT_MAX           500         //ms R键
-#define KEY_A_CNT_MAX           1000        //ms A键
-#define KEY_S_CNT_MAX           1000        //ms S键
-#define KEY_D_CNT_MAX           1000        //ms D键
+#define KEY_A_CNT_MAX           700	        //ms A键
+#define KEY_S_CNT_MAX           700	        //ms S键
+#define KEY_D_CNT_MAX           700	        //ms D键
 #define KEY_F_CNT_MAX           500         //ms F键
 #define KEY_G_CNT_MAX           500         //ms G键
 #define KEY_Z_CNT_MAX           500         //ms Z键
@@ -133,6 +133,7 @@ typedef enum
 typedef struct key_board_info_struct {
   uint8_t						 value;    //值
   key_board_status_e status;   //状态
+  key_board_status_e last_status;   //上一次状态
 	
   int16_t cnt;      //当前计数
   int16_t cnt_max;  //计数上限

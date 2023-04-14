@@ -80,8 +80,8 @@ gimbal_conf_t   gim_conf = {
 	.key_pitch_imu_offset = 1000.0f,
 	.max_pitch_imu_angle = 23.0f,
 	.min_pitch_imu_angle = -40.0f,
-	.max_pitch_motor_angle = 6190, // Ë«Ç¹¡¢ÂóÂÖ 7200  mid 7250
-	.min_pitch_motor_angle = 4775, // Ë«Ç¹¡¢ÂóÂÖ 6100
+	.max_pitch_motor_angle = 2829, // Ë«Ç¹¡¢ÂóÂÖ 7200  mid 7250
+	.min_pitch_motor_angle = 1430, // Ë«Ç¹¡¢ÂóÂÖ 6100
 };
 
 /* Exported variables --------------------------------------------------------*/

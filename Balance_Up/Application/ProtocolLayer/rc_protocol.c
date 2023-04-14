@@ -178,6 +178,7 @@ void keyboard_update_interrupt(rc_sensor_info_t	*info)
  */
 void keyboard_status_update_interrupt(key_board_info_t *key)
 {
+	key->last_status = key->status;
   switch(key->status)
   {
     case relax_K:
@@ -245,6 +246,7 @@ void keyboard_update(rc_sensor_info_t	*info)
  */
 void keyboard_status_update(key_board_info_t *key)
 {
+	key->last_status = key->status;
   switch(key->status)
   {
     case down_K:

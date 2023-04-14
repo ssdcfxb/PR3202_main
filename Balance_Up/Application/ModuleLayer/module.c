@@ -32,6 +32,7 @@ symbal_t symbal = {
 	.gim_sym.turn_right = 0,
 	.gim_sym.turn_left = 0,
 	.rc_update = 0,
+	.slave_reset = 0,
 };
 
 status_t status = {
@@ -68,6 +69,9 @@ void module_info_update(module_t *mod)
 		symbal.gim_sym.reset_start = 1;
 		symbal.gim_sym.reset_ok = 0;
 		status.gim_mode = gyro;
+		symbal.slave_reset = 0;
+		status.lch_cmd.fric_cmd = fric_reset;
+		status.lch_cmd.shoot_cmd = shoot_reset;
 	}
 	else 
 	{
@@ -186,6 +190,7 @@ void RC_StateCheck(void)
 				if (RC_IsChannelReset())
 				{
 					module.state = MODULE_STATE_NORMAL;
+					status.lch_cmd.magz_cmd = magz_close;
 				}
 			}
 			
@@ -209,12 +214,15 @@ void Slave_TxInfoUpdate(void)
 		{
 			front = 0;
 			right = 0;
-			front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
-			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
 			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
-			right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
+			right += (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;
+//			front = right;
+//			front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
+//			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
+			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
+			right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;
 			slave.info->tx_info->rc_ch_ws_val = front;
-			slave.info->tx_info->rc_ch_ad_val = right;
+			slave.info->tx_info->rc_ch_ad_val = 0;//right;
 		}
 	}
 	
@@ -273,6 +281,17 @@ void Slave_TxInfoUpdate(void)
 	if ((symbal.gim_sym.reset_ok == 0) || (symbal.gim_sym.turn_ok == 0))
 		slave.info->tx_info->status |= 0x10;
 	
+	/*  6:自瞄标志位  */
+	slave.info->tx_info->status &= 0xDF;
+	if (((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))\
+			&& (status.gim_mode == vision))
+		slave.info->tx_info->status |= 0x20;
+	
+	/*  7:复位标志位  */
+	slave.info->tx_info->status &= 0xBF;
+	if (symbal.slave_reset == 1)
+		slave.info->tx_info->status |= 0x40;
+	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	/*  yaw轴陀螺仪角度数据  */
@@ -321,18 +340,19 @@ void Key_RxInfoCheck(void)
 {
 	Key_StateUpdate();
 	
+	symbal.slave_reset = 0;
 	status.lch_cmd.fric_cmd = fric_reset;
 //	keyboard.lch_cmd.magz_cmd = lch_reset;
-	status.lch_cmd.shoot_cmd = shoot_reset;
+//	status.lch_cmd.shoot_cmd = shoot_reset;
 	status.heat_mode = heat_limit_on;
-	/*  Ctrl(优先级顺序):关弹仓 关摩擦轮 关小陀螺  */
+	/*  Ctrl(同时):关弹仓 关摩擦轮 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
 	{
 		if (status.lch_state.magz_state == magz_open)
 		{
 			status.lch_cmd.magz_cmd = magz_close;
 		}
-		else if (status.lch_state.fric_state == fric_on)
+		if (status.lch_state.fric_state == fric_on)
 		{
 			status.lch_cmd.fric_cmd = fric_off;
 		}
@@ -347,7 +367,7 @@ void Key_RxInfoCheck(void)
 		status.lch_cmd.fric_cmd = fric_on;
 		status.lch_cmd.magz_cmd = magz_close;
 	}
-	if (((keyboard.state.R == short_press_K) || (keyboard.state.R == long_press_K)) \
+	if (((keyboard.last_state.R == short_press_K) || (keyboard.state.R == long_press_K)) \
 			 && (status.lch_state.fric_state == fric_on))
 	{
 		status.lch_cmd.shoot_cmd = swift_shoot;
@@ -358,11 +378,20 @@ void Key_RxInfoCheck(void)
 		status.heat_mode = heat_limit_off;
 	}
 	/*  Q/E:侧身90°  */
-	if (keyboard.state.Q == down_K)
+	if ((keyboard.state.Q == down_K) && (status.lch_state.magz_state == magz_close))
 	{
 		symbal.gim_sym.turn_left = 1;
 	}
-	if (keyboard.state.E == down_K)
+	if ((keyboard.state.E == down_K) && (status.lch_state.magz_state == magz_close))
+	{
+		symbal.gim_sym.turn_right = 1;
+	}
+	/*  A/D:侧身90°后移动  */
+	if ((keyboard.state.A == down_K) && (status.lch_state.magz_state == magz_close))
+	{
+		symbal.gim_sym.turn_left = 1;
+	}
+	if ((keyboard.state.D == down_K) && (status.lch_state.magz_state == magz_close))
 	{
 		symbal.gim_sym.turn_right = 1;
 	}
@@ -372,7 +401,7 @@ void Key_RxInfoCheck(void)
 		status.chas_cmd = gyro_on;
 	}
 	/*  B:开弹仓  */
-	if (keyboard.state.B == down_K)
+	if ((keyboard.state.B == down_K) && (symbal.gim_sym.turn_ok == 1))
 	{
 		status.lch_cmd.magz_cmd = magz_open;
 		status.lch_cmd.fric_cmd = fric_off;
@@ -401,19 +430,19 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.shoot_cmd = single_shoot;
 	}
-	if ((keyboard.state.mouse_btn_l == long_press_K) && (status.lch_state.fric_state == fric_on))
+	if ((keyboard.state.mouse_btn_l == long_press_K) && (keyboard.last_state.mouse_btn_l == short_press_K) && (status.lch_state.fric_state == fric_on))
 	{
 		status.lch_cmd.shoot_cmd = keep_shoot;
 	}
-	if ((keyboard.state.mouse_btn_l == relax_K) && (status.lch_cmd.shoot_cmd != swift_shoot))
+	if ((keyboard.state.mouse_btn_l == relax_K) && (keyboard.state.R == relax_K))
 	{
 		status.lch_cmd.shoot_cmd = shoot_reset;
 	}
 	
 	
 	status.gim_cmd = gim_reset;
-	/*  V:掉头  */
-	if ((keyboard.state.V == down_K) && (status.lch_state.magz_state == magz_close))
+	/*  C:掉头  */
+	if ((keyboard.state.C == down_K) && (status.lch_state.magz_state == magz_close))
 	{
 		symbal.gim_sym.turn_start = 1;
 		symbal.gim_sym.turn_ok = 0;
@@ -426,6 +455,16 @@ void Key_RxInfoCheck(void)
 	if ((keyboard.state.mouse_btn_r == short_press_K) || (keyboard.state.mouse_btn_r == long_press_K))
 	{
 		status.gim_mode = vision;
+	}
+	
+	/*  ZXV:上下主控复位  */
+	if ((keyboard.state.Z != relax_K) && (keyboard.state.X != relax_K) && (keyboard.state.V != relax_K))
+	{
+		symbal.slave_reset = 1;
+	}
+	if ((keyboard.state.Z == long_press_K) && (keyboard.state.X == long_press_K) && (keyboard.state.V == long_press_K))
+	{
+		HAL_NVIC_SystemReset();
 	}
 	
 }

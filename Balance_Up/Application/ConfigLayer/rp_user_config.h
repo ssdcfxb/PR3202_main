@@ -44,6 +44,8 @@ typedef struct {
 	uint8_t turn_start;
 	uint8_t turn_ok;
 	uint8_t forward; // 1:头为正 0:尾为正
+	uint8_t turn_right;
+	uint8_t turn_left;
 } gimbal_symbal_t;
 
 typedef struct __symbal_struct

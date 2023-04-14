@@ -29,6 +29,8 @@ symbal_t symbal = {
 	.gim_sym.reset_ok = 0,
 	.gim_sym.turn_start = 0,
 	.gim_sym.turn_ok = 1,
+	.gim_sym.turn_right = 0,
+	.gim_sym.turn_left = 0,
 	.rc_update = 0,
 };
 
@@ -37,6 +39,7 @@ status_t status = {
 	.lch_state.magz_state = magz_reset,
 	.lch_state.shoot_state = shoot_reset,
 	.gim_state = gim_reset,
+	.chas_cmd = gyro_reset,
 	.chas_state = gyro_reset,
 	.gim_mode = gyro,
 	.heat_mode = heat_limit_on,
@@ -194,6 +197,27 @@ void Slave_TxInfoUpdate(void)
 {
 	int16_t front, right;
 		
+	/*  底盘移动通道值  */
+	if (module.state == MODULE_STATE_NORMAL)
+	{
+		if (module.remote_mode == RC)
+		{
+			slave.info->tx_info->rc_ch_ws_val = rc_sensor.info->ch3;
+			slave.info->tx_info->rc_ch_ad_val = rc_sensor.info->ch2;
+		}
+		else if(module.remote_mode == KEY)
+		{
+			front = 0;
+			right = 0;
+			front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
+			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
+			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
+			right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
+			slave.info->tx_info->rc_ch_ws_val = front;
+			slave.info->tx_info->rc_ch_ad_val = right;
+		}
+	}
+	
 	/*  1:遥控器状态标志位  */
 	slave.info->tx_info->status &= 0xFE;
 	if (rc_sensor.work_state == DEV_ONLINE)
@@ -205,20 +229,33 @@ void Slave_TxInfoUpdate(void)
 		slave.info->tx_info->status |= 0x02;
 	
 	/*  3:小陀螺状态标志位  */
+		/*  遥控器断电关闭  */
 	if (rc_sensor.work_state == DEV_OFFLINE)
-		status.chas_state = gyro_reset;
+		status.chas_cmd = gyro_reset;
+		/*  遥控器开关小陀螺  */
 	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 	{
 		if (status.chas_state == gyro_on)
 		{
-			status.chas_state = gyro_off;
+			status.chas_cmd = gyro_off;
 		}
 		else
 		{
-			status.chas_state = gyro_on;
+			status.chas_cmd = gyro_on;
 		}
 	}
+		/*  开弹仓关闭  */
 	if (status.lch_state.magz_state == magz_open)
+	{
+		status.chas_cmd = gyro_off;
+	}
+		/*  设置开关标志位  */
+	if (status.chas_cmd == gyro_on)
+		status.chas_state = gyro_on;
+	else
+		status.chas_state = gyro_off;
+		/*  移动时临时关闭  */
+	if (slave.info->tx_info->rc_ch_ws_val != 0)
 	{
 		status.chas_state = gyro_off;
 	}
@@ -241,26 +278,6 @@ void Slave_TxInfoUpdate(void)
 	/*  yaw轴陀螺仪角度数据  */
 	slave.info->tx_info->imu_angle = imu_sensor.info->base_info.yaw;
 	
-	/*  底盘移动通道值  */
-	if (module.state == MODULE_STATE_NORMAL)
-	{
-		if (module.remote_mode == RC)
-		{
-			slave.info->tx_info->rc_ch_ws_val = rc_sensor.info->ch3;
-			slave.info->tx_info->rc_ch_ad_val = rc_sensor.info->ch2;
-		}
-		else if(module.remote_mode == KEY)
-		{
-			front = 0;
-			right = 0;
-			front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
-			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
-			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
-			right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;		
-			slave.info->tx_info->rc_ch_ws_val = front;
-			slave.info->tx_info->rc_ch_ad_val = right;
-		}
-	}
 }
 
 void Vision_TxInfoUpdate(void)
@@ -276,9 +293,6 @@ void Vision_TxInfoUpdate(void)
 	vision_sensor.info->cmd_mode = vision_sensor.info->tx_info->mode;
 	vision_sensor.info->tx_info->my_color = slave.info->my_color;
 	
-	// 反陀螺
-	if (vision_sensor.info->is_hit_enable == 1)
-	status.lch_cmd.shoot_cmd = keep_shoot;
 }
 
 void Rc_RxInfoCheck(void)
@@ -324,7 +338,7 @@ void Key_RxInfoCheck(void)
 		}
 		if (status.chas_state == gyro_on) 
 		{
-			status.chas_state = gyro_off;
+			status.chas_cmd = gyro_off;
 		}
 	}
 	/*  R:速射  */
@@ -338,15 +352,24 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.shoot_cmd = swift_shoot;
 	}
-	/*  Q:热量解锁  */
-	if ((keyboard.state.Q == short_press_K) || (keyboard.state.Q == long_press_K))
+	/*  Shift:热量解锁  */
+	if ((keyboard.state.Shift == short_press_K) || (keyboard.state.Shift == long_press_K))
 	{
 		status.heat_mode = heat_limit_off;
+	}
+	/*  Q/E:侧身90°  */
+	if (keyboard.state.Q == down_K)
+	{
+		symbal.gim_sym.turn_left = 1;
+	}
+	if (keyboard.state.E == down_K)
+	{
+		symbal.gim_sym.turn_right = 1;
 	}
 	/*  F:小陀螺  */
 	if (keyboard.state.F == down_K)
 	{
-		status.chas_state = gyro_on;
+		status.chas_cmd = gyro_on;
 	}
 	/*  B:开弹仓  */
 	if (keyboard.state.B == down_K)

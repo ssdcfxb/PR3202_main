@@ -21,7 +21,7 @@
 #define Fric_18_init 4700.0f
 #define Fric_20_init 4950.0f
 #define Fric_22_init 5200.0f
-#define Fric_30_init 7020.0f
+#define Fric_30_init 7080.0f
 
 /* Exported types ------------------------------------------------------------*/
 // 发射机构模式枚举

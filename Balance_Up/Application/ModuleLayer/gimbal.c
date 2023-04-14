@@ -76,7 +76,7 @@ gimbal_conf_t   gim_conf = {
 	.rc_pitch_motor_offset = 110,
 	.rc_yaw_imu_offset = 3300.0f,//3300
 	.rc_pitch_imu_offset = 3300.0f,
-	.key_yaw_imu_offset = -500.0f,//330
+	.key_yaw_imu_offset = -800.0f,//330
 	.key_pitch_imu_offset = 1000.0f,
 	.max_pitch_imu_angle = 23.0f,
 	.min_pitch_imu_angle = -40.0f,
@@ -355,6 +355,17 @@ void Gimbal_GetKeyInfo(void)
 	if (status.lch_state.magz_state == magz_open)
 	{
 		gimbal.info->target_pitch_imu_angle = 0.f;
+	}
+	
+	if (symbal.gim_sym.turn_left == 1)
+	{
+		gimbal.info->target_yaw_imu_angle += 90.f;
+		symbal.gim_sym.turn_left = 0;
+	}
+	if (symbal.gim_sym.turn_right == 1)
+	{
+		gimbal.info->target_yaw_imu_angle -= 90.f;
+		symbal.gim_sym.turn_right = 0;
 	}
 }
 

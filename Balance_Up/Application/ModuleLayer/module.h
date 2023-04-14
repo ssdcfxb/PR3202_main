@@ -55,6 +55,7 @@ typedef enum
 typedef struct {
 	launcher_state_t	lch_state;
 	gim_cmd_e					gim_state;
+	chas_cmd_e				chas_cmd;
 	chas_cmd_e				chas_state;
 	lch_cmd_t					lch_cmd;
 	gim_cmd_e					gim_cmd;

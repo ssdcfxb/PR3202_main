@@ -1,6 +1,7 @@
 #include "BMI.h"
 
 
+#include "rp_user_config.h"
 #include "rp_math.h"
 #include "ave_filter.h"
 
@@ -328,8 +329,6 @@ void EX_BMI_Get_RawData(int16_t *ggx, int16_t *ggy, int16_t *ggz, int16_t *aax, 
         陀螺仪x轴与yaw轴之间的夹角，单位为度
     @arx
         陀螺仪y轴与yaw轴之间的夹角，单位为度
-    @param[in]  (int16_t) gx,  gy,  gz,  ax,  ay,  az
-    @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
 */
 //float q0_init = 0.0f, q1_init = 1.0f, q2_init = 0.0f, q3_init = 0.0f;
 float arz_ = -90.0f;
@@ -383,9 +382,11 @@ void transform_init(void)
 
 /**
   * @brief  将陀螺仪坐标变换为云台坐标，若不需要变换可在imu_protocol.c中imu_update将其注释
-  * @param  
-  * @retval 
-  */
+  * @brief  坐标变换采用Z-Y-X欧拉角描述，即从陀螺仪坐标系向云台坐标系变换中，坐标系按照绕陀螺仪Z轴、Y轴、X轴的顺序旋转
+	*					每一次旋转的参考坐标系为当前陀螺仪坐标系
+  * @param[in]  (int16_t) gx,  gy,  gz,  ax,  ay,  az
+  * @param[out] (float *) ggx, ggy, ggz, aax, aay, aaz
+	*/
 void Vector_Transform(int16_t gx, int16_t gy, int16_t gz,\
 	                    int16_t ax, int16_t ay, int16_t az,\
 	                    float *ggx, float *ggy, float *ggz,\
@@ -423,19 +424,11 @@ extern struct bmi2_dev ex_bmi270;
         越小积分误差越小
     @halfT
         解算周期的一半，比如1ms解算1次则halfT为0.0005f
-    @lp
-        陀螺仪距pitch轴的垂直距离，单位为m
-    @ly
-        水平时陀螺仪距yaw轴的垂直距离，单位为m
 */
 float Kp = 0.1f;//4
 float norm;
 float halfT = 0.00025f;
 //float halfT = 0.0005f;
-float lp = 0.0f, ly = 0.0f;
-float wx, wy, wz;
-float afx, afy, afz;
-float thr, thp, thy, cosr, cosp, cosy;
 float vx, vy, vz;
 float ex, ey, ez;
 float gx,gy,gz,ax,ay,az;
@@ -476,16 +469,6 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	gy = gy * (double)0.017453;
 	gz = gz * (double)0.017453;
 	
-	/* 角加速度计算 */
-//	afx = (gx - wx)/(halfT * 2);
-//	afy = (gy - wy)/(halfT * 2);
-//	afz = (gz - wz)/(halfT * 2);
-	
-	/* 角速度赋值 */
-//	wx = gx;
-//	wy = gy;
-//	wz = gz;
-	
 	/* 角度解算start */
 	/* 加速度计数据检查 */
 	if(ax * ay * az != 0)
@@ -494,14 +477,6 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 		ax = lsb_to_mps2(ax,2,bmi270.resolution);
 		ay = lsb_to_mps2(ay,2,bmi270.resolution);
 		az = lsb_to_mps2(az,2,bmi270.resolution);
-		
-		/* 利用角速度修正重力加速度测量值 */
-//		ax = ax - afy * lp;
-//		az = az - wy * wy * lp;
-//		
-//		cosp = arm_cos_f32(thp);
-//		ax = ax - wz* wz * ly * cosp;
-//		ay = ay - afz * ly * cosp;
 
 		norm = inVSqrt(ax*ax + ay*ay + az*az);
 		ax = ax *norm;
@@ -549,14 +524,28 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 	//*yaw =  atan2(2*(q1*q2 + q0*q3),q0*q0 +q1*q1-q2*q2 -q3*q3)*57.295773f;
 	arm_atan2_f32(2 * (q1*q2 + q0*q3), q0*q0 +q1*q1-q2*q2 -q3*q3, yaw);
 	
-	
-//	thr =  *roll;
-//	thp = -*pitch;
-//	thy =  *yaw;
 	*roll  *=  57.295773f;
 	*pitch *= -57.295773f;
 	*yaw   *=  57.295773f;
 	/* 角度解算end */
 	
 	return 0;
+}
+
+void BMI_Get_Acceleration(float pitch, float roll, float yaw,\
+													float ax, float ay, float az,\
+													float *accx, float *accy, float *accz)
+{
+	pitch *= (double)0.017453;
+	yaw *= (double)0.017453;
+	roll *= (double)0.017453;
+	
+	ax = lsb_to_mps2(ax,2,bmi270.resolution);
+	ay = lsb_to_mps2(ay,2,bmi270.resolution);
+	az = lsb_to_mps2(az,2,bmi270.resolution);
+	
+	*accx = ax + arm_sin_f32(pitch) * GRAVITY_EARTH;
+	*accy = ay - arm_sin_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
+	*accz = az - arm_cos_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
+	
 }

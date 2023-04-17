@@ -36,13 +36,9 @@ void StartControlTask(void const * argument)
 		CAN_SendAll();
 		
 		if (++i == 60000)
-		{
 			i = 0;
-		}
 		if (i % fps == 0)
-		{
 			vision_send_data();
-		}
 		
     osDelay(1);
   }

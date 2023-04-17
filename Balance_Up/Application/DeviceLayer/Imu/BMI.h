@@ -46,12 +46,14 @@ uint8_t BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
 													 float *ggx,float *ggy,float *ggz,\
 													 float *aax,float *aay,float *aaz);
 													 
-
-
 uint8_t EX_BMI_Get_EulerAngle(float *pitch,float *roll,float *yaw,\
-                           float *pitch_,float *roll_,float *yaw_,\
-													 float *ggx,float *ggy,float *ggz,\
-													 float *aax,float *aay,float *aaz);
+															float *pitch_,float *roll_,float *yaw_,\
+															float *ggx,float *ggy,float *ggz,\
+															float *aax,float *aay,float *aaz);
+													 
+void BMI_Get_Acceleration(float pitch, float roll, float yaw,\
+													float ax, float ay, float az,\
+													float *accx, float *accy, float *accz);
 
 
 #endif

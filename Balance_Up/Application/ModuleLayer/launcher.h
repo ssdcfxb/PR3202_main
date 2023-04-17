@@ -18,7 +18,7 @@
 
 /* Exported macro ------------------------------------------------------------*/
 #define Fric_15_init 4400.0f
-#define Fric_18_init 4700.0f
+#define Fric_18_init 4870.0f
 #define Fric_20_init 4950.0f
 #define Fric_22_init 5200.0f
 #define Fric_30_init 7080.0f

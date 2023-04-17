@@ -203,8 +203,8 @@ void Judge_GetSpeedInfo(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->fric_speed = launcher.conf->Fric_30;
-		launcher.conf->fric_mode = 30;
+		launcher.conf->fric_speed = launcher.conf->Fric_18;
+		launcher.conf->fric_mode = 18;
 	}
 	else
 	{
@@ -456,7 +456,7 @@ void Launcher_GetRcState(void)
 			}
 			else 
 			{
-				/**    “£øÿ∆˜¿Îœﬂ–≈œ¢    **/
+				/**    launcher_mode == lch_keep    **/
 				launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 				launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
 				launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
@@ -465,10 +465,10 @@ void Launcher_GetRcState(void)
 			}
 		}
 		
-//		if (status.lch_cmd.magz_cmd == magz_close)
-//		{
-//			launcher.work_info->launcher_commond = Magz_Close;
-//		}
+		if ((status.gim_mode == vision) && (vision_sensor.info->is_hit_enable != 1))
+		{
+			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+		}
 	}
 	else if(launcher.info->rc_work_state == DEV_ONLINE)
 	{
@@ -501,7 +501,10 @@ void Launcher_GetKeyState(void)
 {
 	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
-//	launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+	if ((status.gim_mode == vision) && (vision_sensor.info->is_hit_enable != 1))
+	{
+		status.lch_cmd.shoot_cmd = shoot_reset;
+	}
 	/*  ≤¶≈Ã÷∏¡Ó  */
 	if (status.lch_cmd.shoot_cmd == keep_shoot)
 	{

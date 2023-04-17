@@ -214,15 +214,12 @@ void Slave_TxInfoUpdate(void)
 		{
 			front = 0;
 			right = 0;
-			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
-			right += (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;
-//			front = right;
-//			front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
-//			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
+			front += (float)rc_sensor.info->W.cnt / (float)KEY_W_CNT_MAX * 660.f;
+			front -= (float)rc_sensor.info->S.cnt / (float)KEY_S_CNT_MAX * 660.f;
 			right += (float)rc_sensor.info->D.cnt / (float)KEY_D_CNT_MAX * 660.f;
 			right -= (float)rc_sensor.info->A.cnt / (float)KEY_A_CNT_MAX * 660.f;
 			slave.info->tx_info->rc_ch_ws_val = front;
-			slave.info->tx_info->rc_ch_ad_val = 0;//right;
+			slave.info->tx_info->rc_ch_ad_val = right;
 		}
 	}
 	
@@ -291,6 +288,11 @@ void Slave_TxInfoUpdate(void)
 	slave.info->tx_info->status &= 0xBF;
 	if (symbal.slave_reset == 1)
 		slave.info->tx_info->status |= 0x40;
+	
+	/*  8:弹仓标志位  */
+	slave.info->tx_info->status &= 0x7F;
+	if (status.lch_state.magz_state == magz_open)
+		slave.info->tx_info->status |= 0x80;
 	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
@@ -367,8 +369,7 @@ void Key_RxInfoCheck(void)
 		status.lch_cmd.fric_cmd = fric_on;
 		status.lch_cmd.magz_cmd = magz_close;
 	}
-	if (((keyboard.last_state.R == short_press_K) || (keyboard.state.R == long_press_K)) \
-			 && (status.lch_state.fric_state == fric_on))
+	if ((keyboard.state.R == down_K) && (status.lch_state.fric_state == fric_on))
 	{
 		status.lch_cmd.shoot_cmd = swift_shoot;
 	}
@@ -386,14 +387,14 @@ void Key_RxInfoCheck(void)
 	{
 		symbal.gim_sym.turn_right = 1;
 	}
-	/*  A/D:侧身90°后移动  */
+	/*  A/D:侧身45°  */
 	if ((keyboard.state.A == down_K) && (status.lch_state.magz_state == magz_close))
 	{
-		symbal.gim_sym.turn_left = 1;
+		symbal.gim_sym.turn_left = 2;
 	}
 	if ((keyboard.state.D == down_K) && (status.lch_state.magz_state == magz_close))
 	{
-		symbal.gim_sym.turn_right = 1;
+		symbal.gim_sym.turn_right = 2;
 	}
 	/*  F:小陀螺  */
 	if (keyboard.state.F == down_K)

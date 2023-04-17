@@ -56,6 +56,10 @@ typedef struct{
 }	raw_info_t;
 
 typedef struct{
+	float accx;
+	float accy;
+	float accz;
+	
 	float yaw;
 	float pitch;
 	float roll;

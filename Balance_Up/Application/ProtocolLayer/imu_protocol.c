@@ -54,9 +54,9 @@ void imu_update(imu_sensor_t *imu_sen)
 	
 	
 	/* 原始数据低通滤波 */
-	gyrox_ = lowpass(gyrox_, gyrox, 0.3);
-	gyroy_ = lowpass(gyroy_, gyroy, 0.3);
-	gyroz_ = lowpass(gyroz_, gyroz, 0.3);
+	gyrox_ = lowpass(gyrox_, gyrox, 0.2);
+	gyroy_ = lowpass(gyroy_, gyroy, 0.2);
+	gyroz_ = lowpass(gyroz_, gyroz, 0.2);
 	accx_ = lowpass(accx_, accx, 1);
 	accy_ = lowpass(accy_, accy, 1);
 	accz_ = lowpass(accz_, accz, 1);
@@ -68,6 +68,14 @@ void imu_update(imu_sensor_t *imu_sen)
 										 &accx_, &accy_, &accz_);
 										 
 	pitch = imu_info->base_info.pitch, roll = imu_info->base_info.roll, yaw = imu_info->base_info.yaw;
+	
+//	accx_ = lowpass(accx_, accx, 0.1);
+//	accy_ = lowpass(accy_, accy, 0.1);
+//	accz_ = lowpass(accz_, accz, 0.1);
+//	BMI_Get_Acceleration(pitch, roll, yaw,\
+//											 accx_, accy_, accz_,\
+//											 &imu_info->base_info.accx, &imu_info->base_info.accy, &imu_info->base_info.accz);
+	
 	/* 计算陀螺仪数据 */
 	//pitch
 	imu_info->base_info.rate_pitch = pitch_;

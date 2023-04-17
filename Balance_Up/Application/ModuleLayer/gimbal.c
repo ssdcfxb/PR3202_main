@@ -367,6 +367,16 @@ void Gimbal_GetKeyInfo(void)
 		gimbal.info->target_yaw_imu_angle -= 90.f;
 		symbal.gim_sym.turn_right = 0;
 	}
+	if (symbal.gim_sym.turn_left == 2)
+	{
+		gimbal.info->target_yaw_imu_angle += 45.f;
+		symbal.gim_sym.turn_left = 0;
+	}
+	if (symbal.gim_sym.turn_right == 2)
+	{
+		gimbal.info->target_yaw_imu_angle -= 45.f;
+		symbal.gim_sym.turn_right = 0;
+	}
 }
 
 

@@ -79,7 +79,46 @@ float RampFloat(float final, float now, float ramp)
 
 float DeathZoom(float input, float center, float death)
 {
-	if(abs(input - center) < death)
+	if(abs_(input - center) < death)
 		return center;
 	return input;
 }
+
+/**
+  * @brief  过零点
+  * @param  
+  * @retval 
+  */
+float Float_ZeroManage(float input, float ramp)
+{
+
+	if( abs_(input) > ramp )
+	{
+		if( input > 0 )
+			input -= ramp * 2;
+		else
+			input += ramp * 2;
+	}
+	
+	return input;
+}
+
+/**
+  * @brief  过零点
+  * @param  
+  * @retval 
+  */
+int16_t Int_ZeroManage(int16_t input, int16_t ramp)
+{
+	
+	if( abs_(input) > ramp )
+	{
+		if( input > 0 )
+			input -= ramp * 2;
+		else
+			input += ramp * 2;
+	}
+	
+	return input;
+}
+

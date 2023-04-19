@@ -18,11 +18,18 @@
 /* Exported functions --------------------------------------------------------*/
 void DRIVER_Init(void)
 {
-  USART1_Init();
+
+	SPI2_Init();
+	imu_sensor.init(&imu_sensor);
+	
+	TIM4_Init();
+	
+	USART1_Init();
 	USART2_Init();
 	USART3_Init();
 	USART4_Init();
 	USART5_Init();
-	SPI2_Init();
-	SPI1_Init();
+	
+
+	CAN_Filter_Init();
 }

@@ -14,10 +14,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
+#include "device.h"
+#include "State.h"
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 void USART2_rxDataHandler(uint8_t *rxBuf);
-	
+
 #endif

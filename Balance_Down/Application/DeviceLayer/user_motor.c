@@ -36,46 +36,32 @@ KT_motor_t KT_motor[KT_MOTOR_LIST] =
 	},
 };
 
-
 //发送ID会在调用init函数后自动获取
-
-RM_motor_t RM_motor[MOM_MOTOR_LIST] = 
+RM_motor_t MOM_motor[MOM_MOTOR_LIST] = 
 {
 	[MOMENTUM_L] = {
 	
-		.id.rx_id      = GM6020_CAN_ID_205,
-		.id.drive_type = M_CAN2,
-		.id.motor_type = GM6020,
+		.id.rx_id      		 = GM6020_CAN_ID_209,
+		.id.drive_type		 = M_CAN2,
+		.id.motor_type		 = GM6020,
+		.mec_info.mec_mid  = MOMENTUM_L_B_POS - MOMENTUM_L_POS_OFFSET,
 		
 		.init          = motor_class_init,
 	},
 	
 	[MOMENTUM_R] = {
 	
-		.id.rx_id      = GM6020_CAN_ID_206,
-		.id.drive_type = M_CAN2,
-		.id.motor_type = GM6020,
+		.id.rx_id      		 = GM6020_CAN_ID_20A,
+		.id.drive_type 		 = M_CAN2,
+		.id.motor_type 		 = GM6020,
+		.mec_info.mec_mid  = MOMENTUM_R_B_POS - MOMENTUM_R_POS_OFFSET,
 		
 		.init          = motor_class_init,
 	},
 };
 
 
-/*
-	float	  kp;
-	float 	ki;
-	float 	kd;
-	
-	float   blind_err;	
-	float 	integral_max;	
-	float   iout_max;
-	float 	out_max;
-*/
-float momentum_L_angle_pid_param[7]    = {0,0,0,0,0,0,0};
-float momentum_L_angle_in_pid_param[7] = {0,0,0,0,0,0,0};
 
-float momentum_R_angle_pid_param[7]    = {0,0,0,0,0,0,0};
-float momentum_R_angle_in_pid_param[7] = {0,0,0,0,0,0,0};
 
 /* Exported variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;
@@ -101,18 +87,22 @@ void KT_motor_init(void)
 void RM_motor_init(void)
 {
 	
-	RM_motor[MOMENTUM_L].init(&RM_motor[MOMENTUM_L]);
-	RM_motor[MOMENTUM_R].init(&RM_motor[MOMENTUM_R]);
-	
-	
-	//PID初始化
-	RM_motor[MOMENTUM_L].pid_init(&RM_motor[MOMENTUM_L].pid.angle, momentum_L_angle_pid_param);
-	RM_motor[MOMENTUM_L].pid_init(&RM_motor[MOMENTUM_L].pid.angle_in, momentum_L_angle_in_pid_param);
-	
-	RM_motor[MOMENTUM_R].pid_init(&RM_motor[MOMENTUM_R].pid.angle, momentum_R_angle_pid_param);
-	RM_motor[MOMENTUM_R].pid_init(&RM_motor[MOMENTUM_R].pid.angle_in, momentum_R_angle_in_pid_param);
+	MOM_motor[MOMENTUM_L].init(&MOM_motor[MOMENTUM_L]);
+	MOM_motor[MOMENTUM_R].init(&MOM_motor[MOMENTUM_R]);
 	
 }
 
-
+/**
+ *	@brief  检测所有电机心跳包
+ */
+void All_motor_heartbeat(void)
+{
+	MOM_motor[MOMENTUM_L].heartbeat(&MOM_motor[MOMENTUM_L]);
+	MOM_motor[MOMENTUM_R].heartbeat(&MOM_motor[MOMENTUM_R]);
+	
+	
+	KT_motor[LEG_L].heartbeat(&KT_motor[LEG_L]);
+	KT_motor[LEG_R].heartbeat(&KT_motor[LEG_R]);
+	
+}
 

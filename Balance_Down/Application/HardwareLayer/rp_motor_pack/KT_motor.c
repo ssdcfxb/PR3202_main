@@ -55,8 +55,8 @@ void KT_motor_class_init(KT_motor_t *motor)
 	if(motor == NULL)
 		return;
 	
-	memset ( (uint8_t*)motor->tx_buff, 0, 8 );
-	memset ( &motor->KT_motor_info.tx_info, 0, 8);
+	memset ( (uint8_t*)motor->tx_buff, 0, 8 * sizeof(uint8_t) );
+	memset ( &motor->KT_motor_info.tx_info, 0, 8 * sizeof(uint8_t) );
 	
 	motor->KT_motor_info.state_info.init_flag         = M_INIT;
 	motor->KT_motor_info.state_info.offline_cnt_max   = OFFLINE_LINE_CNT_MAX;		
@@ -158,7 +158,7 @@ void kt_motor_class_pid_init(KT_motor_t *motor)
 void kt_motor_multi_control(int16_t* iqControl, char kt_motor_num, motor_drive_e drive_type)
 {
 	//判断电流
-	for(int i = 0; i < kt_motor_num; i ++)
+	for( int i = 0; i < kt_motor_num; i ++ )
 	{
 		if( within_or_not(iqControl[i], -KT_TX_IQ_CONTROL_MAX, KT_TX_IQ_CONTROL_MAX) == Flase )
 			return;
@@ -218,7 +218,7 @@ void tx_kt_motor_W_command(KT_motor_t *motor, uint8_t command)
 	
 	KT_motor_tx_info_t   *tx_info  = &motor->KT_motor_info.tx_info;
 	
-	memset( (uint8_t*)motor->tx_buff, 0, 8 );
+	memset( (uint8_t*)motor->tx_buff, 0, 8 * sizeof(uint8_t) );
 	
 	switch(command)
 	{
@@ -416,7 +416,7 @@ void tx_kt_motor_R_command(KT_motor_t *motor, uint8_t command)
 	if( motor == NULL )
 		return;
 	
-	memset( (uint8_t*)motor->tx_buff, 0, 8 );
+	memset( (uint8_t*)motor->tx_buff, 0, 8 * sizeof(uint8_t) );
 	
 	switch(command)
 	{
@@ -473,7 +473,7 @@ void tx_kt_motor_R_command(KT_motor_t *motor, uint8_t command)
 /**
  *	@brief	接收电机发来的信息并自动更新，需要注意，大部分发送给电机的指令，电机也会返回一些数据
 						如果传入空指针，认为电机数据出错，并返回
-						最后面会根据接收结构体的errorState判断是否要自我保护
+						增加了对电机角度和的更新
  *  @return
  */
 void get_kt_motor_info(KT_motor_t *motor, uint8_t *rxBuf)
@@ -485,6 +485,8 @@ void get_kt_motor_info(KT_motor_t *motor, uint8_t *rxBuf)
 	}	
 	
 	uint8_t ID = rxBuf[0];
+	
+	int16_t angle_err = 0;
 	
 	KT_motor_pid_rx_info_t *pid_rx_info = &motor->KT_motor_info.pid_info.rx;
 	KT_motor_rx_info_t     *rx_info     = &motor->KT_motor_info.rx_info;
@@ -667,6 +669,22 @@ void get_kt_motor_info(KT_motor_t *motor, uint8_t *rxBuf)
 			break;
 	}
 
+	
+	
+	angle_err = ((int16_t)rx_info->encoder) - ((int16_t)rx_info->encoder_prev);
+	
+	if(rx_info->encoder <= rx_info->encoder_prev+5000)
+		rx_info->encoder_sum += Int_ZeroManage(angle_err, (int16_t)(KT_18_BIT_TOTAL_ANGLE / 2) );
+	
+	
+	//转变为角度，再转变为弧度
+	rx_info->radian_sum = rx_info->encoder_sum * KT_18_BIT_ANGLE_CONVERSION * ANGLE_CONVERSION_RADIAN;
+	
+	rx_info->encoder_prev = rx_info->encoder;
+	
+	
+	//算电机此时的扭矩，收到的是电机的控制电流值
+	rx_info->torque = ((float)rx_info->current) / KT_TORQUE_TO_CURRENT;
 	
 }
 

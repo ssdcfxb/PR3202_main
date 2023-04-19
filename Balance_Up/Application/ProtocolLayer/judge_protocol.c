@@ -19,4 +19,6 @@ void judge_update(judge_t *self, slave_info_t *info)
 	self->info->my_color = info->my_color;
 	
 	self->info->offline_cnt = 0;
+	if (self->info->shoot_data.bullet_speed < 0.f)
+		self->info->offline_cnt = 50;
 }

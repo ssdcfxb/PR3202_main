@@ -22,6 +22,8 @@ typedef enum jugde_logical_e    //逻辑判断
 {
 	Flase = 0,
 	True  = 1,
+	
+	
 		
 }jugde_logical_e;
 /* Exported types ------------------------------------------------------------*/
@@ -32,8 +34,9 @@ typedef enum jugde_logical_e    //逻辑判断
 #define GET_EVENT(EVENT, FLAG)      ((EVENT) & (FLAG))
 /* 数值函数 */
 #define constrain(x, min, max)	((x>max)?max:(x<min?min:x))
-#define abs(x) 					((x)>0? (x):(-(x)))
-#define one(x)					((x)>0? (1):(-1))
+#define abs_(x) 					((x>0)? (x):(-(x)))
+#define one(x)					( (x>0)? (1): ( (x<0)? (-1):0) )
+#define err(meas, tar)  (meas - tar)
 #define within_or_not(x, min, max)     (x>max)?Flase:((x<min)?Flase:True)  //在规定范围外返回0
 
 
@@ -45,6 +48,8 @@ float RampFloat(float final, float now, float ramp);
 float DeathZoom(float input, float center, float death);
 /* 低通滤波 */
 float lowpass(float X_last, float X_new, float K);
-
+/*过零点*/
+float Float_ZeroManage(float input, float ramp);
+int16_t Int_ZeroManage(int16_t input, int16_t ramp);
 #endif
 

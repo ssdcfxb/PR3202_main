@@ -74,10 +74,15 @@
 
 /*-------------------------电机接收ID定义结束--------------------------*/
 
-
-
-
 #define OFFLINE_LINE_CNT_MAX 100
+//电机总角度
+#define RM_TOTAL_ANGLE           8192      
+#define KT_18_BIT_TOTAL_ANGLE		 16384*4
+
+#define RM_ANGEL_TO_IMU_ANGLE    22.7556f     //8192÷360,即1°有22.76机械角度
+
+
+
 
 //RM2006或者RM3508发送ID指令
 #define RM_F_ID 0x200
@@ -87,30 +92,52 @@
 #define GM_F_ID 0x1FF
 #define GM_B_ID 0x2FF
 
-
 //KT电机多电机发送ID指令，应注意：如果是单电机发送ID指令，已经保存在了电机的id结构体中
 #define KT_MULTI_TX_ID   0x280
+
+
+
+
+
+
+
+
+
+//RM允许发送的最大值
+#define RM_6020_MAX_VOLTAGE_        30000           //这是产品说明书给的
+#define RM_6020_MAX_VOLTAGE         25000           //软件中的最大值
+
+
+//RM电机产品型号
+#define RM_6020_MAX_TORQUE_          1.2f           //峰值扭矩N.M
+#define RM_6020_MAX_TORQUE           1.0f           //峰值扭矩N.M，软件中的最大值
+//1扭矩--->这么多的控制电压
+#define RM_6020_TORQUE_TO_VOLTAGE		(RM_6020_MAX_VOLTAGE_ / RM_6020_MAX_TORQUE_) 
+
+
+
+
+
+
 
 
 
 //KT允许发送的最大值 
 #define KT_TX_ENCODER_OFFSET_MAX    16383*4         //0~16383*4
 #define KT_TX_POWER_CONTROL_MAX     1000            //-1000~1000
-#define KT_TX_IQ_CONTROL_MAX        500             //-2000~2000    1A--->48的值   930
+#define KT_TX_IQ_CONTROL_MAX        2000             //-2000~2000   873max
 #define KT_TX_ANGLE_SIGNLE_MAX      35999           //0~35999
-#define K_CURRENT_TURN		          62.5f			      //电流值，反馈数值2000 对应 32A  2000 / 32
 
 
 //KT电机产品型号
 #define TORQUE_CONSTANT		           0.32f			    //扭矩常数N.M/A
-#define MAX_TORQUE                   0.5f            //峰值扭矩N.M    4.2
-#define SPEED_CONSTANT 		           20 				    //转速常数 rpm/V
-#define MAX_MOTOR_CURRENT            900					  //最大电流，对应峰值电流15A //////////////
-#define REDUCTION_RATIO              1					    //电机减速比	 
-#define ROTOR_INERTIA                0.0004656		  //9025转子惯量kg.m^2    
-#define MAX_CHAS_MOTOR_SPEED 	       710				    //rpm
-#define MAX_CHAS_MOTOR_INIT_SPEED    4680		        //原始反馈速度最大值  
-#define ANGLE_UNIT_CONVERSION        0.021973f	    // 360/16384   //////////////////
+#define KT_9025_MAX_TORQUE           4.8f            //峰值扭矩N.M    5max
+#define KT_9025_MAX_CURRENT          1920					  //最大电流 2000
+#define KT_18_BIT_ANGLE_CONVERSION   0.005493f	    // 360/16384/4  
+
+//1扭矩--->这么多的控制电流
+#define KT_TORQUE_TO_CURRENT         400.f
+#define KT_CURRENT_TURN		           124.12f			  //说明书电流值2048 / 16.5对应于2000 / 16.1
 
 
 /*----------------------------自定义枚举类型开始--------------------------------*/
@@ -416,9 +443,13 @@ typedef struct KT_motor_rx_info_t
 	uint32_t  circleAngle;       //电机单圈角度   0.01°/LSB  （ 0~36000 * 减速比-1） 
 															 //以编码零点作为起始点，顺时针增加，再次到达零点时数值变为0
 	
+	//由于要算出轮子走过的位移，但考虑到应减少发送电机指令，引入如下变量
+	uint16_t	encoder_prev;
+	int64_t		encoder_sum;
+	float			radian_sum;  			     //将编码器的角度和转变为弧度制
+	
+	float     torque;            //电机此时的扭矩
 
-
-	int16_t   angle_add;         //-4096~4096
 	
 }KT_motor_rx_info_t;
 

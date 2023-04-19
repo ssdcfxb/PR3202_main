@@ -2224,6 +2224,7 @@ int8_t bmi2_write_config_file(struct bmi2_dev *dev)
 
         /* Write the configuration file */
         rslt = write_config_file(dev);
+//        rslt = write_config_file(dev);
         if (rslt == BMI2_OK)
         {
             /* Check the configuration load status */
@@ -4877,6 +4878,7 @@ static int8_t write_config_file(struct bmi2_dev *dev)
     if (rslt == BMI2_OK)
     {
         /* Disable loading of the configuration */
+        rslt = set_config_load(BMI2_DISABLE, dev);
         rslt = set_config_load(BMI2_DISABLE, dev);
         if (rslt == BMI2_OK)
         {

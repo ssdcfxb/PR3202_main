@@ -250,35 +250,42 @@ void Judge_GetSpeedInfo(void)
   */
 void Judge_AdaptFricSpeed(void)
 {
-	static int8_t cnt = 0, speed_adapt = 0, adapt_k = 5;
+	static int8_t cnt = 0, speed_adapt = 0, adapt_k = 10;
+	static float last_measure_speed = 0.f;
 	
 	if (judge.work_state == DEV_ONLINE)
 	{
-		if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.95f))
+		if ((launcher.info->measure_launcher_speed != last_measure_speed) || (launcher.info->measure_launcher_speed > 0.f))
 		{
-			cnt++;
-			if (cnt > 2)
+			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.95f))
+			{
+				cnt++;
+				if (cnt > 2)
+				{
+					cnt = 0;
+					speed_adapt = -1;
+				}
+			}
+			else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.5f))
+			{
+				cnt--;
+				if (cnt < -2)
+				{
+					cnt = 0;
+					speed_adapt = 1;
+				}
+			}
+			else
 			{
 				cnt = 0;
-				speed_adapt = -1;
+				speed_adapt = 0;
 			}
+			launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
 		}
-		else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.5f))
-		{
-			cnt--;
-			if (cnt < -2)
-			{
-				cnt = 0;
-				speed_adapt = 1;
-			}
-		}
-		else
-		{
-			cnt = 0;
-			speed_adapt = 0;
-		}
-		launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
+		last_measure_speed = launcher.info->measure_launcher_speed;
 	}
+	else
+		last_measure_speed = 0.f;
 	
 }
 
@@ -303,7 +310,7 @@ void Judge_AdaptDialSpeed(void)
 	{
 		heat_low = 0;
 	}
-	if ((launcher.info->limit_heat - launcher.info->measure_launcher_heat) <= 20)
+	if ((launcher.info->limit_heat - launcher.info->measure_launcher_heat) <= 30)
 	{
 		heat_high = 1;
 	}
@@ -464,11 +471,6 @@ void Launcher_GetRcState(void)
 				launcher.work_info->dial_status = WaitCommond_Dial;
 			}
 		}
-		
-		if ((status.gim_mode == vision) && (vision_sensor.info->is_hit_enable != 1))
-		{
-			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
-		}
 	}
 	else if(launcher.info->rc_work_state == DEV_ONLINE)
 	{
@@ -501,20 +503,7 @@ void Launcher_GetKeyState(void)
 {
 	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
-	if ((status.gim_mode == vision) && (vision_sensor.info->is_hit_enable != 1))
-	{
-		status.lch_cmd.shoot_cmd = shoot_reset;
-	}
 	/*  ²¦ÅÌÖ¸Áî  */
-	if (status.lch_cmd.shoot_cmd == keep_shoot)
-	{
-		launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
-		if (status.lch_state.shoot_state != keep_shoot)
-		{
-			status.lch_state.shoot_state = keep_shoot;
-			launcher.work_info->dial_status = Reload_Dial;
-		}
-	}
 	if (status.lch_cmd.shoot_cmd == single_shoot)
 	{
 		launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
@@ -525,11 +514,20 @@ void Launcher_GetKeyState(void)
 			launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
 		}
 	}
+	if (status.lch_cmd.shoot_cmd == keep_shoot)
+	{
+		if (status.lch_state.shoot_state != keep_shoot)
+		{
+			launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
+			status.lch_state.shoot_state = keep_shoot;
+			launcher.work_info->dial_status = Reload_Dial;
+		}
+	}
 	if (status.lch_cmd.shoot_cmd == swift_shoot)
 	{
-		launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
 		if (status.lch_state.shoot_state != swift_shoot)
 		{
+			launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
 			status.lch_state.shoot_state = swift_shoot;
 			launcher.work_info->dial_status = Reload_Dial;
 		}

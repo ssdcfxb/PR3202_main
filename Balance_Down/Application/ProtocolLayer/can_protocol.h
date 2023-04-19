@@ -1,9 +1,10 @@
 #ifndef __CAN_PROTOCOL_H
 #define __CAN_PROTOCOL_H
 
-#include "driver.h"
+
+
 #include "device.h"
-#include "motor_def.h"
+
 
 /*底盘电机3508时*/
 #define CHASSIS_CAN_ID_LF			 RM3508_CAN_ID_201
@@ -18,10 +19,13 @@
 
 
 /*动量电机*/
-#define MOMENTUM_CAN_ID_L      GM6020_CAN_ID_205 
-#define MOMENTUM_CAN_ID_R 		 GM6020_CAN_ID_206
+#define MOMENTUM_CAN_ID_L      GM6020_CAN_ID_209
+#define MOMENTUM_CAN_ID_R 		 GM6020_CAN_ID_20A
+
+/*电容*/
+#define CAP_CAN_RX_ID 	(0x30)
 
 void CAN1_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 void CAN2_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
-
+__weak void CAP_rxDataHandler(uint32_t canId, uint8_t *rxBuf);
 #endif

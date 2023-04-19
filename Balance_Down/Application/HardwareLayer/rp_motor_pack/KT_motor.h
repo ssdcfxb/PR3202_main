@@ -1,8 +1,8 @@
 #ifndef __KT_motor_H
 #define __KT_motor_H
 
-#include "stm32f4xx.h"                  // Device header
-
+//#include "stm32f4xx.h"                  // Device header
+#include "main.h"
 #include "driver.h"
 #include "motor_def.h"
 #include "algo.h"

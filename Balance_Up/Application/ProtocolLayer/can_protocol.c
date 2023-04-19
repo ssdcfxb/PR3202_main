@@ -4,14 +4,19 @@ int16_t can1_send_buf[8], can2_send_buf[8];
 
 void CAN_SendAll(void)
 {
+	static uint16_t i = 0;
 	if (rc_sensor.work_state == DEV_OFFLINE)
 	{
 		memset(can1_send_buf, 0, 16);
 		memset(can2_send_buf, 0, 16);
 	}
 	
+	if (++i == 60000)
+		i = 0;
+	
 	CAN2_Send_With_int16_to_uint8(RM_motor[FRIC_L].id.tx_id, can2_send_buf);
-	CAN1_Send_With_int16_to_uint8(RM_motor[GIM_P].id.tx_id, can1_send_buf);
+	if (i % 2 == 0)
+		CAN1_Send_With_int16_to_uint8(RM_motor[GIM_P].id.tx_id, can1_send_buf);
 	
 	memset(can1_send_buf, 0, 16);
 	memset(can2_send_buf, 0, 16);

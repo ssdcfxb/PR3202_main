@@ -667,4 +667,6 @@ void get_rm_info(struct RM_motor_class_t *motor, uint8_t *rxBuf)
 	motor_info->angle_prev = motor_info->angle;		
 	
 	motor->state.offline_cnt = 0;
+	
+	motor->state.work_state = M_ONLINE;
 }

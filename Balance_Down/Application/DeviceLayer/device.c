@@ -11,26 +11,33 @@
 
 
 /* Private macro -------------------------------------------------------------*/
+void Judge_Imu_Is_Correct_OK(void);
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
+
+
 dev_list_t dev_list = {
 	.imu_sen    = &imu_sensor,
 	.rc_sen     = &rc_sensor,
-	.kt_motor   = KT_motor,
-	.rm_motor   = RM_motor,
+//	.kt_motor   = KT_motor,
+//	.rm_motor   = MOM_motor,
 };
 
 /* Private functions ---------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 void DEVICE_Init(void)
 {
-	dev_list.rc_sen->init(dev_list.rc_sen);
+	//陀螺仪的初始化放在了driver.c中，加快初始化完成
 	
-	dev_list.imu_sen->init(dev_list.imu_sen);
+	dev_list.rc_sen->init(dev_list.rc_sen);
 	
 	KT_motor_init();
 	
 	RM_motor_init();
+	
+	//延时,使得陀螺仪矫正完成
+	HAL_Delay(2000);
+
 }

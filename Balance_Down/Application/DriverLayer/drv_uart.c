@@ -21,7 +21,8 @@ extern UART_HandleTypeDef huart5;
 #define USART2_RX_DATA_FRAME_LEN	(18u)	// 串口2数据帧长度
 #define USART2_RX_BUF_LEN			(USART2_RX_DATA_FRAME_LEN + 6u)	// 串口2接收缓冲区长度
 
-#define USART1_RX_BUF_LEN     100
+
+#define USART1_RX_BUF_LEN     200
 #define USART3_RX_BUF_LEN     200
 #define USART4_RX_BUF_LEN			100
 #define USART5_RX_BUF_LEN			200
@@ -55,7 +56,7 @@ uint8_t usart5_dma_rxbuf[USART5_RX_BUF_LEN];
 /* Private functions ---------------------------------------------------------*/
 static void dma_m0_rxcplt_callback(DMA_HandleTypeDef *hdma)
 {
-	// 将当前目标内存设置为Memory1
+	// 将当前目标内存设置为Memory1，可查看手册，手册写的是可以软件修改下次的存储器为0或1
 	hdma->Instance->CR |= (uint32_t)(DMA_SxCR_CT);
 	USART2_rxDataHandler(usart2_dma_rxbuf[0]);
 }
@@ -86,7 +87,11 @@ static void uart_rx_idle_callback(UART_HandleTypeDef* huart)
 		//uint32_t status = taskENTER_CRITICAL_FROM_ISR();
 		if ((USART2_RX_BUF_LEN - huart->hdmarx->Instance->NDTR) == USART2_RX_DATA_FRAME_LEN)
 		{
-			if(huart->hdmarx->Instance->CR & DMA_SxCR_CT)
+			//其实是取出DMA的CR寄存器的CT位，说明书给出如果该位是1，说明这一次的数据保存到了存储器1
+			//存储器1数据满了要去调用存储器1的指针函数，在这个函数中去保存数据并把下一次的数据目标地址
+			//改成存储器0
+			//该位可以由硬件和软件修改
+			if(huart->hdmarx->Instance->CR & DMA_SxCR_CT)   
 				huart->hdmarx->XferM1CpltCallback(huart->hdmarx);
 			else
 				huart->hdmarx->XferCpltCallback(huart->hdmarx);
@@ -102,9 +107,13 @@ static void uart_rx_idle_callback(UART_HandleTypeDef* huart)
 		/* clear DMA transfer complete flag */
 		__HAL_DMA_DISABLE(huart->hdmarx);
 		/* handle dbus data dbus_buf from DMA */
-		USART1_rxDataHandler(usart1_dma_rxbuf);
+
+		
+		USART1_rxDataHandler(usart1_dma_rxbuf );
 		memset(usart1_dma_rxbuf, 0, USART1_RX_BUF_LEN);
+		
 		/* restart dma transmission */	  
+	
 		__HAL_DMA_ENABLE(huart->hdmarx);		
 	}
   else if (huart == &huart3)
@@ -158,10 +167,10 @@ static HAL_StatusTypeDef DMAEx_MultiBufferStart_NoIT(DMA_HandleTypeDef *hdma, \
 		return HAL_ERROR;
     }   
 
-	/* Set the UART DMA transfer complete callback */
+	/* Set the UART DMA transfer complete callback */ //两个存储器指针
 	/* Current memory buffer used is Memory 1 callback */
-	hdma->XferCpltCallback   = dma_m0_rxcplt_callback;
-	/* Current memory buffer used is Memory 0 callback */
+	hdma->XferCpltCallback   = dma_m0_rxcplt_callback;        //M0存储器存储完数据后会去调用的指针函数
+	/* Current memory buffer used is Memory 0 callback */			//M1存储器存储完数据后会去调用的指针函数
 	hdma->XferM1CpltCallback = dma_m1_rxcplt_callback;	
 
 	/* Check callback functions */
@@ -183,19 +192,19 @@ static HAL_StatusTypeDef DMAEx_MultiBufferStart_NoIT(DMA_HandleTypeDef *hdma, \
 		hdma->ErrorCode = HAL_DMA_ERROR_NONE;
 
 		/* Enable the Double buffer mode */
-		hdma->Instance->CR |= (uint32_t)DMA_SxCR_DBM;
+		hdma->Instance->CR |= (uint32_t)DMA_SxCR_DBM;  //说明书要这个的介绍，才能开启双缓冲
 
 		/* Configure DMA Stream destination address */
-		hdma->Instance->M1AR = SecondMemAddress;		
+		hdma->Instance->M1AR = SecondMemAddress;		   //存储器1保存目标地址1
 
 		/* Configure DMA Stream data length */
-		hdma->Instance->NDTR = DataLength;		
+		hdma->Instance->NDTR = DataLength;		          //DMA一次搬运的数据长度
 		
 		/* Peripheral to Memory */
 		if((hdma->Init.Direction) == DMA_MEMORY_TO_PERIPH)
 		{   
 			/* Configure DMA Stream destination address */
-			hdma->Instance->PAR = DstAddress;
+			hdma->Instance->PAR = DstAddress;              
 
 			/* Configure DMA Stream source address */
 			hdma->Instance->M0AR = SrcAddress;
@@ -204,10 +213,10 @@ static HAL_StatusTypeDef DMAEx_MultiBufferStart_NoIT(DMA_HandleTypeDef *hdma, \
 		else
 		{
 			/* Configure DMA Stream source address */
-			hdma->Instance->PAR = SrcAddress;
+			hdma->Instance->PAR = SrcAddress;           //外设地址
 
 			/* Configure DMA Stream destination address */
-			hdma->Instance->M0AR = DstAddress;
+			hdma->Instance->M0AR = DstAddress;           //存储器0保存目标地址0
 		}		
 		
 		/* Clear TC flags */
@@ -294,6 +303,7 @@ static HAL_StatusTypeDef DMA_Start(DMA_HandleTypeDef *hdma, \
   * @param   uart IRQHandler id
   * @usage   call in uart handler function USARTx_IRQHandler()
   */
+
 void DRV_UART_IRQHandler(UART_HandleTypeDef *huart)
 {
     // 判断是否为空闲中断
@@ -302,6 +312,7 @@ void DRV_UART_IRQHandler(UART_HandleTypeDef *huart)
 	{
 		uart_rx_idle_callback(huart);
 	}
+
 }
 
 /**
@@ -319,6 +330,9 @@ void USART1_Init(void)
 			  (uint32_t)&huart1.Instance->DR, \
 			  (uint32_t)usart1_dma_rxbuf, \
 			  USART1_RX_BUF_LEN);
+	
+
+	
 }
 
 /**

@@ -2,12 +2,32 @@
 
 void StartControlTask(void const * argument)
 {
+	
   for(;;)
   {
-		//chassic.ctrl();
+		#ifdef NO_LINK_TO_RECEIVE	
+		{
+			Master.ctrl();
+		}
+		#endif	
 		
-		chassic.stop();
+		State.ctrl();
+		
+		chassic.ctrl();
 		
     osDelay(1);
+		
+  }
+}
+
+void Start_Super_Task(void const * argument)
+{
+	for(;;)
+  {
+    
+		Super_2023.ctrl();
+		
+		osDelay(4);
+		
   }
 }

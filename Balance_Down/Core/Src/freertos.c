@@ -50,6 +50,8 @@
 osThreadId defaultTaskHandle;
 osThreadId heartbeatTaskHandle;
 osThreadId controlTaskHandle;
+osThreadId Super_TaskHandle;
+osThreadId UI_TaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -59,6 +61,8 @@ osThreadId controlTaskHandle;
 void StartDefaultTask(void const * argument);
 void StartHeartBeatTask(void const * argument);
 void StartControlTask(void const * argument);
+void Start_Super_Task(void const * argument);
+void Start_UI_Task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -114,8 +118,16 @@ void MX_FREERTOS_Init(void) {
   heartbeatTaskHandle = osThreadCreate(osThread(heartbeatTask), NULL);
 
   /* definition and creation of controlTask */
-  osThreadDef(controlTask, StartControlTask, osPriorityHigh, 0, 256);
+  osThreadDef(controlTask, StartControlTask, osPriorityHigh, 0, 512);
   controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
+
+  /* definition and creation of Super_Task */
+  osThreadDef(Super_Task, Start_Super_Task, osPriorityNormal, 0, 128);
+  Super_TaskHandle = osThreadCreate(osThread(Super_Task), NULL);
+
+  /* definition and creation of UI_Task */
+  osThreadDef(UI_Task, Start_UI_Task, osPriorityNormal, 0, 512);
+  UI_TaskHandle = osThreadCreate(osThread(UI_Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -175,6 +187,42 @@ __weak void StartControlTask(void const * argument)
     osDelay(1);
   }
   /* USER CODE END StartControlTask */
+}
+
+/* USER CODE BEGIN Header_Start_Super_Task */
+/**
+* @brief Function implementing the Super_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_Super_Task */
+__weak void Start_Super_Task(void const * argument)
+{
+  /* USER CODE BEGIN Start_Super_Task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Start_Super_Task */
+}
+
+/* USER CODE BEGIN Header_Start_UI_Task */
+/**
+* @brief Function implementing the UI_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_UI_Task */
+__weak void Start_UI_Task(void const * argument)
+{
+  /* USER CODE BEGIN Start_UI_Task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Start_UI_Task */
 }
 
 /* Private application code --------------------------------------------------*/

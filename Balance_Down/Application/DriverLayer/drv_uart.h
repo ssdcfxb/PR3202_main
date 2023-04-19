@@ -2,7 +2,8 @@
 #define __DRV_UART_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx_hal.h"
+//#include "stm32f4xx_hal.h"
+#include "main.h"
 #include "rc_protocol.h"
 #include "rc_sensor.h"
 

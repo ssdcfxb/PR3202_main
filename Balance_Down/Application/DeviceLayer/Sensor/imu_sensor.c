@@ -7,7 +7,6 @@
 void imu_init(imu_sensor_t *self);
 void imu_heart_beat(work_state_t *heart);
 extern void imu_update(imu_sensor_t *self);
-extern void transform_init(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 struct bmi2_dev bmi270;
@@ -56,14 +55,6 @@ void imu_init(struct imu_struct *self)
 	if(self->driver.tpye == DR_SPI1 || self->driver.tpye == DR_SPI2 || self->driver.tpye == DR_SPI3){
 
 		self->bmi->drive_type = BMI2_SPI_INTF;
-		if(self->driver.tpye == DR_SPI2)
-		{
-			self->bmi->device_aces = BMI2_INT_ACES;
-		}
-		else if(self->driver.tpye == DR_SPI1)
-		{
-			self->bmi->device_aces = BMI2_EXT_ACES;
-		}
 
 	}
 	else if(self->driver.tpye == DRV_IIC){
@@ -72,21 +63,18 @@ void imu_init(struct imu_struct *self)
 		
 	}
 	
-	rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
+	rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type);
 	rs = rslt;
 
 	while(rslt)
 	{
         self->work_state.err_code = IMU_INIT_ERR;
-        rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
+        rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type);
 		rs = rslt;
 	}	
 
 	self->work_state.dev_state = DEV_ONLINE;
 	self->work_state.err_code = IMU_NONE_ERR;
-	
-	/* Ğı×ª¾ØÕó³õÊ¼»¯ */
-	transform_init();
 	
 	self->info->init_flag = 1;
 }

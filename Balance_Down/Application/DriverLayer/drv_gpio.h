@@ -93,8 +93,6 @@
 
 #define BMI_CS_LOW()			(HAL_GPIO_WritePin(BMI_CS_GPIO_Port, BMI_CS_Pin, GPIO_PIN_RESET))
 #define BMI_CS_HIG()			(HAL_GPIO_WritePin(BMI_CS_GPIO_Port, BMI_CS_Pin, GPIO_PIN_SET))
-#define EX_BMI_CS_LOW()		(HAL_GPIO_WritePin(EX_BMI_CS_GPIO_Port, EX_BMI_CS_Pin, GPIO_PIN_RESET))
-#define EX_BMI_CS_HIG()		(HAL_GPIO_WritePin(EX_BMI_CS_GPIO_Port, EX_BMI_CS_Pin, GPIO_PIN_SET))
 
 //#define BMI_CS_Pin GPIO_PIN_12
 //#define BMI_CS_GPIO_Port GPIOB

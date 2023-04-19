@@ -25,17 +25,20 @@ typedef enum {
 	DEV_ID_IMU = 0,
   DEV_ID_IMU_EX,
 	DEV_ID_RC,
+	DEV_ID_JUDGE,
 	DEV_ID_CNT,
 } dev_id_t;
+/* 设备层 --------------------------------------------------------------------*/
 
 /**
  *	@brief	设备工作状态(通用)
  *	@class	device
  */
 typedef enum {
-	DEV_ONLINE,
 	DEV_OFFLINE,
-} dev_work_state_t;
+	
+	DEV_ONLINE,
+} dev_work_state_e;
 
 /**
  *	@brief	错误代码(通用)
@@ -73,7 +76,7 @@ typedef struct device {
 	void				        (*update)(struct device *self, uint8_t *rxBuf);	// 设备数据更新函数
 	void				        (*check)(struct device *self);	// 设备数据检查函数
 	void				        (*heart_beat)(struct device *self);	// 设备心跳包
-	volatile dev_work_state_t	work_state;	// 设备工作状态
+	volatile dev_work_state_e	work_state;	// 设备工作状态
 	volatile dev_errno_t	  	errno;		// 可自定义具体设备错误代码
 	const    dev_id_t		    	id;			// 设备id
 } device_t;
@@ -101,7 +104,7 @@ typedef struct rm_motor_struct {
 	void					    (*update)(struct rm_motor_struct *self, uint8_t *rxBuf);
 	void					    (*check)(struct rm_motor_struct *self);	
 	void					    (*heart_beat)(struct rm_motor_struct *self);
-	volatile dev_work_state_t   work_state;
+	volatile dev_work_state_e   work_state;
 	volatile dev_errno_t	   	  errno;
 	const    dev_id_t		      	id;
 } rm_motor_t;

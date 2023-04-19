@@ -35,7 +35,7 @@ typedef struct drive_str{
 }driver_t;
 
 typedef struct work_state_struct {
-	dev_work_state_t dev_state;
+	dev_work_state_e dev_state;
 	imu_err_e	       err_code;
 	
 	uint8_t   offline_cnt;

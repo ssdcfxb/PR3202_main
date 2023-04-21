@@ -1,4 +1,6 @@
 #include "State.h"
+
+extern void Chassic_Stop(void);
 //---------------------------------------上层函数
 void State_Ctrl(void);//总执行
 void State_Judge_RC_Is_Boot(void);
@@ -31,10 +33,21 @@ State_t State =
 	.ctrl = State_Ctrl,	
 	
 	
-	.chassic_flag.now_state = FALL,
-	.chassic_flag.chas_ctrl_mode = TORQUE_CTRL,
 	.chassic_flag.is_in_air = ON_GROUND,
+	.chassic_flag.brake_ctrl_switch = CLOSE,
+	.chassic_flag.now_state = FALL,
+	.chassic_flag.chas_dir = ALINE_TO_F,
+	.chassic_flag.chas_motion_mode = SMALL_TOP_OFF,
+	.chassic_flag.gimb_motion_mode = GIMB_TURING_AROUND,
+	.chassic_flag.chas_ctrl_mode  = TORQUE_CTRL,
+	.chassic_flag.gimb_auto_mode = AUTO_CLOSE,
+	.chassic_flag.sys_reset_switch = CLOSE,
+
 	
+	.rc_flag.work_state = DEV_OFFLINE,
+	.rc_flag.magz_state = CLOSE,
+	.rc_flag.ch_wise = OPEN,
+	.rc_flag.boot_state = SWITCH_DOWN,
 };
 
 
@@ -56,7 +69,7 @@ void State_Ctrl(void)
 	#ifdef NO_LINK_TO_RECEIVE
 	{
 		State_Judge_RC_Is_Boot();
-		Sys_Judge_Is_Reset();
+		//Sys_Judge_Is_Reset();
 		
 		if( RC_OFFLINE && SUCCESS_COMM )
 			Comm_RC_Offline_Handler();//这里只清除遥控器和底盘标志位
@@ -90,6 +103,7 @@ void Sys_Judge_Is_Reset(void)
 {
 	if(State.chassic_flag.sys_reset_switch == OPEN)
 	{
+		Chassic_Stop();
 		__set_FAULTMASK(1); 
 		NVIC_SystemReset();
 	}

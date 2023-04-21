@@ -296,6 +296,7 @@ void Chassic_Status_Meas_UP(Sys_Status_t *status)
 
 //目标值更新中
 //如果接了接收机,进行了速度目标不为0清除位移、失联保持yaw的目标值是测量值
+
 void Chassic_Status_Tar_UP(Sys_Status_t *status)
 {
 	if(status == NULL)
@@ -308,10 +309,9 @@ void Chassic_Status_Tar_UP(Sys_Status_t *status)
 	#endif	
 	
 	#ifdef NO_LINK_TO_RECEIVE
-	{	
+	{
 
-		if( (State.chassic_flag.chas_motion_mode == SMALL_TOP_OFF && \
-			  State.chassic_flag.now_state != ALINE) || State.rc_flag.ch_wise == CLOSE)	
+		if( State.rc_flag.ch_wise == CLOSE )	
 		{
 			Chassic_Sim(0, 0);
 		}
@@ -449,6 +449,7 @@ void Chassic_Status_Tar_UP(Sys_Status_t *status)
 				status->tar.M_X_L = -MOMENTUM_MAX_X_MEAS;
 				status->tar.M_X_R = MOMENTUM_MAX_X_MEAS;
 				
+				chassic.info.M_LQR_Gain[M_X] = 10 * M_LQR_Param[M_X];
 				chassic.info.M_LQR_Gain[C_X] = chassic.info.M_LQR_Gain[C_V] = 0;
 				
 				Chas_Clear_X_Info();
@@ -457,8 +458,11 @@ void Chassic_Status_Tar_UP(Sys_Status_t *status)
 			//关闭小陀螺,根据头的位置就近回位,误差小到一定程度然后设置底盘状态为对齐
 			else if(State.chassic_flag.chas_motion_mode == SMALL_TOP_OFF)
 			{		
+
+				
 				status->tar.M_X_L = status->tar.M_X_R = 0;
 			
+				chassic.info.M_LQR_Gain[M_X] = M_LQR_Param[M_X];
 				chassic.info.M_LQR_Gain[C_X] = M_LQR_Param[C_X];
 				chassic.info.M_LQR_Gain[C_V] = M_LQR_Param[C_V];
 				
@@ -468,12 +472,13 @@ void Chassic_Status_Tar_UP(Sys_Status_t *status)
 				else		
 					status->tar.Yaw = VALUE_PI;
 			
-				if( abs_(status->err.Yaw) <= 3 * ANGLE_CONVERSION_RADIAN ) 
-					Chassic_Flag_Set(ALINE);
-				else
-					Chassic_Sim(0, 0);
+//				if( abs_(status->err.Yaw) <= 3 * ANGLE_CONVERSION_RADIAN ) 
+//					Chassic_Flag_Set(ALINE);
+//				else
+//					Chassic_Sim(0, 0);
 			}		
 		}
+		
 	}
 	
 	#endif
@@ -1091,14 +1096,14 @@ void Chassic_Sim(float WS, float AD)
 				yaw_err = chassic.info.Status.err.Yaw;
 
 	
-	if( abs(yaw_err) < MAX_YAW_ANGLE_ERR * ANGLE_CONVERSION_RADIAN )
+	if( abs_(yaw_err) < MAX_YAW_ANGLE_ERR * ANGLE_CONVERSION_RADIAN )
 	{
 		//如果只是原地旋转
-		if( v_tar == 0 && abs(v_err) < SPIN_STATE_X_SPEED )
+		if( v_tar == 0 && abs_(v_err) < SPIN_STATE_X_SPEED )
 			yaw_tar += AD / -CH_MAX * ONLY_SPIN_RATE;  
 		
 		//如果是还没刹车完就旋转
-		if( v_tar == 0 && abs(v_err) > SPIN_STATE_X_SPEED )
+		if( v_tar == 0 && abs_(v_err) > SPIN_STATE_X_SPEED )
 			yaw_tar += AD / -CH_MAX * SPIN_AS_BRAKING_RATE;  
 		
 		//如果是前进的时候要旋转
@@ -1187,7 +1192,7 @@ void Momentum_At_Limited_Pos_Protect(void)
 		    M_R_T = chassic.info.M_R_M.Tx_Torque;
 	
 	//左动量块在最前或在最后
-	if( abs(M_X_L) >= MOMENTUM_MAX_X_MEAS - 0.01f ) //0.17m
+	if( abs_(M_X_L) >= MOMENTUM_MAX_X_MEAS - 0.01f ) //0.17m
 	{
 		//动量块在前(即正的)且扭矩一直往前(即负的)
 		//动量块在后(即负的)且扭矩一直往后(即正的)
@@ -1195,7 +1200,7 @@ void Momentum_At_Limited_Pos_Protect(void)
 			chassic.info.M_L_M.Tx_Torque = chassic.info.M_L_M.Voltage = 0;
 	}
 	
-	if( abs(M_X_R) >= MOMENTUM_MAX_X_MEAS - 0.01f )
+	if( abs_(M_X_R) >= MOMENTUM_MAX_X_MEAS - 0.01f )
 	{
 		//动量块在前(即正的)且扭矩一直往前(即负的)
 		//动量块在后(即负的)且扭矩一直往后(即正的)
@@ -1214,7 +1219,7 @@ void Chassic_X_Speed_Tar_Dynamic_Changes(float WS)
 	float spd_err  = chassic.info.Status.err.C_V;
 	
 	//第一阶段,先到达最大起步
-	if(abs(spd_meas) <= X_MAX_START_SPEED - 0.2f) //当前速度小于1.8m/s
+	if(abs_(spd_meas) <= X_MAX_START_SPEED - 0.2f) //当前速度小于1.8m/s
 		chassic.info.Status.tar.C_V = WS / CH_MAX * X_MAX_START_SPEED;
 		
 	//第二阶段,提高目标速度
@@ -1223,20 +1228,20 @@ void Chassic_X_Speed_Tar_Dynamic_Changes(float WS)
 		//想要正向再加速
 		if(WS ==  CH_MAX)
 		{
-			if(abs(spd_err) <= 0.2f)
+			if(abs_(spd_err) <= 0.2f)
 				chassic.info.Status.tar.C_V += 0.5f;
 		}
 		
 		//想要反向再加速
 		else if(WS ==  CH_MIN)
 		{
-			if(abs(spd_err) <= 0.2f)
+			if(abs_(spd_err) <= 0.2f)
 				chassic.info.Status.tar.C_V -= 0.5f;
 		}
 		
 		else
 		{
-			chassic.info.Status.tar.C_V = WS / CH_MAX * abs(spd_meas);
+			chassic.info.Status.tar.C_V = WS / CH_MAX * abs_(spd_meas);
 		}
 		
 		chassic.info.Status.tar.C_V = constrain(chassic.info.Status.tar.C_V,
@@ -1250,7 +1255,6 @@ void Chassic_X_Speed_Tar_Dynamic_Changes(float WS)
 //刹车调整位移目标0点
 int16_t Last_WS_Val, This_WS_Val;
 float kp,ki;
-uint8_t brake_over;
 void Chassic_Brake_Over_Dynamic_Ctrl(void)
 {
 	float cnt;
@@ -1273,8 +1277,7 @@ void Chassic_Brake_Over_Dynamic_Ctrl(void)
 	{
 		Chassic_Flag_Set(CLOSE);
 		chassic.info.C_LQR_Gain[C_X] = C_LQR_Param[C_X];
-		chassic.info.Status.tar.C_X = 0;
-		brake_over = 0;
+		Chas_Clear_X_Info();
 	}
 		
 	
@@ -1284,8 +1287,7 @@ void Chassic_Brake_Over_Dynamic_Ctrl(void)
 	{
 		Chassic_Flag_Set(CLOSE);
 		chassic.info.C_LQR_Gain[C_X] = C_LQR_Param[C_X];
-		chassic.info.Status.tar.C_X = 0;
-		brake_over = 0;
+		Chas_Clear_X_Info();
 	}
 		
 	
@@ -1294,32 +1296,14 @@ void Chassic_Brake_Over_Dynamic_Ctrl(void)
 		chassic.info.C_LQR_Gain[C_X] = C_LQR_Param[C_X];
 		cnt = abs_(chassic.info.Status.meas.C_X)/0.1f;
 			
-		if( abs_(chassic.info.Status.meas.C_V) <= 0.02f || brake_over == 1)
+		if( abs_(chassic.info.Status.meas.C_V) <= 0.02f )
 		{
-			/*刹车停止且角度很大*/
-			if( abs_(chassic.info.Status.meas.Pitch) >= 10.f * ANGLE_CONVERSION_RADIAN )
-			{
-				Chas_Clear_X_Info();
-				brake_over = 1;
-			}
-				
-			/*刹车停止且角度很小*/
-			else if( abs_(chassic.info.Status.meas.Pitch) <= 3.f * ANGLE_CONVERSION_RADIAN )
-			{
-				chassic.info.C_LQR_Gain[C_X] -= kp * abs_(chassic.info.Status.err.C_X) + \
-																				ki * abs_(chassic.info.Status.err.C_V);
-				
-				if(abs_(chassic.info.Status.meas.C_V) <= 0.01f)
-				{
-					Chassic_Flag_Set(CLOSE);
-					brake_over = 0;
-				}	
-			}
-				
+			Chas_Clear_X_Info();
+			Chassic_Flag_Set(CLOSE);	
 		}
 		
 		/*刹车速度还没到0*/
-		if( abs_(chassic.info.Status.meas.C_V) > 0.02f && brake_over == 0 )
+		else
 		{
 			if(abs_(chassic.info.Status.meas.Pitch) < 15.f * ANGLE_CONVERSION_RADIAN)
 				chassic.info.C_LQR_Gain[C_X] -= cnt*10.f;

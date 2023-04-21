@@ -310,7 +310,7 @@ void Judge_AdaptDialSpeed(void)
 	{
 		heat_low = 0;
 	}
-	if ((launcher.info->limit_heat - launcher.info->measure_launcher_heat) <= 30)
+	if ((launcher.info->limit_heat - launcher.info->measure_launcher_heat) <= 20)
 	{
 		heat_high = 1;
 	}
@@ -322,7 +322,7 @@ void Judge_AdaptDialSpeed(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->dial_speed = -4000.0f;
+		launcher.conf->dial_speed = -3000.0f;
 		launcher.conf->dial_swiftspeed = -6000.f;
 	}
 	else
@@ -331,12 +331,12 @@ void Judge_AdaptDialSpeed(void)
 		{
 			if (heat_low == 1)
 			{
-				launcher.conf->dial_speed = -4000.0f;
+				launcher.conf->dial_speed = -3000.0f;
 				launcher.conf->dial_swiftspeed = -6000.f;
 			}
 			else
 			{
-				launcher.conf->dial_speed = -4000.0f;
+				launcher.conf->dial_speed = -2000.0f;
 				launcher.conf->dial_swiftspeed = -6000.f;
 			}
 			if (heat_high == 1)
@@ -347,13 +347,13 @@ void Judge_AdaptDialSpeed(void)
 			}
 			else
 			{
-				launcher.conf->dial_speed = -4000.0f;
+				launcher.conf->dial_speed = -2000.0f;
 				launcher.conf->dial_swiftspeed = -6000.f;
 			}
 		}
 		else
 		{
-			launcher.conf->dial_speed = -4000.0f;
+			launcher.conf->dial_speed = -3000.0f;
 			launcher.conf->dial_swiftspeed = -6000.f;
 		}
 	}

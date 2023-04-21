@@ -104,6 +104,9 @@ int main(void)
   MX_USART6_UART_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
+	SPI1_Init();
+	SPI2_Init();
+	imu_sensor.init(&imu_sensor);
 	DRIVER_Init();
 	DEVICE_Init();
 	TIM4_Init();

@@ -59,7 +59,7 @@ void super_heart_beat(struct CAP_RP_struct *self)
 /*----------------------------与超电主控的通讯--------------------------------------------*/
 void set_message(void)
 {
-	Super_2023.TX.chassis_power_buffer = judge_sensor.info->power_heat_data.chassis_power_buffer;
+	Super_2023.TX.chassis_power_buffer = 10;//judge_sensor.info->power_heat_data.chassis_power_buffer;
 	Super_2023.TX.chassis_power_limit = judge_sensor.info->game_robot_status.chassis_power_limit;
 	Super_2023.TX.chassis_volt = judge_sensor.info->power_heat_data.chassis_volt;	//**
 	Super_2023.TX.chassis_current = judge_sensor.info->power_heat_data.chassis_current;	//**

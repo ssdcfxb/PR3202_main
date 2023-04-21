@@ -9,7 +9,7 @@ void StartControlTask(void const * argument)
 	launcher.init();
   for(;;)
   {
-		if(module.state == MODULE_STATE_NORMAL) 
+		if((module.state == MODULE_STATE_NORMAL))
 		{
 			if (module.remote_mode == KEY)
 			{

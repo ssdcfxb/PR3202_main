@@ -23,6 +23,4 @@ void DRIVER_Init(void)
 	USART3_Init();
 	USART6_Init();
 	TIM5_Init();
-	SPI1_Init();
-	SPI2_Init();
 }

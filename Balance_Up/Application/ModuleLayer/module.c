@@ -10,6 +10,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "module.h"
 
+//#include "drv_tim.h"
+//#include "can_protocol.h"
 #include "launcher.h"
 #include "gimbal.h"
 /* Private macro -------------------------------------------------------------*/
@@ -22,6 +24,7 @@ void Rc_RxInfoCheck(void);
 void Key_RxInfoCheck(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
+//extern int16_t can1_send_buf[8], can2_send_buf[8];
 /* Exported functions --------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 symbal_t symbal = {
@@ -459,14 +462,20 @@ void Key_RxInfoCheck(void)
 	}
 	
 	/*  ZXV:上下主控复位  */
-	if ((keyboard.state.Z != relax_K) && (keyboard.state.X != relax_K) && (keyboard.state.V != relax_K))
-	{
-		symbal.slave_reset = 1;
-	}
-	if ((keyboard.state.Z == long_press_K) && (keyboard.state.X == long_press_K) && (keyboard.state.V == long_press_K))
-	{
-		HAL_NVIC_SystemReset();
-	}
-	
+//	if ((keyboard.state.Z != relax_K) && (keyboard.state.X != relax_K) && (keyboard.state.V != relax_K))
+//	{
+//		symbal.slave_reset = 1;
+//	}
+//	if ((keyboard.state.Z == long_press_K) && (keyboard.state.X == long_press_K) && (keyboard.state.V == long_press_K))
+//	{
+//		memset(can1_send_buf, 0, 16);
+//		memset(can2_send_buf, 0, 16);
+//		CAN_SendAll();
+//		Magazine_Sleep();
+//		
+//		__set_FAULTMASK(1); 
+//		NVIC_SystemReset();
+//	}
+//	
 }
 

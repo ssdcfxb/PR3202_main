@@ -376,8 +376,8 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.shoot_cmd = swift_shoot;
 	}
-	/*  Shift:热量解锁  */
-	if ((keyboard.state.Shift == short_press_K) || (keyboard.state.Shift == long_press_K))
+	/*  G:热量解锁  */
+	if ((keyboard.state.G == short_press_K) || (keyboard.state.G == long_press_K))
 	{
 		status.heat_mode = heat_limit_off;
 	}
@@ -476,6 +476,6 @@ void Key_RxInfoCheck(void)
 //		__set_FAULTMASK(1); 
 //		NVIC_SystemReset();
 //	}
-//	
+	
 }
 

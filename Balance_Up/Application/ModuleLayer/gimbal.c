@@ -273,6 +273,45 @@ void Gimbal_YawResetCheck(void)
 		
 }
 
+/**
+  * @brief  云台复位
+  * @param  
+  * @retval 
+  */
+void Gimbal_Reset(void)
+{
+	if (symbal.gim_sym.reset_start == 1 && symbal.gim_sym.reset_ok == 0)
+	{
+		if (gimbal.info->gimbal_mode == gim_machine)
+		{
+			Gimbal_MotoReset();
+		}
+		else if ((gimbal.info->gimbal_mode == gim_gyro) || (gimbal.info->gimbal_mode == gim_gyro2))
+		{
+			Gimbal_GyroReset();
+		}
+	}
+}
+
+void Gimbal_MotoReset(void)
+{
+	gimbal.info->target_pitch_motor_angle = gim_conf.restart_pitch_motor_angle;
+	gimbal.info->target_yaw_motor_angle = gim_conf.restart_yaw_motor_angle;
+	
+	symbal.gim_sym.reset_start = 0;
+}
+
+void Gimbal_GyroReset(void)
+{
+	
+	gimbal.info->target_pitch_imu_angle = gim_conf.restart_pitch_imu_angle;
+	gimbal.info->target_yaw_imu_angle = gimbal.info->measure_yaw_imu_angle \
+																		+ (float)gimbal.info->yaw_motor_angle_err * ECD_TO_ANGLE;
+	
+	symbal.gim_sym.reset_start = 0;
+}
+
+
 void Gimbal_GetRcInfo(void)
 {
 	if (gimbal.info->gimbal_mode == gim_machine)
@@ -286,7 +325,6 @@ void Gimbal_GetRcInfo(void)
 		gimbal.info->target_pitch_motor_angle = gimbal.info->measure_pitch_motor_angle;
 		gimbal.info->target_pitch_imu_deltaangle = (float)rc_sensor.info->ch1 / gim_conf.rc_pitch_imu_offset;
 		gimbal.info->target_yaw_imu_deltaangle = -(float)rc_sensor.info->ch0 / gim_conf.rc_yaw_imu_offset;
-		
 	}
 	else if (gimbal.info->gimbal_mode == gim_vision)
 	{
@@ -399,44 +437,6 @@ void Gimbal_YawTurn(void)
 			gimbal.info->target_yaw_imu_angle = gimbal.info->measure_yaw_imu_angle + 179.5f;
 		}
 	}
-}
-
-/**
-  * @brief  云台复位
-  * @param  
-  * @retval 
-  */
-void Gimbal_Reset(void)
-{
-	if (symbal.gim_sym.reset_start == 1 && symbal.gim_sym.reset_ok == 0)
-	{
-		if (gimbal.info->gimbal_mode == gim_machine)
-		{
-			Gimbal_MotoReset();
-		}
-		else if ((gimbal.info->gimbal_mode == gim_gyro) || (gimbal.info->gimbal_mode == gim_gyro2))
-		{
-			Gimbal_GyroReset();
-		}
-	}
-}
-
-void Gimbal_MotoReset(void)
-{
-	gimbal.info->target_pitch_motor_angle = gim_conf.restart_pitch_motor_angle;
-	gimbal.info->target_yaw_motor_angle = gim_conf.restart_yaw_motor_angle;
-	
-	symbal.gim_sym.reset_start = 0;
-}
-
-void Gimbal_GyroReset(void)
-{
-	
-	gimbal.info->target_pitch_imu_angle = gim_conf.restart_pitch_imu_angle;
-	gimbal.info->target_yaw_imu_angle = gimbal.info->measure_yaw_imu_angle \
-																		+ (float)gimbal.info->yaw_motor_angle_err * ECD_TO_ANGLE;
-	
-	symbal.gim_sym.reset_start = 0;
 }
 
 /**

@@ -323,7 +323,6 @@ void Judge_AdaptDialSpeed(void)
 	if (judge.work_state == DEV_OFFLINE)
 	{
 		launcher.conf->dial_speed = -3000.0f;
-		launcher.conf->dial_swiftspeed = -6000.f;
 	}
 	else
 	{
@@ -332,29 +331,24 @@ void Judge_AdaptDialSpeed(void)
 			if (heat_low == 1)
 			{
 				launcher.conf->dial_speed = -3000.0f;
-				launcher.conf->dial_swiftspeed = -6000.f;
 			}
 			else
 			{
 				launcher.conf->dial_speed = -2000.0f;
-				launcher.conf->dial_swiftspeed = -6000.f;
 			}
 			if (heat_high == 1)
 			{
 				launcher.conf->dial_speed = -0.0f;
-				launcher.conf->dial_swiftspeed = -0.f;
 				status.lch_cmd.shoot_cmd = shoot_reset;
 			}
 			else
 			{
 				launcher.conf->dial_speed = -2000.0f;
-				launcher.conf->dial_swiftspeed = -6000.f;
 			}
 		}
 		else
 		{
 			launcher.conf->dial_speed = -3000.0f;
-			launcher.conf->dial_swiftspeed = -6000.f;
 		}
 	}
 }

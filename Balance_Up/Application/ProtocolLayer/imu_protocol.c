@@ -72,9 +72,9 @@ void imu_update(imu_sensor_t *imu_sen)
 //	accx_ = lowpass(accx_, accx, 0.1);
 //	accy_ = lowpass(accy_, accy, 0.1);
 //	accz_ = lowpass(accz_, accz, 0.1);
-//	BMI_Get_Acceleration(pitch, roll, yaw,\
-//											 accx_, accy_, accz_,\
-//											 &imu_info->base_info.accx, &imu_info->base_info.accy, &imu_info->base_info.accz);
+	BMI_Get_Acceleration(pitch, roll, yaw,\
+											 accx_, accy_, accz_,\
+											 &imu_info->base_info.accx, &imu_info->base_info.accy, &imu_info->base_info.accz);
 	
 	/* ╪фкЦмсбщргйЩ╬щ */
 	//pitch

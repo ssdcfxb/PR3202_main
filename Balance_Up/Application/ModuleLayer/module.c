@@ -372,7 +372,7 @@ void Key_RxInfoCheck(void)
 		status.lch_cmd.fric_cmd = fric_on;
 		status.lch_cmd.magz_cmd = magz_close;
 	}
-	if (((keyboard.state.R == short_press_K) || (keyboard.state.R == long_press_K)) && (status.lch_state.fric_state == fric_on))
+	if ((keyboard.state.R == down_K) && (status.lch_state.fric_state == fric_on))
 	{
 		status.lch_cmd.shoot_cmd = swift_shoot;
 	}

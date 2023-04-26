@@ -61,7 +61,6 @@ launcher_work_info_t  launcher_work_info = {
 	.launcher_commond.Fric_cmd = Fric_Reset,
 	.launcher_commond.Magz_cmd = Magz_Reset,
 	.launcher_commond.Dial_cmd = Shoot_Reset,
-	.lock_cnt = 0,
 	.shoot_cnt = 0,
 };
 
@@ -75,7 +74,6 @@ launcher_conf_t   launcher_conf = {
 	.dial_swiftspeed = -6000.0f,
 	.dial_torque_limit = 2000.0f,
 	.lock_angle_check = 1.5f,
-	.lock_cnt = 50,
 	.Back_Angle = 45.0f,
 	.Load_Angle = -45.0f,
 //	.wait_time = 1000,  //发射间隔时间，单位ms
@@ -686,19 +684,10 @@ void Dial_StatusCheck(void)
 		else 
 		{
 			/**    拨盘角度堵转检测    **/
-			if (abs(launcher.info->measure_dial_speed) < 5)
+			if (RM_motor[DIAL].ctr_stuck_flag(&RM_motor[DIAL], launcher.conf->dial_torque_limit))
 			{
-				launcher.work_info->lock_cnt ++;
-				if (launcher.work_info->lock_cnt > launcher.conf->lock_cnt)
-				{
-					launcher.work_info->dial_status = F_Lock_Dial;
-					launcher.info->target_dial_angle = launcher.conf->Back_Angle + launcher.info->measure_dial_angle;
-					launcher.work_info->lock_cnt = 0;
-				}
-			}
-			else 
-			{
-				launcher.work_info->lock_cnt = 0;
+				launcher.work_info->dial_status = F_Lock_Dial;
+				launcher.info->target_dial_angle = launcher.conf->Back_Angle + launcher.info->measure_dial_angle;
 			}
 		}
 	}
@@ -738,26 +727,16 @@ void Dial_StatusCheck(void)
 		}
 		else 
 		{
-			if (abs(launcher.info->measure_dial_speed) < 5)
+			if (RM_motor[DIAL].ctr_stuck_flag(&RM_motor[DIAL], launcher.conf->dial_torque_limit))
 			{
-				launcher.work_info->lock_cnt ++;
-				if (launcher.work_info->lock_cnt > launcher.conf->lock_cnt)
-				{
-					launcher.work_info->dial_status = Reload_Dial;
-					launcher.info->target_dial_angle = -launcher.conf->Back_Angle + launcher.info->measure_dial_angle;
-					launcher.work_info->lock_cnt = 0;
-				}
-			}
-			else 
-			{
-				launcher.work_info->lock_cnt = 0;
+				launcher.work_info->dial_status = Reload_Dial;
+				launcher.info->target_dial_angle = -launcher.conf->Back_Angle + launcher.info->measure_dial_angle;
 			}
 		}
 	}
 	else
 	{
 		launcher.work_info->dial_status = WaitCommond_Dial;
-//		launcher.info->target_dial_angle = launcher.info->measure_dial_angle;
 	}
 }
 

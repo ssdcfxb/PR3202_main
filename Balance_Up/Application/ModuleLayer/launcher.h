@@ -76,27 +76,6 @@ typedef enum {
 	Swift_Shoot,		// 速射
 } Dial_cmd_e;
 
-///*  发射机构指令  */
-//typedef struct {
-//	fric_cmd_e		fric_cmd;
-//	magz_cmd_e		magz_cmd;
-//	dial_cmd_e		shoot_cmd;
-//} lch_cmd_t;
-
-//// 发射机构指令枚举
-//typedef enum
-//{
-//	Fric_Toggle,    // 开关摩擦轮
-//	Fric_Open,			// 开摩擦轮
-//	Fric_Close,			// 关摩擦轮
-//	Magz_Open,      // 开弹仓
-//	Magz_Close,     // 关弹仓
-//	Func_Reset,     // 功能复位
-//	Single_Shoot,   // 单发
-//	Keep_Shoot,     // 连发
-//	WaitCommond_L   // 等待指令
-//} launcher_commond_e;
-
 // 发射机构指令枚举
 typedef struct
 {
@@ -132,6 +111,7 @@ typedef struct
 	float  target_right_speed;
 	float  target_dial_speed;
 	float  target_dial_angle;
+	float  target_heat_angle;
 	
 	uint8_t  last_s1;
 	uint8_t  init_s2;
@@ -145,7 +125,6 @@ typedef struct
  	launcher_commond_t  launcher_commond;
 	fric_status_e       fric_status;
 	dial_status_e       dial_status;
-	uint16_t            lock_cnt;
 	uint16_t            shoot_cnt;
 } launcher_work_info_t;
 
@@ -162,7 +141,6 @@ typedef struct
 	float    dial_swiftspeed;
 	float    dial_torque_limit;
 	float    lock_angle_check;
-	int16_t  lock_cnt;
 	float    Back_Angle;
 	float    Load_Angle;
 	uint16_t wait_time;

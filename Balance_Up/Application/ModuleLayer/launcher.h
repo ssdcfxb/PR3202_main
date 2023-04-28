@@ -27,30 +27,30 @@
 // 发射机构模式枚举
 typedef enum
 {
+	lch_keep,      // 保持
 	lch_gyro,      // 陀螺仪
 	lch_gyro2,     // 陀螺仪
 	lch_machine,   // 机械
-	lch_keep,      // 保持
 } launcher_mode_e;
 
 // 摩擦轮状态枚举
 typedef enum
 {
+	WaitCommond_Fric, // 等待指令
 	On_Fric,        // 开启
 	Off_Fric,       // 关闭
-	WaitCommond_Fric // 等待指令
 } fric_status_e;
 
 // 拨盘状态枚举
 typedef enum
 {
+	WaitCommond_Dial,// 等待指令
 	Reload_Dial,     // 补弹
-	F_Lock_Dial,     // 正向卡弹
+	Lock_Dial,    	 // 卡弹
 	SpeedKeep_Dial,  // 速度保持
 	SwiftKeep_Dial,  // 速射保持
 //	Unload_Dial,   // 退弹
 //	B_Lock_Dial ,  // 反向卡弹
-	WaitCommond_Dial // 等待指令
 } dial_status_e;
 
 /*  摩擦轮指令枚举  */
@@ -106,6 +106,7 @@ typedef struct
 	float    measure_launcher_speed;
 	uint16_t limit_heat;
 	uint16_t measure_launcher_heat;
+	uint16_t remain_heat;
 	
 	float  target_left_speed;
 	float  target_right_speed;

@@ -18,6 +18,7 @@
 typedef enum {
 	MODULE_STATE_RCLOST,	// 遥控失联
 	MODULE_STATE_RCINIT,	// 遥控初始化
+	MODULE_STATE_IMUERR,	// 陀螺仪错误
 	MODULE_STATE_NORMAL,	// 组件正常
 	MODULE_STATE_WRONG,	  // 组件错误
 } module_state_t;

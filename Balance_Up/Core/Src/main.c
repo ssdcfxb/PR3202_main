@@ -200,8 +200,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			i = 0;
 		}
 		
-		
-		imu_sensor.update(&imu_sensor);
+		if (imu_sensor.work_state.err_code == IMU_NONE_ERR)
+		{
+			imu_sensor.update(&imu_sensor);
+		}
 		
 		
 	}

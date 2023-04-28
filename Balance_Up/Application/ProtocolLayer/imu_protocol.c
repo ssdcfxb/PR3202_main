@@ -39,8 +39,8 @@ void imu_update(imu_sensor_t *imu_sen)
 	else if(imu_sen->driver.tpye == DR_SPI2)
 	{
 		BMI_Get_RawData(&ggx, &ggy, &ggz, &aax, &aay, &aaz);
+		BMI_Get_Temperature(&temp);
 	}
-	BMI_Get_Temperature(&temp);
 	imu_info->raw_info.acc_x = aax;
 	imu_info->raw_info.acc_y = aay;
 	imu_info->raw_info.acc_z = aaz;
@@ -90,4 +90,16 @@ void imu_update(imu_sensor_t *imu_sen)
 	imu_info->base_info.ave_rate_yaw = ave_fil_update(&imu_yaw_dif_speed_ave_filter, imu_info->base_info.rate_yaw, 3);
 	
 	imu_sen->work_state.offline_cnt = 0;
+	
+	/*  imu¶ÁÈ¡Êý¾ÝÅÐ¶Ï  */
+	if ((aax == 0) && (aay == 0) && (aaz == 0) \
+			 && (ggx == 0) && (ggy == 0) && (ggz == 0))
+	{
+		if(++imu_sen->work_state.err_cnt == 100)
+		{
+			imu_sen->work_state.dev_state = DEV_OFFLINE;
+			imu_sen->work_state.err_code = IMU_DATA_ERR;
+			imu_sen->work_state.offline_cnt = imu_sen->work_state.offline_max_cnt;
+		}
+	}
 }

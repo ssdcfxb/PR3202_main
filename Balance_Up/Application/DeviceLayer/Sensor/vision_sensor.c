@@ -47,6 +47,7 @@ void vision_init(vision_sensor_t *vis_sen)
 	tx_info->mode = AIM_OFF;     // datau8_1
 	tx_info->shoot_speed = 0;    // datau8_2
 	tx_info->my_color = 0;       // datau8_3
+	tx_info->is_change_target = 0;// datau8_4
 	
 	rx_info->pitch_angle = 0.0f; // dataf_1
 	rx_info->yaw_angle = 0.0f;   // dataf_2

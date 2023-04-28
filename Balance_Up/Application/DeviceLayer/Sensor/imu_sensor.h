@@ -37,6 +37,9 @@ typedef struct work_state_struct {
 	dev_work_state_t dev_state;
 	imu_err_e	       err_code;
 	
+	uint8_t			err_cnt;
+	int8_t			init_code;
+	
 	uint8_t   offline_cnt;
 	uint8_t   offline_max_cnt;
 	

@@ -46,6 +46,7 @@ imu_sensor_t imu_sensor = {
 	.work_state.dev_state = DEV_OFFLINE,
 	.id = DEV_ID_IMU,	
 	.work_state.offline_max_cnt = 50,	
+	.work_state.err_cnt = 0,
 	
 	.init = &imu_init,
 	.update = &imu_update,
@@ -56,7 +57,6 @@ imu_sensor_t imu_sensor = {
 /* Exported functions --------------------------------------------------------*/
 void imu_init(struct imu_struct *self)
 {
-	int8_t rslt;
 	uint32_t tickstart = HAL_GetTick();
 
 	self->work_state.dev_state = DEV_OFFLINE;
@@ -83,14 +83,16 @@ void imu_init(struct imu_struct *self)
 		
 	}
 	
-	rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
-	rs = rslt;
+	self->work_state.init_code = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
 
-	while(rslt)
+	while(self->work_state.init_code)
 	{
+		if (++self->work_state.err_cnt == 50)
+		{
+			break;
+		}
         self->work_state.err_code = IMU_INIT_ERR;
-        rslt = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
-		rs = rslt;
+        self->work_state.init_code = self->bmi->init(self->bmi->dev,self->bmi->drive_type,self->bmi->device_aces);
 	}	
 
 	
@@ -110,13 +112,24 @@ void imu_init(struct imu_struct *self)
 //		rs1 = rslt;
 //	}	
 
-	self->work_state.dev_state = DEV_ONLINE;
-	self->work_state.err_code = IMU_NONE_ERR;
+	if (self->work_state.init_code == 0)
+	{
+		self->work_state.dev_state = DEV_ONLINE;
+		self->work_state.err_code = IMU_NONE_ERR;
+		self->work_state.err_cnt = 0;
+		self->info->init_flag = 1;
+		
+		/* 旋转矩阵初始化 */
+		transform_init();
+	}
+	else
+	{
+		self->work_state.dev_state = DEV_OFFLINE;
+		self->work_state.err_code = IMU_INIT_ERR;
+		self->work_state.offline_cnt = self->work_state.offline_max_cnt;
+		self->info->init_flag = 0;
+	}
 	
-	/* 旋转矩阵初始化 */
-	transform_init();
-	
-	self->info->init_flag = 1;
 }
 
 

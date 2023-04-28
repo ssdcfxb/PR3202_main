@@ -71,8 +71,8 @@ void module_info_update(module_t *mod)
 		launcher.info->launcher_mode = lch_keep;
 		symbal.gim_sym.reset_start = 1;
 		symbal.gim_sym.reset_ok = 0;
-		status.gim_mode = gyro;
 		symbal.slave_reset = 0;
+		status.gim_mode = gyro;
 		status.lch_cmd.fric_cmd = fric_reset;
 		status.lch_cmd.shoot_cmd = shoot_reset;
 	}
@@ -119,25 +119,28 @@ void module_info_update(module_t *mod)
 		}
 		
 		// 遥控器视觉
-		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+		if (module.remote_mode == RC)
 		{
-			if (vision_sensor.work_state == DEV_ONLINE)
+			if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
 			{
-				if (status.gim_mode == gyro)
+				if (vision_sensor.work_state == DEV_ONLINE)
 				{
-					status.gim_mode = vision;
-					gimbal.info->gimbal_mode = gim_vision;
+					if (status.gim_mode == gyro)
+					{
+						status.gim_mode = vision;
+						gimbal.info->gimbal_mode = gim_vision;
+					}
+					else
+					{
+						status.gim_mode = gyro;
+						gimbal.info->gimbal_mode = gim_gyro;
+					}
 				}
 				else
 				{
 					status.gim_mode = gyro;
 					gimbal.info->gimbal_mode = gim_gyro;
 				}
-			}
-			else
-			{
-				status.gim_mode = gyro;
-				gimbal.info->gimbal_mode = gim_gyro;
 			}
 		}
 //		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
@@ -199,12 +202,19 @@ void RC_StateCheck(void)
 			
 		}
 	}
+	
+	if (imu_sensor.work_state.err_code != IMU_NONE_ERR)
+	{
+		module.state = MODULE_STATE_IMUERR;
+	}
 }
 
 void Slave_TxInfoUpdate(void)
 {
 	int16_t front, right;
 		
+	slave.info->tx_info->rc_ch_ws_val = 0;
+	slave.info->tx_info->rc_ch_ad_val = 0;
 	/*  底盘移动通道值  */
 	if (module.state == MODULE_STATE_NORMAL)
 	{
@@ -228,7 +238,7 @@ void Slave_TxInfoUpdate(void)
 	
 	/*  1:遥控器状态标志位  */
 	slave.info->tx_info->status &= 0xFE;
-	if (rc_sensor.work_state == DEV_ONLINE)
+	if (module.state == MODULE_STATE_NORMAL)
 		slave.info->tx_info->status |= 0x01;
 	
 	/*  2:弹仓状态标志位  */
@@ -241,15 +251,18 @@ void Slave_TxInfoUpdate(void)
 	if (rc_sensor.work_state == DEV_OFFLINE)
 		status.chas_cmd = gyro_reset;
 		/*  遥控器开关小陀螺  */
-	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
+	if (module.remote_mode == RC)
 	{
-		if (status.chas_state == gyro_on)
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 		{
-			status.chas_cmd = gyro_off;
-		}
-		else
-		{
-			status.chas_cmd = gyro_on;
+			if (status.chas_state == gyro_on)
+			{
+				status.chas_cmd = gyro_off;
+			}
+			else
+			{
+				status.chas_cmd = gyro_on;
+			}
 		}
 	}
 		/*  开弹仓关闭  */
@@ -348,7 +361,7 @@ void Key_RxInfoCheck(void)
 	symbal.slave_reset = 0;
 	status.lch_cmd.fric_cmd = fric_reset;
 //	keyboard.lch_cmd.magz_cmd = lch_reset;
-//	status.lch_cmd.shoot_cmd = shoot_reset;
+	status.lch_cmd.shoot_cmd = shoot_reset;
 	status.heat_mode = heat_limit_on;
 	/*  Ctrl(同时):关弹仓 关摩擦轮 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
@@ -404,6 +417,11 @@ void Key_RxInfoCheck(void)
 	{
 		status.chas_cmd = gyro_on;
 	}
+	/*  V:切换目标  */
+	if (keyboard.state.V == down_K)
+	{
+		vision_sensor.info->tx_info->is_change_target ++;
+	}
 	/*  B:开弹仓  */
 	if ((keyboard.state.B == down_K) && (symbal.gim_sym.turn_ok == 1))
 	{
@@ -438,11 +456,11 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.shoot_cmd = keep_shoot;
 	}
-	if ((keyboard.state.mouse_btn_l == relax_K) && (keyboard.state.R == relax_K))
-	{
-		status.lch_cmd.shoot_cmd = shoot_reset;
-	}
-	
+//	if (keyboard.state.mouse_btn_l == relax_K)
+//	{
+//		status.lch_cmd.shoot_cmd = shoot_reset;
+//	}
+//	
 	
 	status.gim_cmd = gim_reset;
 	/*  C:掉头  */
@@ -462,20 +480,30 @@ void Key_RxInfoCheck(void)
 	}
 	
 	/*  ZXV:上下主控复位  */
-//	if ((keyboard.state.Z != relax_K) && (keyboard.state.X != relax_K) && (keyboard.state.V != relax_K))
-//	{
-//		symbal.slave_reset = 1;
-//	}
-//	if ((keyboard.state.Z == long_press_K) && (keyboard.state.X == long_press_K) && (keyboard.state.V == long_press_K))
-//	{
+	if ((keyboard.state.Z != relax_K) && (keyboard.state.X != relax_K) && (keyboard.state.V != relax_K))
+	{
+		symbal.slave_reset = 1;
+	}
+	if ((keyboard.state.Z == long_press_K) && (keyboard.state.X == long_press_K) && (keyboard.state.V == long_press_K))
+	{
 //		memset(can1_send_buf, 0, 16);
 //		memset(can2_send_buf, 0, 16);
 //		CAN_SendAll();
 //		Magazine_Sleep();
-//		
-//		__set_FAULTMASK(1); 
-//		NVIC_SystemReset();
-//	}
+		
+		__set_FAULTMASK(1); 
+		NVIC_SystemReset();
+	}
+	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+	{
+		static uint8_t cnt = 0;
+		symbal.slave_reset = 1;
+		if(cnt++ == 5)
+		{
+			__set_FAULTMASK(1);
+			NVIC_SystemReset();
+		}
+	}
 	
 }
 

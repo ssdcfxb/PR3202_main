@@ -38,13 +38,21 @@ typedef struct launcher_state_struct {
 	dial_cmd_e		shoot_state;
 } launcher_state_t;
 
-/*  小陀螺状态  */
+/*  底盘状态  */
 typedef enum
 {
-	gyro_reset, 			// 功能复位
-	gyro_on,        	// 开启
-	gyro_off,       	// 关闭
+	chas_reset, 			// 功能复位
+	gyro_on,        	// 小陀螺开启
+	lean_on,					// 侧身开启
 } chas_cmd_e;
+
+/*  底盘速度状态  */
+typedef enum
+{
+	speed_reset, 			// 功能复位
+	rapid_on,        	// 加速开启
+	rapid_off,       	// 加速关闭
+} speed_cmd_e;
 
 /*  热量限制状态  */
 typedef enum
@@ -55,13 +63,14 @@ typedef enum
 
 typedef struct {
 	launcher_state_t	lch_state;
+	gim_cmd_e					gim_cmd;
 	gim_cmd_e					gim_state;
 	chas_cmd_e				chas_cmd;
 	chas_cmd_e				chas_state;
 	lch_cmd_t					lch_cmd;
-	gim_cmd_e					gim_cmd;
 	gim_mode_e				gim_mode;
 	heat_cmd_e				heat_mode;
+	speed_cmd_e				speed_cmd;
 	uint8_t						tw_last_state;
 } status_t;
 

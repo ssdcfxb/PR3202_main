@@ -102,4 +102,8 @@ void imu_update(imu_sensor_t *imu_sen)
 			imu_sen->work_state.offline_cnt = imu_sen->work_state.offline_max_cnt;
 		}
 	}
+	else
+	{
+		imu_sen->work_state.err_cnt = 0;
+	}
 }

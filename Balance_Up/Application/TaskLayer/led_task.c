@@ -4,9 +4,9 @@ void StartLedTask(void const * argument)
 {
 	static	uint16_t i = 0;
 	
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
   for(;;)
   {
 		if (++i == 60000)
@@ -15,7 +15,7 @@ void StartLedTask(void const * argument)
 		/*  陀螺仪指示灯  */
 		if (imu_sensor.work_state.err_code == IMU_NONE_ERR)
 		{
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
 		}
 		else
 		{
@@ -26,7 +26,7 @@ void StartLedTask(void const * argument)
 		/*  云台电机指示灯  */
 		if ((RM_motor[GIM_Y].state.work_state == M_ONLINE) && (RM_motor[GIM_P].state.work_state == M_ONLINE))
 		{
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
 		}
 		else
 		{
@@ -37,7 +37,7 @@ void StartLedTask(void const * argument)
 		/*  下主控指示灯  */
 		if (slave.work_state == DEV_ONLINE)
 		{
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
 		}
 		else
 		{

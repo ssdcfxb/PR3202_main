@@ -15,7 +15,7 @@ extern void transform_init(void);
 struct bmi2_dev bmi270;
 struct bmi2_dev ex_bmi270;
 
-int8_t rs, rs1;
+//int8_t rs, rs1;
 
 bmi_t bmi_client = {
 
@@ -87,7 +87,7 @@ void imu_init(struct imu_struct *self)
 
 	while(self->work_state.init_code)
 	{
-		if (++self->work_state.err_cnt == 50)
+		if (++self->work_state.err_cnt == 250)
 		{
 			break;
 		}

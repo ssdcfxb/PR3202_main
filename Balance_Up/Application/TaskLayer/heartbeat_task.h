@@ -6,6 +6,8 @@
 
 #include "module.h"
 
+extern IWDG_HandleTypeDef hiwdg;
+
 void StartHeartBeatTask(void const * argument);
 
 #endif

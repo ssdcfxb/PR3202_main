@@ -43,10 +43,11 @@ status_t status = {
 	.lch_state.magz_state = magz_reset,
 	.lch_state.shoot_state = shoot_reset,
 	.gim_state = gim_reset,
-	.chas_cmd = gyro_reset,
-	.chas_state = gyro_reset,
+	.chas_cmd = chas_reset,
+	.chas_state = chas_reset,
 	.gim_mode = gyro,
 	.heat_mode = heat_limit_on,
+	.speed_cmd = speed_reset,
 	.tw_last_state = 0,
 };
 
@@ -119,30 +120,30 @@ void module_info_update(module_t *mod)
 		}
 		
 		// 遥控器视觉
-		if (module.remote_mode == RC)
-		{
-			if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
-			{
-				if (vision_sensor.work_state == DEV_ONLINE)
-				{
-					if (status.gim_mode == gyro)
-					{
-						status.gim_mode = vision;
-						gimbal.info->gimbal_mode = gim_vision;
-					}
-					else
-					{
-						status.gim_mode = gyro;
-						gimbal.info->gimbal_mode = gim_gyro;
-					}
-				}
-				else
-				{
-					status.gim_mode = gyro;
-					gimbal.info->gimbal_mode = gim_gyro;
-				}
-			}
-		}
+//		if (module.remote_mode == RC)
+//		{
+//			if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+//			{
+//				if (vision_sensor.work_state == DEV_ONLINE)
+//				{
+//					if (status.gim_mode == gyro)
+//					{
+//						status.gim_mode = vision;
+//						gimbal.info->gimbal_mode = gim_vision;
+//					}
+//					else
+//					{
+//						status.gim_mode = gyro;
+//						gimbal.info->gimbal_mode = gim_gyro;
+//					}
+//				}
+//				else
+//				{
+//					status.gim_mode = gyro;
+//					gimbal.info->gimbal_mode = gim_gyro;
+//				}
+//			}
+//		}
 //		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 //		{
 //			status.gim_mode = gyro;
@@ -237,27 +238,27 @@ void Slave_TxInfoUpdate(void)
 	}
 	
 	/*  1:遥控器状态标志位  */
-	slave.info->tx_info->status &= 0xFE;
+	slave.info->tx_info->status &= 0xFFFE;
 	if (module.state == MODULE_STATE_NORMAL)
-		slave.info->tx_info->status |= 0x01;
+		slave.info->tx_info->status |= 0x0001;
 	
 	/*  2:弹仓状态标志位  */
-	slave.info->tx_info->status &= 0xFD;
-	if (launcher.work_info->launcher_commond.Magz_cmd == Magz_Open)
-		slave.info->tx_info->status |= 0x02;
+	slave.info->tx_info->status &= 0xFFFD;
+	if (status.lch_state.magz_state == magz_open)
+		slave.info->tx_info->status |= 0x0002;
 	
 	/*  3:小陀螺状态标志位  */
 		/*  遥控器断电关闭  */
 	if (rc_sensor.work_state == DEV_OFFLINE)
-		status.chas_cmd = gyro_reset;
+		status.chas_cmd = chas_reset;
 		/*  遥控器开关小陀螺  */
-	if (module.remote_mode == RC)
+	if ((module.remote_mode == RC) && (module.mode == MODULE_MODE_GYRO2))
 	{
 		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 		{
 			if (status.chas_state == gyro_on)
 			{
-				status.chas_cmd = gyro_off;
+				status.chas_cmd = chas_reset;
 			}
 			else
 			{
@@ -268,47 +269,86 @@ void Slave_TxInfoUpdate(void)
 		/*  开弹仓关闭  */
 	if (status.lch_state.magz_state == magz_open)
 	{
-		status.chas_cmd = gyro_off;
+		status.chas_cmd = chas_reset;
 	}
 		/*  设置开关标志位  */
 	if (status.chas_cmd == gyro_on)
 		status.chas_state = gyro_on;
-	else
-		status.chas_state = gyro_off;
+	else if (status.chas_cmd == chas_reset)
+		status.chas_state = chas_reset;
 		/*  移动时临时关闭  */
-	if (slave.info->tx_info->rc_ch_ws_val != 0)
+	if ((status.chas_state == gyro_on) && (slave.info->tx_info->rc_ch_ws_val != 0))
 	{
-		status.chas_state = gyro_off;
+		status.chas_state = chas_reset;
 	}
-	slave.info->tx_info->status &= 0xFB;
+	slave.info->tx_info->status &= 0xFFFB;
 	if (status.chas_state == gyro_on)
-		slave.info->tx_info->status |= 0x04;
+		slave.info->tx_info->status |= 0x0004;
 	
 	/*  4:头的朝向  */
-	slave.info->tx_info->status &= 0xF7;
+	slave.info->tx_info->status &= 0xFFF7;
 	if (gimbal.conf->restart_yaw_motor_angle != gimbal.conf->MID_VALUE)
-		slave.info->tx_info->status |= 0x08;
+		slave.info->tx_info->status |= 0x0008;
 	
 	/*  5:换头状态标志位  */
-	slave.info->tx_info->status &= 0xEF;
+	slave.info->tx_info->status &= 0xFFEF;
 	if ((symbal.gim_sym.reset_ok == 0) || (symbal.gim_sym.turn_ok == 0))
-		slave.info->tx_info->status |= 0x10;
+		slave.info->tx_info->status |= 0x0010;
 	
 	/*  6:自瞄标志位  */
-	slave.info->tx_info->status &= 0xDF;
+	slave.info->tx_info->status &= 0xFFDF;
 	if (((vision_sensor.info->is_find_target == 1) || (vision_sensor.info->is_find_buff == 1))\
 			&& (status.gim_mode == vision))
-		slave.info->tx_info->status |= 0x20;
+		slave.info->tx_info->status |= 0x0020;
 	
 	/*  7:复位标志位  */
-	slave.info->tx_info->status &= 0xBF;
+	slave.info->tx_info->status &= 0xFFBF;
 	if (symbal.slave_reset == 1)
-		slave.info->tx_info->status |= 0x40;
+		slave.info->tx_info->status |= 0x0040;
 	
-	/*  8:弹仓标志位  */
-	slave.info->tx_info->status &= 0x7F;
+	/*  8:侧身状态标志位  */
+		/*  遥控器断电关闭  */
+	if (rc_sensor.work_state == DEV_OFFLINE)
+		status.chas_cmd = chas_reset;
+		/*  遥控器开关侧身  */
+	if ((module.remote_mode == RC) && (module.mode == MODULE_MODE_GYRO))
+	{
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
+		{
+			if (status.chas_state == lean_on)
+			{
+				status.chas_cmd = chas_reset;
+			}
+			else
+			{
+				status.chas_cmd = lean_on;
+			}
+		}
+	}
+		/*  开弹仓关闭  */
 	if (status.lch_state.magz_state == magz_open)
-		slave.info->tx_info->status |= 0x80;
+	{
+		status.chas_cmd = chas_reset;
+	}
+		/*  设置开关标志位  */
+	if (status.chas_cmd == lean_on)
+		status.chas_state = lean_on;
+	else if (status.chas_cmd == chas_reset)
+		status.chas_state = chas_reset;
+		/*  移动时临时关闭  */
+	if ((status.chas_state == lean_on) && (slave.info->tx_info->rc_ch_ws_val != 0))
+	{
+		status.chas_state = chas_reset;
+	}
+	
+	slave.info->tx_info->status &= 0xFF7F;
+	if (status.chas_state == lean_on)
+		slave.info->tx_info->status |= 0x0080;
+	
+	/*  9:加速标志位  */
+	slave.info->tx_info->status &= 0xFEFF;
+	if (status.speed_cmd == rapid_on)
+		slave.info->tx_info->status |= 0x0100;
 	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
@@ -334,19 +374,54 @@ void Vision_TxInfoUpdate(void)
 
 void Rc_RxInfoCheck(void)
 {
-	/*  遥控器换头  */
-//	if (vision_sensor.work_state == DEV_OFFLINE)
-//	{
-//		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+	/*  遥控器清空热量  */
+	if (module.mode == MODULE_MODE_GYRO2)
+	{
+		status.lch_cmd.shoot_cmd = shoot_reset;
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+		{
+			if (status.lch_state.magz_state == magz_close)
+			{
+				status.lch_cmd.shoot_cmd = swift_shoot;
+			}
+		}
+	}
+	/*  遥控器加速  */
+	status.speed_cmd = rapid_off;
+	if (module.mode == MODULE_MODE_GYRO2)
+	{
+		status.speed_cmd = rapid_on;
+	}
+	// 遥控器视觉
+	if (module.mode == MODULE_MODE_GYRO)
+	{
+		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+		{
+			if (vision_sensor.work_state == DEV_ONLINE)
+			{
+				if (status.gim_mode == gyro)
+				{
+					status.gim_mode = vision;
+					gimbal.info->gimbal_mode = gim_vision;
+				}
+				else
+				{
+					status.gim_mode = gyro;
+					gimbal.info->gimbal_mode = gim_gyro;
+				}
+			}
+			else
+			{
+				status.gim_mode = gyro;
+				gimbal.info->gimbal_mode = gim_gyro;
+			}
+		}
+	}
+//		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 //		{
-//			if (status.lch_state.magz_state == magz_close)
-//			{
-//				symbal.gim_sym.turn_start = 1;
-//				symbal.gim_sym.turn_ok = 0;
-//				status.gim_cmd = gim_turn;
-//			}
+//			status.gim_mode = gyro;
+//			gimbal.info->gimbal_mode = gim_gyro;
 //		}
-//	}
 	/*  关弹仓  */
 	if (status.chas_state == gyro_on)
 	{
@@ -376,8 +451,21 @@ void Key_RxInfoCheck(void)
 		}
 		if (status.chas_state == gyro_on) 
 		{
-			status.chas_cmd = gyro_off;
+			status.chas_cmd = chas_reset;
 		}
+		else if (status.chas_state == lean_on) 
+		{
+			status.chas_cmd = chas_reset;
+		}
+	}
+	/*  Q/E:转头90°  */
+	if ((keyboard.state.Q == down_K) && (status.lch_state.magz_state == magz_close))
+	{
+		symbal.gim_sym.turn_left = 1;
+	}
+	if ((keyboard.state.E == down_K) && (status.lch_state.magz_state == magz_close))
+	{
+		symbal.gim_sym.turn_right = 1;
 	}
 	/*  R:速射  */
 	if (keyboard.state.R == down_K)
@@ -389,33 +477,20 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.shoot_cmd = swift_shoot;
 	}
-	/*  G:热量解锁  */
-	if ((keyboard.state.G == short_press_K) || (keyboard.state.G == long_press_K))
+	/*  A/D:侧身  */
+	if ((keyboard.state.A == down_K) || (keyboard.state.D == down_K))
 	{
-		status.heat_mode = heat_limit_off;
-	}
-	/*  Q/E:侧身90°  */
-	if ((keyboard.state.Q == down_K) && (status.lch_state.magz_state == magz_close))
-	{
-		symbal.gim_sym.turn_left = 1;
-	}
-	if ((keyboard.state.E == down_K) && (status.lch_state.magz_state == magz_close))
-	{
-		symbal.gim_sym.turn_right = 1;
-	}
-	/*  A/D:侧身45°  */
-	if ((keyboard.state.A == down_K) && (status.lch_state.magz_state == magz_close))
-	{
-		symbal.gim_sym.turn_left = 2;
-	}
-	if ((keyboard.state.D == down_K) && (status.lch_state.magz_state == magz_close))
-	{
-		symbal.gim_sym.turn_right = 2;
+		status.chas_cmd = lean_on;
 	}
 	/*  F:小陀螺  */
 	if (keyboard.state.F == down_K)
 	{
 		status.chas_cmd = gyro_on;
+	}
+	/*  G:热量解锁  */
+	if ((keyboard.state.G == short_press_K) || (keyboard.state.G == long_press_K))
+	{
+		status.heat_mode = heat_limit_off;
 	}
 	/*  V:切换目标  */
 	if (keyboard.state.V == down_K)
@@ -461,6 +536,11 @@ void Key_RxInfoCheck(void)
 //		status.lch_cmd.shoot_cmd = shoot_reset;
 //	}
 //	
+	
+	/*  长按Shift:加速  */
+	status.speed_cmd = speed_reset;
+	if (keyboard.state.Shift != relax_K)
+		status.speed_cmd = rapid_on;
 	
 	status.gim_cmd = gim_reset;
 	/*  C:掉头  */

@@ -300,6 +300,9 @@ void Judge_AdaptDialSpeed(void)
 	launcher.info->limit_heat = judge.info->game_robot_status.shooter_id1_17mm_cooling_limit;
 	launcher.info->measure_launcher_heat = judge.info->power_heat_data.shooter_id1_17mm_cooling_heat;
 	launcher.info->remain_heat = launcher.info->limit_heat - launcher.info->measure_launcher_heat;
+	// 一次打7颗,多了会拨空枪
+	if (launcher.info->remain_heat > 80)
+		launcher.info->remain_heat = 80;
 	
 	if (status.heat_mode == heat_limit_off)
 		launcher.info->measure_launcher_heat = 0;
@@ -435,7 +438,18 @@ void Launcher_GetRcState(void)
 				if (rc_sensor.info->s2 == RC_SW_MID)
 				{
 					launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
-					launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+					if (status.lch_state.shoot_state != swift_shoot)
+						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+					if (status.lch_cmd.shoot_cmd == swift_shoot)
+					{
+						if (status.lch_state.shoot_state != swift_shoot)
+						{
+							status.lch_state.shoot_state = swift_shoot;
+							launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+							launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+							launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
+						}
+					}
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{

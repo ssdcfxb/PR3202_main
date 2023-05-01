@@ -537,6 +537,8 @@ void BMI_Get_Acceleration(float pitch, float roll, float yaw,\
 													float ax, float ay, float az,\
 													float *accx, float *accy, float *accz)
 {
+	float imu_accx, imu_accy, imu_accz;
+	
 	pitch *= (double)0.017453;
 	yaw *= (double)0.017453;
 	roll *= (double)0.017453;
@@ -545,8 +547,19 @@ void BMI_Get_Acceleration(float pitch, float roll, float yaw,\
 	ay = lsb_to_mps2(ay,2,bmi270.resolution);
 	az = lsb_to_mps2(az,2,bmi270.resolution);
 	
-	*accx = ax + arm_sin_f32(pitch) * GRAVITY_EARTH;
-	*accy = ay - arm_sin_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
-	*accz = az - arm_cos_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
+	imu_accx = ax + arm_sin_f32(pitch) * GRAVITY_EARTH;
+	imu_accy = ay - arm_sin_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
+	imu_accz = az - arm_cos_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
+	
+	*accx = imu_accx * arm_cos_f32(pitch) + imu_accz * arm_sin_f32(pitch);
+	*accy = imu_accy * arm_cos_f32(roll) - imu_accz * arm_sin_f32(roll);
+	*accz = imu_accz * arm_cos_f32(pitch) * arm_cos_f32(roll) - imu_accx * arm_sin_f32(pitch) * arm_cos_f32(roll) \
+					+ imu_accy * arm_sin_f32(roll) * arm_cos_f32(pitch);
+//	
+//	*accx = ax + arm_sin_f32(pitch) * GRAVITY_EARTH;
+//	*accy = ay - arm_sin_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
+//	*accz = az - arm_cos_f32(roll) * arm_cos_f32(pitch) * GRAVITY_EARTH;
+	
+	
 	
 }

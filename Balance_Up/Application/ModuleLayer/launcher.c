@@ -201,8 +201,8 @@ void Judge_GetSpeedInfo(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->fric_speed = launcher.conf->Fric_18;
-		launcher.conf->fric_mode = 18;
+		launcher.conf->fric_speed = launcher.conf->Fric_30;
+		launcher.conf->fric_mode = 30;
 	}
 	else
 	{
@@ -413,18 +413,45 @@ void Launcher_GetRcState(void)
 				
 				if (rc_sensor.info->s2 == RC_SW_MID)
 				{
+					status.lch_cmd.shoot_cmd = shoot_reset;
+					/* 跳变开关摩擦轮 */
 					launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
-					launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 					if (launcher.info->last_s2 == RC_SW_DOWN)
 						launcher.work_info->launcher_commond.Fric_cmd = Fric_Toggle;
+					
+					/* 清空热量 */
+					if (status.lch_state.shoot_state != swift_shoot)
+						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+					if (status.lch_cmd.shoot_cmd == swift_shoot)
+					{
+						if (status.lch_state.shoot_state != swift_shoot)
+						{
+							status.lch_state.shoot_state = swift_shoot;
+							launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+							launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+							launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
+						}
+					}
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
-					status.lch_state.shoot_state = keep_shoot;
-					if (launcher.info->last_s2 != rc_sensor.info->s2)
+					/* 遥控器连发自动打弹 */
+					status.lch_cmd.shoot_cmd = keep_shoot;
+					if (status.lch_state.shoot_state != keep_shoot)
 					{
+						status.lch_state.shoot_state = keep_shoot;
 						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
 					}
+					if (vision_sensor.info->is_hit_enable == 0)
+					{
+						status.lch_state.shoot_state = shoot_reset;
+						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+					}
+					/* 旧代码 */
+//					if (launcher.info->last_s2 != rc_sensor.info->s2)
+//					{
+//						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
+//					}
 				}
 				else if (rc_sensor.info->s2 == RC_SW_DOWN)
 				{
@@ -438,18 +465,7 @@ void Launcher_GetRcState(void)
 				if (rc_sensor.info->s2 == RC_SW_MID)
 				{
 					launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
-					if (status.lch_state.shoot_state != swift_shoot)
-						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
-					if (status.lch_cmd.shoot_cmd == swift_shoot)
-					{
-						if (status.lch_state.shoot_state != swift_shoot)
-						{
-							status.lch_state.shoot_state = swift_shoot;
-							launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
-							launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
-							launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
-						}
-					}
+					launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
@@ -516,6 +532,11 @@ void Launcher_GetKeyState(void)
 			vision_sensor.info->tx_info->is_change_target ++;
 	}
 	
+	/*  键盘自动打弹  */
+	if (status.auto_cmd == auto_shoot_on)
+	{
+		status.lch_cmd.shoot_cmd = keep_shoot;
+	}
 	
 	/*  拨盘指令  */
 	if (status.lch_cmd.shoot_cmd == single_shoot)
@@ -533,6 +554,12 @@ void Launcher_GetKeyState(void)
 		{
 			status.lch_state.shoot_state = keep_shoot;
 			launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
+		}
+		/*  自动打弹  */
+		if (vision_sensor.info->is_hit_enable == 0)
+		{
+			status.lch_state.shoot_state = shoot_reset;
+			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 		}
 	}
 	if (status.lch_cmd.shoot_cmd == swift_shoot)
@@ -714,6 +741,8 @@ void Dial_StatusCheck(void)
 		}
 		else
 		{
+			if (status.lch_state.shoot_state == shoot_reset)
+				launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 			/*  单发完成后复位  */
 			if (status.lch_state.shoot_state == single_shoot)
 			{
@@ -740,6 +769,10 @@ void Dial_StatusCheck(void)
 		/*  拨盘堵转处理完成  */
 		if (launcher.info->measure_dial_angle > launcher.info->target_dial_angle - launcher.conf->lock_angle_check)
 		{
+			if (status.lch_state.shoot_state == shoot_reset)
+			{
+				launcher.work_info->dial_status = WaitCommond_Dial;
+			}
 			if (status.lch_state.shoot_state == single_shoot)
 			{
 				launcher.work_info->dial_status = WaitCommond_Dial;

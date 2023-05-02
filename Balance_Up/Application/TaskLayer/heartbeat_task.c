@@ -4,7 +4,7 @@ void StartHeartBeatTask(void const * argument)
 {
   for(;;)
   {
-		HAL_IWDG_Refresh(&hiwdg);
+//		HAL_IWDG_Refresh(&hiwdg);
 		imu_sensor.heart_beat(&imu_sensor.work_state);
 		rc_sensor.heart_beat(&rc_sensor);
 		vision_sensor.heart_beat(&vision_sensor);

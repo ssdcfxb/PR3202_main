@@ -14,6 +14,7 @@ typedef enum {
   IMU_ID_ERR,
   IMU_INIT_ERR,
   IMU_DATA_ERR,
+  IMU_DATA_CALI,
 } imu_err_e;
 
 typedef enum{
@@ -77,12 +78,19 @@ typedef struct{
 
 }	base_info_t;
 
+typedef struct{
+	float	gx_offset;
+	float gy_offset;
+	float gz_offset;	
+}	offset_info_t;
+
 typedef struct imu_info_struct {
 
-	raw_info_t  raw_info;
-
-	base_info_t base_info;
+	raw_info_t  	raw_info;
+	base_info_t 	base_info;
+	offset_info_t	offset_info;
 	
+	float				*kp;
 	uint8_t		  init_flag;
 
 } imu_info_t;

@@ -153,8 +153,10 @@ BMI2_INTF_RETURN_TYPE bmi2_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_
 	uint8_t res;
 	
 	SPI_CS_LOW();
+	bmi2_delay_us(1, NULL);
 	HAL_SPI_Transmit(&hspi2, &reg_addr, 1, 1000);
 	res = HAL_SPI_Receive(&hspi2, reg_data, len, 1000);
+	bmi2_delay_us(1, NULL);
 	SPI_CS_HIG();
 	return res;
 	
@@ -168,8 +170,10 @@ BMI2_INTF_RETURN_TYPE bmi2_spi_write(uint8_t reg_addr, const uint8_t *reg_data, 
 	uint8_t res;
 	
 	SPI_CS_LOW();
+	bmi2_delay_us(1, NULL);
 	HAL_SPI_Transmit(&hspi2, &reg_addr, 1, 1000);
 	res = HAL_SPI_Transmit(&hspi2, (uint8_t *)reg_data, len, 1000);
+	bmi2_delay_us(1, NULL);
 	SPI_CS_HIG();
 	return res;
 

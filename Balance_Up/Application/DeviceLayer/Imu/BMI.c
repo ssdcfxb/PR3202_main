@@ -267,10 +267,11 @@ void EX_MPU_Read_all(uint8_t reg,uint8_t *buff,uint8_t len)
 void MPU_Read_all(uint8_t reg,uint8_t *buff,uint8_t len)
 {
 	BMI_CS_LOW();
-	bmi2_delay_us(5, NULL);
+	bmi2_delay_us(1, NULL);
 	reg |= 0x80;
 	HAL_SPI_Transmit(&hspi2, &reg,  1, 1000);
 	HAL_SPI_Receive(&hspi2, buff, len+1, 1000);
+	bmi2_delay_us(1, NULL);
 	BMI_CS_HIG();
 }
 
@@ -426,7 +427,7 @@ extern struct bmi2_dev ex_bmi270;
     @halfT
         解算周期的一半，比如1ms解算1次则halfT为0.0005f
 */
-float Kp = 0.1f;//4
+float Kp = 10.f;//4
 float norm;
 float halfT = 0.00025f;
 //float halfT = 0.0005f;

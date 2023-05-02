@@ -18,6 +18,7 @@
 typedef enum {
 	MODULE_STATE_RCLOST,	// 遥控失联
 	MODULE_STATE_RCINIT,	// 遥控初始化
+	MODULE_STATE_IMUTMP,	// 陀螺仪校准临界状态
 	MODULE_STATE_IMUERR,	// 陀螺仪错误
 	MODULE_STATE_NORMAL,	// 组件正常
 	MODULE_STATE_WRONG,	  // 组件错误
@@ -61,6 +62,13 @@ typedef enum
 	heat_limit_off,    // 关闭热量限制
 } heat_cmd_e;
 
+/*  键盘自动打弹状态  */
+typedef enum
+{
+	auto_shoot_off,    // 关闭自动打弹
+	auto_shoot_on,     // 开启自动打弹
+} auto_cmd_e;
+
 typedef struct {
 	launcher_state_t	lch_state;
 	gim_cmd_e					gim_cmd;
@@ -71,6 +79,8 @@ typedef struct {
 	gim_mode_e				gim_mode;
 	heat_cmd_e				heat_mode;
 	speed_cmd_e				speed_cmd;
+	auto_cmd_e				auto_cmd;
+	auto_cmd_e				auto_state;
 	uint8_t						tw_last_state;
 } status_t;
 

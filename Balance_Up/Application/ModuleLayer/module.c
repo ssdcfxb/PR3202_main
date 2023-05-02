@@ -17,7 +17,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 void module_info_update(module_t *mod);
-void RC_StateCheck(void);
+void Module_StateCheck(void);
 void Slave_TxInfoUpdate(void);
 void Vision_TxInfoUpdate(void);
 void Rc_RxInfoCheck(void);
@@ -48,6 +48,7 @@ status_t status = {
 	.gim_mode = gyro,
 	.heat_mode = heat_limit_on,
 	.speed_cmd = speed_reset,
+	.auto_state = auto_shoot_off,
 	.tw_last_state = 0,
 };
 
@@ -60,7 +61,7 @@ module_t module = {
 /* Private functions ---------------------------------------------------------*/
 void module_info_update(module_t *mod)
 {
-	RC_StateCheck();
+	Module_StateCheck();
 	Slave_TxInfoUpdate();
 	Vision_TxInfoUpdate();
 	
@@ -169,8 +170,9 @@ void module_info_update(module_t *mod)
 	status.tw_last_state = rc_sensor.info->thumbwheel.status;
 }
 
-void RC_StateCheck(void)
+void Module_StateCheck(void)
 {
+	/*  Ò£¿ØÆ÷×´Ì¬¼ì²â  */
 	if(rc_sensor.work_state == DEV_OFFLINE) 
 	{
 		module.state = MODULE_STATE_RCLOST;
@@ -204,7 +206,9 @@ void RC_StateCheck(void)
 		}
 	}
 	
-	if (imu_sensor.work_state.err_code != IMU_NONE_ERR)
+	/*  ÍÓÂÝÒÇ×´Ì¬¼ì²â  */
+	if ((imu_sensor.work_state.err_code != IMU_NONE_ERR) && \
+			(imu_sensor.work_state.err_code != IMU_DATA_CALI))
 	{
 		module.state = MODULE_STATE_IMUERR;
 	}
@@ -375,7 +379,7 @@ void Vision_TxInfoUpdate(void)
 void Rc_RxInfoCheck(void)
 {
 	/*  Ò£¿ØÆ÷Çå¿ÕÈÈÁ¿  */
-	if (module.mode == MODULE_MODE_GYRO2)
+	if (module.mode == MODULE_MODE_GYRO)
 	{
 		status.lch_cmd.shoot_cmd = shoot_reset;
 		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
@@ -393,7 +397,7 @@ void Rc_RxInfoCheck(void)
 		status.speed_cmd = rapid_on;
 	}
 	// Ò£¿ØÆ÷ÊÓ¾õ
-	if (module.mode == MODULE_MODE_GYRO)
+	if (module.mode == MODULE_MODE_GYRO2)
 	{
 		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
 		{
@@ -422,6 +426,18 @@ void Rc_RxInfoCheck(void)
 //			status.gim_mode = gyro;
 //			gimbal.info->gimbal_mode = gim_gyro;
 //		}
+	/*  Ò£¿ØÆ÷ÍÓÂÝÒÇÐ£Õý  */
+	if (module.state == MODULE_STATE_IMUTMP)
+	{
+		if ((rc_sensor.info->s2 == RC_SW_DOWN) && (rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+		{
+			imu_sensor.work_state.err_code = IMU_DATA_CALI;
+		}
+		if ((rc_sensor.info->s2 != RC_SW_DOWN) && (imu_sensor.work_state.err_code != IMU_DATA_CALI))
+		{
+			module.state = MODULE_STATE_NORMAL;
+		}
+	}
 	/*  ¹Øµ¯²Ö  */
 	if (status.chas_state == gyro_on)
 	{
@@ -522,6 +538,8 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.fric_cmd = fric_on;
 		status.lch_cmd.magz_cmd = magz_close;
+		if ((status.auto_cmd == auto_shoot_on) && (status.gim_mode == vision))
+			status.auto_cmd = auto_shoot_off;
 	}
 	if ((keyboard.state.mouse_btn_l == down_K) && (status.lch_state.fric_state == fric_on))
 	{
@@ -554,9 +572,17 @@ void Key_RxInfoCheck(void)
 	
 	status.gim_mode = gyro;
 	/*  mouse_btn_r:×ÔÃé  */
+	if (keyboard.state.mouse_btn_r == down_K)
+	{
+		status.auto_cmd = auto_shoot_on;
+	}
 	if ((keyboard.state.mouse_btn_r == short_press_K) || (keyboard.state.mouse_btn_r == long_press_K))
 	{
 		status.gim_mode = vision;
+	}
+	if (keyboard.state.mouse_btn_r == relax_K)
+	{
+		status.auto_cmd = auto_shoot_off;
 	}
 	
 	/*  ZXV:ÉÏÏÂÖ÷¿Ø¸´Î»  */
@@ -574,7 +600,8 @@ void Key_RxInfoCheck(void)
 		__set_FAULTMASK(1); 
 		NVIC_SystemReset();
 	}
-	if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+	/*  Ò£¿ØÆ÷¸´Î»  */
+	if ((rc_sensor.info->s2 == RC_SW_UP) && (rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
 	{
 		static uint8_t cnt = 0;
 		symbal.slave_reset = 1;
@@ -583,6 +610,13 @@ void Key_RxInfoCheck(void)
 			__set_FAULTMASK(1);
 			NVIC_SystemReset();
 		}
+	}
+	
+	
+	/*  Ò£¿ØÆ÷ÍÓÂÝÒÇÐ£Õý  */
+	if ((rc_sensor.info->s2 == RC_SW_DOWN) && (rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
+	{
+		module.state = MODULE_STATE_IMUTMP;
 	}
 	
 }

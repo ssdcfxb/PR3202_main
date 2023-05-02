@@ -111,11 +111,13 @@ int main(void)
 	SPI1_Init();
 	SPI2_Init();
 	imu_sensor.init(&imu_sensor);
+	TIM4_Init();
+	HAL_Delay(1000);
+	*(imu_sensor.info->kp) = 0.1f;
 	DRIVER_Init();
 	DEVICE_Init();
-	TIM4_Init();
 	CAN_Filter_Init();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -206,7 +208,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			i = 0;
 		}
 		
-		if (imu_sensor.work_state.err_code == IMU_NONE_ERR)
+		if ((imu_sensor.work_state.err_code == IMU_NONE_ERR) || \
+				(imu_sensor.work_state.err_code == IMU_DATA_CALI))
 		{
 			imu_sensor.update(&imu_sensor);
 		}

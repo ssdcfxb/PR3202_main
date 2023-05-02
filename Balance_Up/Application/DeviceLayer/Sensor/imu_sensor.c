@@ -12,6 +12,8 @@ extern void imu_update(imu_sensor_t *self);
 extern void transform_init(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+extern float Kp;
+
 struct bmi2_dev bmi270;
 struct bmi2_dev ex_bmi270;
 
@@ -33,6 +35,10 @@ bmi_t ex_bmi_client = {
 
 imu_info_t imu_info = 
 {
+	.offset_info.gx_offset = 0.f,
+	.offset_info.gy_offset = 0.f,
+	.offset_info.gz_offset = 0.f,
+	.kp = &Kp,
 	.init_flag = 0,
 };
 

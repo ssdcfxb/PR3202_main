@@ -8,7 +8,7 @@
 /* Private variables ---------------------------------------------------------*/
 extern uint32_t micros(void);
 
-uint8_t vision_txBuf[30];
+uint8_t vision_txBuf[40];
 
 uint32_t t1, t2, tmp;
 /* Exported variables --------------------------------------------------------*/
@@ -16,6 +16,15 @@ extern UART_HandleTypeDef huart6;
 
 vision_tx_info_t vision_tx_info = {
 	.SOF = 0xA5,
+	.blood_0 = 0,
+	.blood_1 = 0,
+	.blood_2 = 0,
+	.blood_3 = 0,
+	.blood_4 = 0,
+	.blood_5 = 0,
+	.blood_6 = 0,
+	.blood_7 = 0,
+	.blood_8 = 0,
 };
 vision_rx_info_t vision_rx_info;
 

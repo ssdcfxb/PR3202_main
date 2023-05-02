@@ -286,8 +286,8 @@ void Slave_TxInfoUpdate(void)
 		status.chas_state = chas_reset;
 	}
 	slave.info->tx_info->status &= 0xFFFB;
-	if (status.chas_state == gyro_on)
-		slave.info->tx_info->status |= 0x0004;
+//	if (status.chas_state == gyro_on)
+//		slave.info->tx_info->status |= 0x0004;
 	
 	/*  4:头的朝向  */
 	slave.info->tx_info->status &= 0xFFF7;
@@ -538,8 +538,6 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.fric_cmd = fric_on;
 		status.lch_cmd.magz_cmd = magz_close;
-		if ((status.auto_cmd == auto_shoot_on) && (status.gim_mode == vision))
-			status.auto_cmd = auto_shoot_off;
 	}
 	if ((keyboard.state.mouse_btn_l == down_K) && (status.lch_state.fric_state == fric_on))
 	{
@@ -549,11 +547,7 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.shoot_cmd = keep_shoot;
 	}
-//	if (keyboard.state.mouse_btn_l == relax_K)
-//	{
-//		status.lch_cmd.shoot_cmd = shoot_reset;
-//	}
-//	
+	
 	
 	/*  长按Shift:加速  */
 	status.speed_cmd = speed_reset;
@@ -569,20 +563,25 @@ void Key_RxInfoCheck(void)
 		status.gim_cmd = gim_turn;
 	}
 	
-	
-	status.gim_mode = gyro;
-	/*  mouse_btn_r:自瞄  */
+	/*  mouse_btn_r:自动打弹  */
 	if (keyboard.state.mouse_btn_r == down_K)
 	{
 		status.auto_cmd = auto_shoot_on;
 	}
-	if ((keyboard.state.mouse_btn_r == short_press_K) || (keyboard.state.mouse_btn_r == long_press_K))
-	{
-		status.gim_mode = vision;
-	}
 	if (keyboard.state.mouse_btn_r == relax_K)
 	{
 		status.auto_cmd = auto_shoot_off;
+	}
+	if (keyboard.state.mouse_btn_l != relax_K)
+	{
+		status.auto_cmd = auto_shoot_off;
+	}
+	
+	/*  mouse_btn_r:自瞄  */
+	status.gim_mode = gyro;
+	if ((keyboard.state.mouse_btn_r == short_press_K) || (keyboard.state.mouse_btn_r == long_press_K))
+	{
+		status.gim_mode = vision;
 	}
 	
 	/*  ZXV:上下主控复位  */
@@ -617,6 +616,9 @@ void Key_RxInfoCheck(void)
 	if ((rc_sensor.info->s2 == RC_SW_DOWN) && (rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 	{
 		module.state = MODULE_STATE_IMUTMP;
+		imu_sensor.info->offset_info.gx_offset = 0.f;
+		imu_sensor.info->offset_info.gy_offset = 0.f;
+		imu_sensor.info->offset_info.gz_offset = 0.f;
 	}
 	
 }

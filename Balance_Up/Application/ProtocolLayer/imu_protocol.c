@@ -75,6 +75,7 @@ void imu_update(imu_sensor_t *imu_sen)
 				imu_info->offset_info.gy_offset = 0;
 			if (abs(imu_info->offset_info.gz_offset) > 5.f)
 				imu_info->offset_info.gz_offset = 0;
+			imu_sen->work_state.cali_end = 1;
 		}
 	}
 	else

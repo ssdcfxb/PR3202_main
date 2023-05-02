@@ -51,6 +51,7 @@ imu_sensor_t imu_sensor = {
 	.driver.tpye = DR_SPI2,
 	.work_state.dev_state = DEV_OFFLINE,
 	.id = DEV_ID_IMU,	
+	.work_state.cali_end = 0,	
 	.work_state.offline_max_cnt = 50,	
 	.work_state.err_cnt = 0,
 	
@@ -61,6 +62,7 @@ imu_sensor_t imu_sensor = {
 
 /* Private functions ---------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
+float imu_read[3];
 void imu_init(struct imu_struct *self)
 {
 	uint32_t tickstart = HAL_GetTick();
@@ -127,6 +129,14 @@ void imu_init(struct imu_struct *self)
 		
 		/* Ðý×ª¾ØÕó³õÊ¼»¯ */
 		transform_init();
+		
+		Flash_ReadData(IMU_DATA_ADDR, (uint32_t*)imu_read, 12);
+		if (*(uint32_t*)imu_read != 0xFFFFFFFF)
+		{
+			imu_sensor.info->offset_info.gx_offset = imu_read[0];
+			imu_sensor.info->offset_info.gy_offset = imu_read[1];
+			imu_sensor.info->offset_info.gz_offset = imu_read[2];
+		}
 	}
 	else
 	{

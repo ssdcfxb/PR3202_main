@@ -606,6 +606,11 @@
               <FilePath>..\Application\DriverLayer\drv_can.c</FilePath>
             </File>
             <File>
+              <FileName>drv_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DriverLayer\drv_flash.c</FilePath>
+            </File>
+            <File>
               <FileName>drv_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\DriverLayer\drv_spi.c</FilePath>

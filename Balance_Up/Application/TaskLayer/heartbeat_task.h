@@ -4,6 +4,7 @@
 #include "cmsis_os.h"
 #include "main.h"
 
+#include "drv_flash.h"
 #include "module.h"
 
 extern IWDG_HandleTypeDef hiwdg;

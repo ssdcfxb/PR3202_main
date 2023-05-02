@@ -5,6 +5,7 @@
 #include "rp_config.h"
 #include "bmi_t.h"
 
+#include "drv_flash.h"
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
@@ -38,8 +39,10 @@ typedef struct work_state_struct {
 	dev_work_state_t dev_state;
 	imu_err_e	       err_code;
 	
-	uint8_t			err_cnt;
-	int8_t			init_code;
+	uint8_t		err_cnt;
+	int8_t		init_code;
+	
+	uint8_t		cali_end;
 	
 	uint8_t   offline_cnt;
 	uint8_t   offline_max_cnt;

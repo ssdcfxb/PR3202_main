@@ -243,8 +243,8 @@ void Slave_TxInfoUpdate(void)
 	
 	/*  1:遥控器状态标志位  */
 	slave.info->tx_info->status &= 0xFFFE;
-//	if (module.state == MODULE_STATE_NORMAL)
-//		slave.info->tx_info->status |= 0x0001;
+	if (module.state == MODULE_STATE_NORMAL)
+		slave.info->tx_info->status |= 0x0001;
 	
 	/*  2:弹仓状态标志位  */
 	slave.info->tx_info->status &= 0xFFFD;
@@ -549,7 +549,7 @@ void Key_RxInfoCheck(void)
 	{
 		status.lch_cmd.shoot_cmd = single_shoot;
 	}
-	if (((keyboard.state.mouse_btn_l == short_press_K) || (keyboard.state.mouse_btn_l == long_press_K)) && (status.lch_state.fric_state == fric_on))
+	if ((keyboard.state.mouse_btn_l == long_press_K) && (status.lch_state.fric_state == fric_on))
 	{
 		status.lch_cmd.shoot_cmd = keep_shoot;
 	}

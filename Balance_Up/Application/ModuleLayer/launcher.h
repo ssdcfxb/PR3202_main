@@ -106,6 +106,7 @@ typedef struct
 	float    measure_launcher_speed;
 	uint16_t limit_heat;
 	uint16_t measure_launcher_heat;
+	uint16_t last_measure_launcher_heat;
 	uint16_t remain_heat;
 	
 	float  target_left_speed;
@@ -127,6 +128,7 @@ typedef struct
 	fric_status_e       fric_status;
 	dial_status_e       dial_status;
 	uint16_t            shoot_cnt;
+	uint8_t							swift_enable;
 } launcher_work_info_t;
 
 typedef struct

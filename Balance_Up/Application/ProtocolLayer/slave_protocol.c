@@ -26,7 +26,6 @@ void USART3_rxDataHandler(uint8_t *rxBuf)
 }
 
 /* Exported functions --------------------------------------------------------*/
-
 bool slave_send_data(slave_t *slef)
 {
 	slave_tx_info.data_length = sizeof(slv_tx_info_t);
@@ -38,7 +37,6 @@ bool slave_send_data(slave_t *slef)
                                    | slave_txBuf[sizeof(slv_tx_info_t)-1]);
 	
 //	memset(&slave_tx_info.data_length, 0, (sizeof(slv_tx_info_t) - 1));
-	
 	if(HAL_UART_Transmit_DMA(&huart3,slave_txBuf,sizeof(slv_tx_info_t)) == HAL_OK)
 	{
 			return true;

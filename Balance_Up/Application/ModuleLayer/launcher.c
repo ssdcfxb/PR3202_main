@@ -62,6 +62,7 @@ launcher_work_info_t  launcher_work_info = {
 	.launcher_commond.Magz_cmd = Magz_Reset,
 	.launcher_commond.Dial_cmd = Shoot_Reset,
 	.shoot_cnt = 0,
+	.swift_enable = 1,
 };
 
 launcher_conf_t   launcher_conf = {
@@ -298,11 +299,24 @@ void Judge_AdaptDialSpeed(void)
 	static uint8_t heat_low = 0, heat_high = 0;
 	
 	launcher.info->limit_heat = judge.info->game_robot_status.shooter_id1_17mm_cooling_limit;
+	launcher.info->last_measure_launcher_heat = launcher.info->measure_launcher_heat;
 	launcher.info->measure_launcher_heat = judge.info->power_heat_data.shooter_id1_17mm_cooling_heat;
 	launcher.info->remain_heat = launcher.info->limit_heat - launcher.info->measure_launcher_heat;
 	// 一次打7颗,多了会拨空枪
 	if (launcher.info->remain_heat > 80)
 		launcher.info->remain_heat = 80;
+	// 裁判系统未更新时不打弹
+	if (launcher.work_info->swift_enable == 0)
+	{
+		if (launcher.info->measure_launcher_heat == launcher.info->last_measure_launcher_heat)
+		{
+			launcher.info->remain_heat = 0;
+		}
+		else
+		{
+			launcher.work_info->swift_enable = 1;
+		}
+	}
 	
 	if (status.heat_mode == heat_limit_off)
 		launcher.info->measure_launcher_heat = 0;
@@ -329,7 +343,7 @@ void Judge_AdaptDialSpeed(void)
 	{
 		launcher.conf->dial_speed = -3000.0f;
 		//test
-		launcher.info->limit_heat = 75;
+		launcher.info->limit_heat = 40;
 		launcher.info->measure_launcher_heat = 0;
 		launcher.info->remain_heat = launcher.info->limit_heat - launcher.info->measure_launcher_heat;
 	}
@@ -424,12 +438,17 @@ void Launcher_GetRcState(void)
 						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 					if (status.lch_cmd.shoot_cmd == swift_shoot)
 					{
-						if (status.lch_state.shoot_state != swift_shoot)
+						/*  判断裁判系统数据是否更新  */
+						if (launcher.work_info->swift_enable == 1)
 						{
-							status.lch_state.shoot_state = swift_shoot;
-							launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
-							launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
-							launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
+							launcher.work_info->swift_enable = 0;
+							if (status.lch_state.shoot_state != swift_shoot)
+							{
+								status.lch_state.shoot_state = swift_shoot;
+								launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+								launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+								launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
+							}
 						}
 					}
 				}
@@ -533,7 +552,8 @@ void Launcher_GetKeyState(void)
 	}
 	
 	/*  键盘自动打弹  */
-	if (status.auto_cmd == auto_shoot_on)
+	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
+			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1))
 	{
 		status.lch_cmd.shoot_cmd = keep_shoot;
 	}
@@ -556,7 +576,7 @@ void Launcher_GetKeyState(void)
 			launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
 		}
 		/*  自动打弹  */
-		if (vision_sensor.info->is_hit_enable == 0)
+		if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 0))
 		{
 			status.lch_state.shoot_state = shoot_reset;
 			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
@@ -662,21 +682,6 @@ void Fric_StatusCheck(void)
 		{
 			status.lch_state.fric_state = fric_on;
 		}
-	}
-	
-	
-	/*  开关弹仓  */
-	if (launcher.work_info->launcher_commond.Magz_cmd == Magz_Open)
-	{
-		Magazine_Open();
-		launcher.work_info->fric_status = Off_Fric;
-		status.lch_state.magz_state = magz_open;
-		status.lch_cmd.fric_cmd = fric_off;
-	}
-	else
-	{
-		Magazine_Close();
-		status.lch_state.magz_state = magz_close;
 	}
 	
 }
@@ -852,6 +857,21 @@ void Fric_Ctrl(void)
 		                                        launcher.info->target_right_speed);
 		
 	}
+	
+	/*  开关弹仓  */
+	if (launcher.work_info->launcher_commond.Magz_cmd == Magz_Open)
+	{
+		Magazine_Open();
+		launcher.work_info->fric_status = Off_Fric;
+		status.lch_state.magz_state = magz_open;
+		status.lch_cmd.fric_cmd = fric_off;
+	}
+	else
+	{
+		Magazine_Close();
+		status.lch_state.magz_state = magz_close;
+	}
+	
 }
 
 /**

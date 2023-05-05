@@ -257,19 +257,19 @@ void Judge_AdaptFricSpeed(void)
 	{
 		if ((launcher.info->measure_launcher_speed != last_measure_speed) && (launcher.info->measure_launcher_speed > 0.f))
 		{
-			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.95f))
+			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 1.15f))
 			{
 				cnt++;
-				if (cnt > 2)
+				if (cnt >= 2)
 				{
 					cnt = 0;
 					speed_adapt = -1;
 				}
 			}
-			else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.5f))
+			else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.45f))
 			{
 				cnt--;
-				if (cnt < -2)
+				if (cnt <= -2)
 				{
 					cnt = 0;
 					speed_adapt = 1;

@@ -69,6 +69,15 @@ typedef enum
 	auto_shoot_on,     // 开启自动打弹
 } auto_cmd_e;
 
+/*  打符标志位  */
+typedef enum
+{
+	buff_reset, 			// 功能复位
+	small_buff_on,   	// 小符开启
+	big_buff_on,     	// 大符开启
+	debuff_on,				// 反符开启
+} buff_cmd_e;
+
 typedef struct {
 	launcher_state_t	lch_state;
 	gim_cmd_e					gim_cmd;
@@ -81,6 +90,7 @@ typedef struct {
 	speed_cmd_e				speed_cmd;
 	auto_cmd_e				auto_cmd;
 	auto_cmd_e				auto_state;
+	buff_cmd_e				buff_cmd;
 	uint8_t						tw_last_state;
 } status_t;
 

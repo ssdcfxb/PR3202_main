@@ -34,15 +34,31 @@ void StartLedTask(void const * argument)
 				HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_2);
 		}
 		
-		/*  下主控指示灯  */
-		if (slave.work_state == DEV_ONLINE)
+		/*  下主控&遥控器指示灯  */
+		if ((slave.work_state == DEV_ONLINE) && (rc_sensor.work_state == DEV_ONLINE))
 		{
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
 		}
 		else
 		{
-			if (i % 1000 == 0)
-				HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+			if ((slave.work_state == DEV_OFFLINE) && (rc_sensor.work_state == DEV_OFFLINE))
+			{
+				if (i % 150 == 0)
+					HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+			}
+			else
+			{
+				if (slave.work_state == DEV_OFFLINE)
+				{
+					if (i % 1000 == 0)
+						HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+				}
+				if (rc_sensor.work_state == DEV_OFFLINE)
+				{
+					if (i % 500 == 0)
+						HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+				}
+			}
 		}
 		
     osDelay(1);

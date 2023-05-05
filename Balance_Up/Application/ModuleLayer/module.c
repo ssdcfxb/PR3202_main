@@ -354,6 +354,11 @@ void Slave_TxInfoUpdate(void)
 	if (status.speed_cmd == rapid_on)
 		slave.info->tx_info->status |= 0x0100;
 	
+	/*  10:打符标志位  */
+	slave.info->tx_info->status &= 0xFDFF;
+	if (status.buff_cmd != buff_reset)
+		slave.info->tx_info->status |= 0x0200;
+	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	/*  yaw轴陀螺仪角度数据  */
@@ -371,6 +376,15 @@ void Vision_TxInfoUpdate(void)
 	vision_sensor.info->tx_info->yaw_angle = vision_sensor.info->measure_yaw_angle;
 	vision_sensor.info->tx_info->shoot_speed = vision_sensor.info->measure_shoot_speed;
 	vision_sensor.info->tx_info->mode = AIM_ON;
+	if (status.buff_cmd == small_buff_on)
+	{
+		vision_sensor.info->tx_info->mode = AIM_SMALL_BUFF;
+	}
+	if (status.buff_cmd == big_buff_on)
+	{
+		vision_sensor.info->tx_info->mode = AIM_BIG_BUFF;
+	}
+	
 	vision_sensor.info->cmd_mode = vision_sensor.info->tx_info->mode;
 	vision_sensor.info->tx_info->my_color = slave.info->my_color;
 	
@@ -454,6 +468,7 @@ void Key_RxInfoCheck(void)
 //	keyboard.lch_cmd.magz_cmd = lch_reset;
 	status.lch_cmd.shoot_cmd = shoot_reset;
 	status.heat_mode = heat_limit_on;
+	status.buff_cmd = buff_reset;
 	/*  Ctrl(同时):关弹仓 关摩擦轮 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
 	{
@@ -508,10 +523,28 @@ void Key_RxInfoCheck(void)
 	{
 		status.heat_mode = heat_limit_off;
 	}
+	/*  X:小符  */
+	if (keyboard.state.X != relax_K)
+	{
+		status.chas_cmd = lean_on;
+		status.buff_cmd = small_buff_on;
+	}
+	/*  Z:大符  */
+	if (keyboard.state.Z != relax_K)
+	{
+		status.chas_cmd = lean_on;
+		status.buff_cmd = big_buff_on;
+	}
+	/*  ZX:反符  */
+//	if ((keyboard.state.X != relax_K) && (keyboard.state.Z != relax_K))
+//	{
+//		status.buff_cmd = debuff_on;
+//	}
+	
 	/*  V:切换目标  */
 	if (keyboard.state.V == down_K)
 	{
-		vision_sensor.info->tx_info->is_change_target ++;
+//		vision_sensor.info->tx_info->is_change_target ++;
 	}
 	
 	
@@ -572,7 +605,7 @@ void Key_RxInfoCheck(void)
 	/*  mouse_btn_r:自动打弹  */
 	if (keyboard.state.mouse_btn_r == down_K)
 	{
-		status.auto_cmd = auto_shoot_on;
+//		status.auto_cmd = auto_shoot_on;
 	}
 	if (keyboard.state.mouse_btn_r == relax_K)
 	{

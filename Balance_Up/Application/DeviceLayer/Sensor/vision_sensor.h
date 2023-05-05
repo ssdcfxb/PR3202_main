@@ -29,16 +29,16 @@ typedef __packed struct
 	float    			pitch_angle; 			// dataf_2
 	uint8_t  			shoot_speed; 			// datau8_2
  	uint8_t  			my_color;    			// datau8_3	0:ºì	1:À¶
-	uint8_t				blood_0;
-	uint8_t				blood_1;
-	uint8_t				blood_2;
-	uint8_t				blood_3;
-	uint8_t				blood_4;
-	uint8_t				blood_5;
-	uint8_t				blood_6;
-	uint8_t				blood_7;
-	uint8_t				blood_8;
- 	uint8_t  			is_change_target; // datau8_4
+//	uint8_t				blood_0;
+//	uint8_t				blood_1;
+//	uint8_t				blood_2;
+//	uint8_t				blood_3;
+//	uint8_t				blood_4;
+//	uint8_t				blood_5;
+//	uint8_t				blood_6;
+//	uint8_t				blood_7;
+//	uint8_t				blood_8;
+// 	uint8_t  			is_change_target; // datau8_4
 	uint16_t 			CRC16;
 }vision_tx_info_t;
 

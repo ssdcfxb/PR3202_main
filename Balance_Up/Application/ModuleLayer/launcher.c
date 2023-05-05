@@ -247,14 +247,15 @@ void Judge_GetSpeedInfo(void)
   * @param  
   * @retval 
   */
+int8_t cnt = 0;
+float last_measure_speed = 0.f;
 void Judge_AdaptFricSpeed(void)
 {
-	static int8_t cnt = 0, speed_adapt = 0, adapt_k = 10;
-	static float last_measure_speed = 0.f;
+	static int8_t speed_adapt = 0, adapt_k = 10;
 	
 	if (judge.work_state == DEV_ONLINE)
 	{
-		if ((launcher.info->measure_launcher_speed != last_measure_speed) || (launcher.info->measure_launcher_speed > 0.f))
+		if ((launcher.info->measure_launcher_speed != last_measure_speed) && (launcher.info->measure_launcher_speed > 0.f))
 		{
 			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.95f))
 			{
@@ -280,6 +281,31 @@ void Judge_AdaptFricSpeed(void)
 				speed_adapt = 0;
 			}
 			launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
+			
+			switch (judge.info->game_robot_status.shooter_id1_17mm_speed_limit)
+			{
+				case 0:
+					launcher.conf->fric_speed = 0;
+					break;
+				case 15:
+					launcher.conf->Fric_15 = launcher.conf->fric_speed;
+					break;
+				case 18:
+					launcher.conf->Fric_18 = launcher.conf->fric_speed;
+					break;
+				case 20:
+					launcher.conf->Fric_20 = launcher.conf->fric_speed;
+					break;
+				case 22:
+					launcher.conf->Fric_22 = launcher.conf->fric_speed;
+					break;
+				case 30:
+					launcher.conf->Fric_30 = launcher.conf->fric_speed;
+					break;
+				default:
+					launcher.conf->fric_speed = 0;
+					break;
+			}
 		}
 		last_measure_speed = launcher.info->measure_launcher_speed;
 	}
@@ -296,10 +322,11 @@ void Judge_AdaptFricSpeed(void)
   */
 void Judge_AdaptDialSpeed(void)
 {
-	static uint8_t heat_low = 0, heat_high = 0;
+	static uint8_t heat_low = 0, heat_high = 0, judge_cnt = 0;
+	static uint16_t last_measure_heat = 0;
 	
+	last_measure_heat = launcher.info->measure_launcher_heat;
 	launcher.info->limit_heat = judge.info->game_robot_status.shooter_id1_17mm_cooling_limit;
-	launcher.info->last_measure_launcher_heat = launcher.info->measure_launcher_heat;
 	launcher.info->measure_launcher_heat = judge.info->power_heat_data.shooter_id1_17mm_cooling_heat;
 	launcher.info->remain_heat = launcher.info->limit_heat - launcher.info->measure_launcher_heat;
 	// 一次打7颗,多了会拨空枪
@@ -308,12 +335,19 @@ void Judge_AdaptDialSpeed(void)
 	// 裁判系统未更新时不打弹
 	if (launcher.work_info->swift_enable == 0)
 	{
-		if (launcher.info->measure_launcher_heat == launcher.info->last_measure_launcher_heat)
+		if (launcher.info->measure_launcher_heat == last_measure_heat)
 		{
 			launcher.info->remain_heat = 0;
 		}
 		else
 		{
+			judge_cnt = 0;
+			launcher.work_info->swift_enable = 1;
+		}
+		
+		if (++ judge_cnt >= 100)
+		{
+			judge_cnt = 0;
 			launcher.work_info->swift_enable = 1;
 		}
 	}
@@ -441,7 +475,6 @@ void Launcher_GetRcState(void)
 						/*  判断裁判系统数据是否更新  */
 						if (launcher.work_info->swift_enable == 1)
 						{
-							launcher.work_info->swift_enable = 0;
 							if (status.lch_state.shoot_state != swift_shoot)
 							{
 								status.lch_state.shoot_state = swift_shoot;
@@ -454,18 +487,19 @@ void Launcher_GetRcState(void)
 				}
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
-					/* 遥控器连发自动打弹 */
+					/* 遥控器连发 */
 					status.lch_cmd.shoot_cmd = keep_shoot;
 					if (status.lch_state.shoot_state != keep_shoot)
 					{
 						status.lch_state.shoot_state = keep_shoot;
 						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
 					}
-					if (vision_sensor.info->is_hit_enable == 0)
-					{
-						status.lch_state.shoot_state = shoot_reset;
-						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
-					}
+					/*  自瞄自动打弹  */
+//					if (vision_sensor.info->is_hit_enable == 0)
+//					{
+//						status.lch_state.shoot_state = shoot_reset;
+//						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+//					}
 					/* 旧代码 */
 //					if (launcher.info->last_s2 != rc_sensor.info->s2)
 //					{
@@ -544,18 +578,18 @@ void Launcher_GetKeyState(void)
 	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
 	
-	/*  测试  */
-	if (rc_sensor.info->s2 == RC_SW_UP)
-	{
-		if (launcher.info->last_s2 != rc_sensor.info->s2)
-			vision_sensor.info->tx_info->is_change_target ++;
-	}
+	/*  遥控器切换目标测试  */
+//	if (rc_sensor.info->s2 == RC_SW_UP)
+//	{
+//		if (launcher.info->last_s2 != rc_sensor.info->s2)
+//			vision_sensor.info->tx_info->is_change_target ++;
+//	}
 	
 	/*  键盘自动打弹  */
 	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
 			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1))
 	{
-		status.lch_cmd.shoot_cmd = keep_shoot;
+//		status.lch_cmd.shoot_cmd = keep_shoot;
 	}
 	
 	/*  拨盘指令  */
@@ -584,12 +618,16 @@ void Launcher_GetKeyState(void)
 	}
 	if (status.lch_cmd.shoot_cmd == swift_shoot)
 	{
-		if (status.lch_state.shoot_state != swift_shoot)
+		/*  判断裁判系统数据是否更新  */
+		if (launcher.work_info->swift_enable == 1)
 		{
-			status.lch_state.shoot_state = swift_shoot;
-			launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
-			launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
-			launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
+			if (status.lch_state.shoot_state != swift_shoot)
+			{
+				status.lch_state.shoot_state = swift_shoot;
+				launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+				launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+				launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
+			}
 		}
 	}
 	if (status.lch_cmd.shoot_cmd == shoot_reset)
@@ -762,6 +800,7 @@ void Dial_StatusCheck(void)
 			{
 				if (launcher.info->measure_dial_angle < (launcher.info->target_heat_angle + launcher.conf->lock_angle_check))
 				{
+					launcher.work_info->swift_enable = 0;
 					status.lch_state.shoot_state = shoot_reset;
 					launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 				}

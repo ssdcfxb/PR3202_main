@@ -106,7 +106,6 @@ typedef struct
 	float    measure_launcher_speed;
 	uint16_t limit_heat;
 	uint16_t measure_launcher_heat;
-	uint16_t last_measure_launcher_heat;
 	uint16_t remain_heat;
 	
 	float  target_left_speed;

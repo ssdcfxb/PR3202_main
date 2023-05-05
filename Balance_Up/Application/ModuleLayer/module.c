@@ -359,6 +359,11 @@ void Slave_TxInfoUpdate(void)
 	if (status.buff_cmd != buff_reset)
 		slave.info->tx_info->status |= 0x0200;
 	
+	/*  11:陀螺仪状态标志位  */
+	slave.info->tx_info->status &= 0xFBFF;
+	if (imu_sensor.work_state.err_code != IMU_NONE_ERR)
+		slave.info->tx_info->status |= 0x0400;
+	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	/*  yaw轴陀螺仪角度数据  */

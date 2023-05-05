@@ -480,7 +480,7 @@ void Launcher_GetRcState(void)
 								status.lch_state.shoot_state = swift_shoot;
 								launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
 								launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
-								launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 1) * launcher.conf->Load_Angle;
+								launcher.info->target_heat_angle = launcher.info->measure_dial_angle + (launcher.info->remain_heat/10 - 2) * launcher.conf->Load_Angle;
 							}
 						}
 					}

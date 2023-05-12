@@ -20,7 +20,7 @@ void DRIVER_Init(void)
 {
 
 	SPI2_Init();
-	imu_sensor.init(&imu_sensor);
+//	imu_sensor.init(&imu_sensor);
 	
 	TIM4_Init();
 	

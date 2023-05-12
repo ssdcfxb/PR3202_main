@@ -95,10 +95,10 @@ void imu_init(struct imu_struct *self)
 
 	while(self->work_state.init_code)
 	{
-		if (++self->work_state.err_cnt == 250)
+		if (++self->work_state.err_cnt == 100)
 		{
-//			__set_FAULTMASK(1); 
-//			NVIC_SystemReset();
+			__set_FAULTMASK(1); 
+			NVIC_SystemReset();
 			break;
 		}
         self->work_state.err_code = IMU_INIT_ERR;
@@ -132,13 +132,16 @@ void imu_init(struct imu_struct *self)
 		/* Ðý×ª¾ØÕó³õÊ¼»¯ */
 		transform_init();
 		
-		Flash_ReadData(IMU_DATA_ADDR, (uint32_t*)imu_read, 12);
-		if (*(uint32_t*)imu_read != 0xFFFFFFFF)
-		{
-			imu_sensor.info->offset_info.gx_offset = imu_read[0];
-			imu_sensor.info->offset_info.gy_offset = imu_read[1];
-			imu_sensor.info->offset_info.gz_offset = imu_read[2];
-		}
+//		Flash_ReadData(IMU_DATA_ADDR, (uint32_t*)imu_read, 12);
+//		if (*(uint32_t*)imu_read != 0xFFFFFFFF)
+//		{
+//			imu_sensor.info->offset_info.gx_offset = imu_read[0];
+//			imu_sensor.info->offset_info.gy_offset = imu_read[1];
+//			imu_sensor.info->offset_info.gz_offset = imu_read[2];
+//		}
+		imu_sensor.info->offset_info.gx_offset = 0.f;
+		imu_sensor.info->offset_info.gy_offset = 0.f;
+		imu_sensor.info->offset_info.gz_offset = 0.f;
 	}
 	else
 	{

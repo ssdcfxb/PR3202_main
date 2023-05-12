@@ -26,37 +26,37 @@ void StartLedTask(void const * argument)
 		/*  云台电机指示灯  */
 		if ((RM_motor[GIM_Y].state.work_state == M_ONLINE) && (RM_motor[GIM_P].state.work_state == M_ONLINE))
 		{
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
 		}
 		else
 		{
 			if (i % 500 == 0)
-				HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_2);
+				HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
 		}
 		
 		/*  下主控&遥控器指示灯  */
 		if ((slave.work_state == DEV_ONLINE) && (rc_sensor.work_state == DEV_ONLINE))
 		{
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
 		}
 		else
 		{
 			if ((slave.work_state == DEV_OFFLINE) && (rc_sensor.work_state == DEV_OFFLINE))
 			{
 				if (i % 150 == 0)
-					HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+					HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_2);
 			}
 			else
 			{
 				if (slave.work_state == DEV_OFFLINE)
 				{
 					if (i % 1000 == 0)
-						HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+						HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_2);
 				}
 				if (rc_sensor.work_state == DEV_OFFLINE)
 				{
 					if (i % 500 == 0)
-						HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+						HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_2);
 				}
 			}
 		}

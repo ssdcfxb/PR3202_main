@@ -46,8 +46,10 @@ bool vision_send_data(void)
 	return false;
 }
 
+uint32_t rx_cnt = 0, rxr_cnt = 0;
 void vision_update(vision_sensor_t *vis_sen, uint8_t *rxBuf)
 {
+	rx_cnt ++;
 	if(rxBuf[0] == 0xA5)
 	{
 		if(Verify_CRC8_Check_Sum(rxBuf, 3) == true)
@@ -56,6 +58,8 @@ void vision_update(vision_sensor_t *vis_sen, uint8_t *rxBuf)
 			{
 				memcpy(&vision_rx_info, rxBuf, sizeof(vision_rx_info_t));
 				vis_sen->info->rx_flag = 1;
+				
+				rxr_cnt++;
 				t1 = t2;
 				t2 = micros();
 				tmp = t2 - t1;

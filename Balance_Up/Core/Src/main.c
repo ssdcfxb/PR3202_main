@@ -108,16 +108,18 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+	
 	SPI1_Init();
 	SPI2_Init();
 	imu_sensor.init(&imu_sensor);
-	TIM4_Init();
-	HAL_Delay(1000);
-	*(imu_sensor.info->kp) = 0.1f;
+	HAL_Delay(10);
+	
 	DRIVER_Init();
 	DEVICE_Init();
-	CAN_Filter_Init();
-//  MX_IWDG_Init();
+	
+#if defined	(DEBUG_MODE) && (DEBUG_MODE == 0)
+  MX_IWDG_Init();
+#endif
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

@@ -841,20 +841,21 @@ ARM Macro Assembler    Page 13
               00000400 
               00000200 
               00000000 
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
-erwork --depend=balance_down\startup_stm32f407xx.d -obalance_down\startup_stm32
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
+interwork --depend=balance_down\startup_stm32f407xx.d -obalance_down\startup_st
 
 
 
 ARM Macro Assembler    Page 14 
 
 
-f407xx.o -I..\Core\Inc -I.\RTE\_Balance_Down -IE:\Keil5\ARM\PACK\ARM\CMSIS\5.9.
-0\CMSIS\Core\Include -IE:\Keil5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\DSP\Include -IE:
-\Keil5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\DSP\PrivateInclude -IE:\Keil5\ARM\PACK\Ke
-il\STM32F4xx_DFP\2.16.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include --predefine="
-__UVISION_VERSION SETA 524" --predefine="_RTE_ SETA 1" --predefine="STM32F407xx
- SETA 1" --list=startup_stm32f407xx.lst startup_stm32f407xx.s
+m32f407xx.o -I..\Core\Inc -I.\RTE\_Balance_Down -ID:\AppData\Local\Arm\Packs\AR
+M\CMSIS-DSP\1.14.4\Include -ID:\AppData\Local\Arm\Packs\ARM\CMSIS-DSP\1.14.4\Pr
+ivateInclude -ID:\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include -I
+D:\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.0\Drivers\CMSIS\Device\ST\ST
+M32F4xx\Include --predefine="__UVISION_VERSION SETA 538" --predefine="_RTE_ SET
+A 1" --predefine="STM32F407xx SETA 1" --predefine="_RTE_ SETA 1" --list=startup
+_stm32f407xx.lst startup_stm32f407xx.s
 
 
 

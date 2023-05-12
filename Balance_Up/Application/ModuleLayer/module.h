@@ -69,6 +69,13 @@ typedef enum
 	auto_shoot_on,     // 开启自动打弹
 } auto_cmd_e;
 
+/*  键盘自动打符状态  */
+typedef enum
+{
+	auto_buff_off,		 // 关闭自动打符
+	auto_buff_on,			 // 开启自动打符
+} autobuff_cmd_e;
+
 /*  打符标志位  */
 typedef enum
 {
@@ -89,7 +96,7 @@ typedef struct {
 	heat_cmd_e				heat_mode;
 	speed_cmd_e				speed_cmd;
 	auto_cmd_e				auto_cmd;
-	auto_cmd_e				auto_state;
+	autobuff_cmd_e		autobuff_cmd;
 	buff_cmd_e				buff_cmd;
 	uint8_t						tw_last_state;
 } status_t;

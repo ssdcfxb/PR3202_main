@@ -63,7 +63,7 @@ typedef __packed struct rx_pack
 		int16_t           rc_ch_ad_val;
 		
 		//所有标志位从低到高设置,这里不用共用体
-		uint8_t  					status;		
+		uint16_t  					status;		
 		
 		float             yaw_angle;
 		int16_t 					motor_angle;

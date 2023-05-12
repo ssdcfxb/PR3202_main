@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+#define DEBUG_MODE 0
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

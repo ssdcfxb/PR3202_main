@@ -49,6 +49,8 @@ status_t status = {
 	.heat_mode = heat_limit_on,
 	.speed_cmd = speed_reset,
 	.auto_cmd = auto_shoot_off,
+	.autobuff_cmd = auto_buff_off,
+	.buff_cmd = buff_reset,
 	.tw_last_state = 0,
 };
 
@@ -256,7 +258,7 @@ void Slave_TxInfoUpdate(void)
 	if (rc_sensor.work_state == DEV_OFFLINE)
 		status.chas_cmd = chas_reset;
 		/*  遥控器开关小陀螺  */
-	if ((module.remote_mode == RC) && (module.mode == MODULE_MODE_GYRO2))
+	if ((module.remote_mode == RC) && (module.mode == MODULE_MODE_GYRO))
 	{
 		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 		{
@@ -289,7 +291,7 @@ void Slave_TxInfoUpdate(void)
 	if (status.chas_state == gyro_on)
 		slave.info->tx_info->status |= 0x0004;
 	
-	/*  4:头的朝向  */
+	/*  4:头的朝向(开启侧身时为1)  */
 	slave.info->tx_info->status &= 0xFFF7;
 	if (gimbal.conf->restart_yaw_motor_angle != gimbal.conf->MID_VALUE)
 		slave.info->tx_info->status |= 0x0008;
@@ -315,7 +317,7 @@ void Slave_TxInfoUpdate(void)
 	if (rc_sensor.work_state == DEV_OFFLINE)
 		status.chas_cmd = chas_reset;
 		/*  遥控器开关侧身  */
-	if ((module.remote_mode == RC) && (module.mode == MODULE_MODE_GYRO))
+	if ((module.remote_mode == RC) && (module.mode == MODULE_MODE_GYRO2))
 	{
 		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_DOWN))
 		{
@@ -364,6 +366,12 @@ void Slave_TxInfoUpdate(void)
 	if (imu_sensor.work_state.err_code != IMU_NONE_ERR)
 		slave.info->tx_info->status |= 0x0400;
 	
+	/*  12:左右标志位(关闭侧身时为0)  */
+	slave.info->tx_info->status &= 0xF7FF;
+	if ((gimbal.info->measure_yaw_motor_angle < gimbal.conf->MID_VALUE) &&\
+			(gimbal.info->measure_yaw_motor_angle > (gimbal.conf->MID_VALUE - HALF_ECD_RANGE)))
+		slave.info->tx_info->status |= 0x0800;	
+	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	/*  yaw轴陀螺仪角度数据  */
@@ -380,6 +388,8 @@ void Vision_TxInfoUpdate(void)
 	vision_sensor.info->tx_info->pitch_angle = vision_sensor.info->measure_pitch_angle;
 	vision_sensor.info->tx_info->yaw_angle = vision_sensor.info->measure_yaw_angle;
 	vision_sensor.info->tx_info->shoot_speed = vision_sensor.info->measure_shoot_speed;
+	vision_sensor.info->tx_info->my_color = slave.info->my_color;
+	
 	vision_sensor.info->tx_info->mode = AIM_ON;
 	if (status.buff_cmd == small_buff_on)
 	{
@@ -389,9 +399,7 @@ void Vision_TxInfoUpdate(void)
 	{
 		vision_sensor.info->tx_info->mode = AIM_BIG_BUFF;
 	}
-	
 	vision_sensor.info->cmd_mode = vision_sensor.info->tx_info->mode;
-	vision_sensor.info->tx_info->my_color = slave.info->my_color;
 	
 }
 
@@ -474,6 +482,7 @@ void Key_RxInfoCheck(void)
 	status.lch_cmd.shoot_cmd = shoot_reset;
 	status.heat_mode = heat_limit_on;
 	status.buff_cmd = buff_reset;
+	status.gim_mode = gyro;
 	/*  Ctrl(同时):关弹仓 关摩擦轮 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
 	{
@@ -529,16 +538,33 @@ void Key_RxInfoCheck(void)
 		status.heat_mode = heat_limit_off;
 	}
 	/*  X:小符  */
-	if (keyboard.state.X != relax_K)
+	if ((keyboard.state.X == short_press_K) || (keyboard.state.X == long_press_K))
 	{
 		status.chas_cmd = lean_on;
 		status.buff_cmd = small_buff_on;
+		status.gim_mode = vision;
 	}
 	/*  Z:大符  */
-	if (keyboard.state.Z != relax_K)
+	if ((keyboard.state.Z == short_press_K) || (keyboard.state.Z == long_press_K))
 	{
 		status.chas_cmd = lean_on;
 		status.buff_cmd = big_buff_on;
+		status.gim_mode = vision;
+	}
+	/*  自动打符  */
+	if ((keyboard.state.X == down_K) || (keyboard.state.Z == down_K))
+	{
+		status.autobuff_cmd = auto_buff_on;
+	}
+	
+	if ((keyboard.state.X == up_K) || (keyboard.state.Z == up_K))
+	{
+		status.chas_cmd = chas_reset;
+		status.autobuff_cmd = auto_buff_off;
+	}
+	if ((keyboard.state.X == relax_K) && (keyboard.state.Z == relax_K))
+	{
+		status.autobuff_cmd = auto_buff_off;
 	}
 	/*  ZX:反符  */
 //	if ((keyboard.state.X != relax_K) && (keyboard.state.Z != relax_K))
@@ -619,10 +645,10 @@ void Key_RxInfoCheck(void)
 	if (keyboard.state.mouse_btn_l != relax_K)
 	{
 		status.auto_cmd = auto_shoot_off;
+		status.autobuff_cmd = auto_buff_off;
 	}
 	
 	/*  mouse_btn_r:自瞄  */
-	status.gim_mode = gyro;
 	if ((keyboard.state.mouse_btn_r == short_press_K) || (keyboard.state.mouse_btn_r == long_press_K))
 	{
 		status.gim_mode = vision;

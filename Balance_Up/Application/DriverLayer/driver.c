@@ -23,4 +23,6 @@ void DRIVER_Init(void)
 	USART3_Init();
 	USART6_Init();
 	TIM5_Init();
+	TIM4_Init();
+	CAN_Filter_Init();
 }

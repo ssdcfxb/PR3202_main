@@ -2,7 +2,7 @@
 
 uint16_t fps = 7;
 uint32_t err_code = 0;
-uint8_t sw = 0;
+//uint8_t sw = 0;
 float imu_temp[3];
 
 void StartHeartBeatTask(void const * argument)
@@ -37,11 +37,12 @@ void StartHeartBeatTask(void const * argument)
 			vision_send_data();
 		
 		/* ≤‚ ‘¥˙¬Î */
-		if (sw == 1)
-		{
-			__set_FAULTMASK(1); 
-			NVIC_SystemReset();
-		}
+//		if (sw == 1)
+//		{
+//			__set_FAULTMASK(1); 
+//			NVIC_SystemReset();
+//		}
+		
 //		if (imu_sensor.work_state.cali_end == 1)
 //		{
 //			

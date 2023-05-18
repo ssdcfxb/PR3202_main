@@ -116,12 +116,13 @@ int main(void)
 	imu_sensor.init(&imu_sensor);
 	HAL_Delay(10);
 	
-	DEVICE_Init();
-	DRIVER_Init();
-	
 #if defined	(DEBUG_MODE) && (DEBUG_MODE == 0)
   MX_IWDG_Init();
 #endif
+
+	DEVICE_Init();
+	DRIVER_Init();
+	
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

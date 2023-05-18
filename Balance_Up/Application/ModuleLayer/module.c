@@ -562,6 +562,8 @@ void Key_RxInfoCheck(void)
 	if ((keyboard.state.X == down_K) || (keyboard.state.Z == down_K))
 	{
 		status.autobuff_cmd = auto_buff_on;
+		status.lch_cmd.fric_cmd = fric_on;
+		status.lch_cmd.magz_cmd = magz_close;
 	}
 	
 	if ((keyboard.state.X == up_K) || (keyboard.state.Z == up_K))

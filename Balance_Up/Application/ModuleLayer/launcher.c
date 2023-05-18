@@ -596,14 +596,27 @@ void Launcher_GetKeyState(void)
 //	}
 	
 	/*  键盘自动打符  */
-	if ((status.auto_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
-			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (vision_sensor.info->is_find_buff == 1))
+	if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == small_buff_on) &&\
+			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (vision_sensor.info->is_find_buff == 1) && (status.lch_state.fric_state == fric_on))
 	{
 		if (++buff_cnt >= 500)
 		{
 			buff_cnt = 0;
 			status.lch_cmd.shoot_cmd = single_shoot;
 		}
+	}
+	else if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == big_buff_on) &&\
+			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (vision_sensor.info->is_find_buff == 1) && (status.lch_state.fric_state == fric_on))
+	{
+		if (++buff_cnt >= 600)
+		{
+			buff_cnt = 0;
+			status.lch_cmd.shoot_cmd = single_shoot;
+		}
+	}
+	else
+	{
+		buff_cnt = 0;
 	}
 	
 	/*  拨盘指令  */

@@ -105,17 +105,19 @@ int main(void)
   MX_USART6_UART_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
+	
+	SPI1_Init();
+	SPI2_Init();
+	
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
 	
-	SPI1_Init();
-	SPI2_Init();
 	imu_sensor.init(&imu_sensor);
 	HAL_Delay(10);
 	
-	DRIVER_Init();
 	DEVICE_Init();
+	DRIVER_Init();
 	
 #if defined	(DEBUG_MODE) && (DEBUG_MODE == 0)
   MX_IWDG_Init();

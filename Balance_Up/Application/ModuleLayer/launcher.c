@@ -582,11 +582,11 @@ void Launcher_GetKeyState(void)
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
 	
 	/*  遥控器切换目标测试  */
-//	if (rc_sensor.info->s2 == RC_SW_UP)
-//	{
-//		if (launcher.info->last_s2 != rc_sensor.info->s2)
-//			vision_sensor.info->tx_info->is_change_target ++;
-//	}
+	if (rc_sensor.info->s2 == RC_SW_UP)
+	{
+		if (launcher.info->last_s2 != rc_sensor.info->s2)
+			vision_sensor.info->tx_info->is_change_target ++;
+	}
 	
 	/*  键盘自动打弹  */
 //	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\

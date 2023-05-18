@@ -95,7 +95,7 @@ void imu_init(struct imu_struct *self)
 
 	while(self->work_state.init_code)
 	{
-		if (++self->work_state.err_cnt == 100)
+		if (++self->work_state.err_cnt == 5)
 		{
 			__set_FAULTMASK(1); 
 			NVIC_SystemReset();
@@ -126,7 +126,7 @@ void imu_init(struct imu_struct *self)
 	{
 		self->work_state.dev_state = DEV_ONLINE;
 		self->work_state.err_code = IMU_NONE_ERR;
-		self->work_state.err_cnt = 0;
+//		self->work_state.err_cnt = 0;
 		self->info->init_flag = 1;
 		
 		/* Ğı×ª¾ØÕó³õÊ¼»¯ */

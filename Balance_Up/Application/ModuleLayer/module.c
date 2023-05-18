@@ -51,6 +51,7 @@ status_t status = {
 	.auto_cmd = auto_shoot_off,
 	.autobuff_cmd = auto_buff_off,
 	.buff_cmd = buff_reset,
+	.block_cmd = block_reset,
 	.tw_last_state = 0,
 };
 
@@ -372,6 +373,11 @@ void Slave_TxInfoUpdate(void)
 			(gimbal.info->measure_yaw_motor_angle > (gimbal.conf->MID_VALUE - HALF_ECD_RANGE)))
 		slave.info->tx_info->status |= 0x0800;	
 	
+	/*  13:卡墙处理标志位  */
+	slave.info->tx_info->status &= 0xEFFF;
+	if (status.block_cmd == block_on)
+		slave.info->tx_info->status |= 0x1000;
+	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	/*  yaw轴陀螺仪角度数据  */
@@ -472,6 +478,7 @@ void Rc_RxInfoCheck(void)
 	}
 }
 
+uint8_t rst_cnt = 0;
 void Key_RxInfoCheck(void)
 {
 	Key_StateUpdate();
@@ -483,7 +490,7 @@ void Key_RxInfoCheck(void)
 	status.heat_mode = heat_limit_on;
 	status.buff_cmd = buff_reset;
 	status.gim_mode = gyro;
-	/*  Ctrl(同时):关弹仓 关摩擦轮 关小陀螺  */
+	/*  Ctrl(同时):关弹仓 关侧身 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
 	{
 		if (status.lch_state.magz_state == magz_open)
@@ -575,7 +582,7 @@ void Key_RxInfoCheck(void)
 	/*  V:切换目标  */
 	if (keyboard.state.V == down_K)
 	{
-//		vision_sensor.info->tx_info->is_change_target ++;
+		vision_sensor.info->tx_info->is_change_target ++;
 	}
 	
 	
@@ -624,6 +631,18 @@ void Key_RxInfoCheck(void)
 	if (keyboard.state.Shift != relax_K)
 		status.speed_cmd = rapid_on;
 	
+	/*  长按Ctrl:卡墙处理  */
+	status.block_cmd = block_reset;
+	if (keyboard.state.Ctrl == long_press_K)
+	{
+		status.block_cmd = block_on;
+		status.chas_cmd = chas_reset;
+	}
+	if (keyboard.state.Ctrl == up_K)
+	{
+		status.lch_cmd.magz_cmd = magz_close;
+	}
+	
 	status.gim_cmd = gim_reset;
 	/*  C:掉头  */
 	if ((keyboard.state.C == down_K) && (status.lch_state.magz_state == magz_close))
@@ -658,17 +677,31 @@ void Key_RxInfoCheck(void)
 	if ((keyboard.state.Z != relax_K) && (keyboard.state.X != relax_K) && (keyboard.state.V != relax_K))
 	{
 		symbal.slave_reset = 1;
+		if (++rst_cnt == 20)
+		{
+			__set_FAULTMASK(1); 
+			NVIC_SystemReset();
+		}
 	}
-	if ((keyboard.state.Z == long_press_K) && (keyboard.state.X == long_press_K) && (keyboard.state.V == long_press_K))
+	else
 	{
+		rst_cnt = 0;
+	}
+//	if ((keyboard.state.Z == long_press_K) && (keyboard.state.X == long_press_K) && (keyboard.state.V == long_press_K))
+//	{
 //		memset(can1_send_buf, 0, 16);
 //		memset(can2_send_buf, 0, 16);
 //		CAN_SendAll();
 //		Magazine_Sleep();
-		
-		__set_FAULTMASK(1); 
-		NVIC_SystemReset();
-	}
+//		
+//		__set_FAULTMASK(1); 
+//		NVIC_SystemReset();
+//	}
+	
+	
+	
+	
+	
 	/*  遥控器复位  */
 	if ((rc_sensor.info->s2 == RC_SW_UP) && (rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
 	{
@@ -680,6 +713,12 @@ void Key_RxInfoCheck(void)
 			NVIC_SystemReset();
 		}
 	}
+	
+	/*  遥控器卡墙处理  */
+//	if ((rc_sensor.info->s2 == RC_SW_UP) && (abs(rc_sensor.info->ch1) == 660))
+//	{
+//		status.block_cmd = block_on;
+//	}
 	
 	
 	/*  遥控器陀螺仪校正  */

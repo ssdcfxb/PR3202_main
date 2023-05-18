@@ -137,6 +137,6 @@ void imu_update(imu_sensor_t *imu_sen)
 	}
 	else
 	{
-		imu_sen->work_state.err_cnt = 0;
+//		imu_sen->work_state.err_cnt = 0;
 	}
 }

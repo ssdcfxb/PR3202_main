@@ -85,6 +85,13 @@ typedef enum
 	debuff_on,				// 反符开启
 } buff_cmd_e;
 
+/*  卡墙标志位  */
+typedef enum
+{
+	block_reset, 			// 功能复位
+	block_on,  			 	// 倒地自救开启
+} block_cmd_e;
+
 typedef struct {
 	launcher_state_t	lch_state;
 	gim_cmd_e					gim_cmd;
@@ -98,6 +105,7 @@ typedef struct {
 	auto_cmd_e				auto_cmd;
 	autobuff_cmd_e		autobuff_cmd;
 	buff_cmd_e				buff_cmd;
+	block_cmd_e				block_cmd;
 	uint8_t						tw_last_state;
 } status_t;
 

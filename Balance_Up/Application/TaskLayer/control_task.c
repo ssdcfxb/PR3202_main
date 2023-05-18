@@ -7,7 +7,7 @@ void StartControlTask(void const * argument)
 	launcher.init();
   for(;;)
   {
-		if(module.state == MODULE_STATE_NORMAL)
+		if((module.state == MODULE_STATE_NORMAL) && (symbal.slave_reset != 1))
 		{
 			if (module.remote_mode == KEY)
 			{

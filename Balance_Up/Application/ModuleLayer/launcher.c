@@ -248,7 +248,7 @@ void Judge_GetSpeedInfo(void)
   * @param  
   * @retval 
   */
-int8_t cnt = 0;
+int8_t cnt = 0, low_cnt = 0;
 float last_measure_speed = 0.f;
 void Judge_AdaptFricSpeed(void)
 {
@@ -258,8 +258,15 @@ void Judge_AdaptFricSpeed(void)
 	{
 		if ((launcher.info->measure_launcher_speed != last_measure_speed) && (launcher.info->measure_launcher_speed > 0.f))
 		{
-			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 1.05f))
+			if (launcher.info->measure_launcher_speed > launcher.info->limit_speed)
 			{
+				low_cnt = 0;
+				cnt = 0;
+				speed_adapt = -20;
+			}
+			else if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 1.05f))
+			{
+				low_cnt = 0;
 				cnt++;
 				if (cnt >= 2)
 				{
@@ -267,8 +274,19 @@ void Judge_AdaptFricSpeed(void)
 					speed_adapt = -1;
 				}
 			}
+			else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 2.05f))
+			{
+				low_cnt++;
+//				cnt = 0;
+				if (low_cnt >= 3)
+				{
+					low_cnt = 0;
+					speed_adapt = 15;
+				}
+			}
 			else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.45f))
 			{
+				low_cnt = 0;
 				cnt--;
 				if (cnt <= -2)
 				{
@@ -278,6 +296,7 @@ void Judge_AdaptFricSpeed(void)
 			}
 			else
 			{
+				low_cnt = 0;
 				cnt = 0;
 				speed_adapt = 0;
 			}
@@ -599,7 +618,7 @@ void Launcher_GetKeyState(void)
 	if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == small_buff_on) &&\
 			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (vision_sensor.info->is_find_buff == 1) && (status.lch_state.fric_state == fric_on))
 	{
-		if (++buff_cnt >= 500)
+		if (++buff_cnt >= 600)
 		{
 			buff_cnt = 0;
 			status.lch_cmd.shoot_cmd = single_shoot;
@@ -608,7 +627,7 @@ void Launcher_GetKeyState(void)
 	else if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == big_buff_on) &&\
 			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (vision_sensor.info->is_find_buff == 1) && (status.lch_state.fric_state == fric_on))
 	{
-		if (++buff_cnt >= 600)
+		if (++buff_cnt >= 800)
 		{
 			buff_cnt = 0;
 			status.lch_cmd.shoot_cmd = single_shoot;

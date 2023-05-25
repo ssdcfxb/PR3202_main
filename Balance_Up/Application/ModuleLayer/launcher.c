@@ -627,7 +627,7 @@ void Launcher_GetKeyState(void)
 	else if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == big_buff_on) &&\
 			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (vision_sensor.info->is_find_buff == 1) && (status.lch_state.fric_state == fric_on))
 	{
-		if (++buff_cnt >= 800)
+		if (++buff_cnt >= 1000)
 		{
 			buff_cnt = 0;
 			status.lch_cmd.shoot_cmd = single_shoot;

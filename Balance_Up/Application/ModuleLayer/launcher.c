@@ -258,7 +258,7 @@ void Judge_AdaptFricSpeed(void)
 	{
 		if ((launcher.info->measure_launcher_speed != last_measure_speed) && (launcher.info->measure_launcher_speed > 0.f))
 		{
-			if (launcher.info->measure_launcher_speed > launcher.info->limit_speed)
+			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.45f))
 			{
 				low_cnt = 0;
 				cnt = 0;

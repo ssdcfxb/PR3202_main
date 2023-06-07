@@ -488,11 +488,11 @@ void Key_RxInfoCheck(void)
 //	keyboard.lch_cmd.magz_cmd = lch_reset;
 	status.lch_cmd.shoot_cmd = shoot_reset;
 	status.heat_mode = heat_limit_on;
-	status.buff_cmd = buff_reset;
 	status.gim_mode = gyro;
-	/*  Ctrl(同时):关弹仓 关侧身 关小陀螺  */
+	/*  Ctrl(同时):关打符 关弹仓 关侧身 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
 	{
+		status.buff_cmd = buff_reset;
 		if (status.lch_state.magz_state == magz_open)
 		{
 			status.lch_cmd.magz_cmd = magz_close;
@@ -545,17 +545,22 @@ void Key_RxInfoCheck(void)
 		status.heat_mode = heat_limit_off;
 	}
 	/*  X:小符  */
-	if ((keyboard.state.X == short_press_K) || (keyboard.state.X == long_press_K))
+	if (keyboard.state.X == down_K)
 	{
 		status.chas_cmd = lean_on;
 		status.buff_cmd = small_buff_on;
 		status.gim_mode = vision;
 	}
 	/*  Z:大符  */
-	if ((keyboard.state.Z == short_press_K) || (keyboard.state.Z == long_press_K))
+	if (keyboard.state.Z == down_K)
 	{
 		status.chas_cmd = lean_on;
 		status.buff_cmd = big_buff_on;
+		status.gim_mode = vision;
+	}
+	if ((status.buff_cmd == big_buff_on) || (status.buff_cmd == small_buff_on))
+	{
+		status.chas_cmd = lean_on;
 		status.gim_mode = vision;
 	}
 	/*  自动打符  */

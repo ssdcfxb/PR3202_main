@@ -4,6 +4,7 @@ uint16_t fps = 7;
 uint32_t err_code = 0;
 //uint8_t sw = 0;
 float imu_temp[3];
+float kp_dat = 0.1f;
 
 void StartHeartBeatTask(void const * argument)
 {
@@ -13,10 +14,10 @@ void StartHeartBeatTask(void const * argument)
 		if (++i == 60000)
 			i = 0;
 		
-		if (*(imu_sensor.info->kp) != 0.1f)
+		if (*(imu_sensor.info->kp) != kp_dat)
 		{
 			if (i % 1000 == 0)
-				*(imu_sensor.info->kp) = 0.1f;
+				*(imu_sensor.info->kp) = kp_dat;
 		}
 		
 #if defined	(DEBUG_MODE) && (DEBUG_MODE == 0)

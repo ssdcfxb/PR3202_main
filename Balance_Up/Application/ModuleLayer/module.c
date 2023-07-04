@@ -378,6 +378,11 @@ void Slave_TxInfoUpdate(void)
 	if (status.block_cmd == block_on)
 		slave.info->tx_info->status |= 0x1000;
 	
+	/*  14:打符模式标志位  */
+	slave.info->tx_info->status &= 0xDFFF;
+	if (status.buff_cmd == big_buff_on)
+		slave.info->tx_info->status |= 0x2000;
+	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	/*  yaw轴陀螺仪角度数据  */
@@ -493,6 +498,7 @@ void Key_RxInfoCheck(void)
 	if (keyboard.state.Ctrl == down_K)
 	{
 		status.buff_cmd = buff_reset;
+		status.autobuff_cmd = auto_buff_off;
 		if (status.lch_state.magz_state == magz_open)
 		{
 			status.lch_cmd.magz_cmd = magz_close;
@@ -571,15 +577,16 @@ void Key_RxInfoCheck(void)
 		status.lch_cmd.magz_cmd = magz_close;
 	}
 	
-	if ((keyboard.state.X == up_K) || (keyboard.state.Z == up_K))
-	{
-		status.chas_cmd = chas_reset;
-		status.autobuff_cmd = auto_buff_off;
-	}
-	if ((keyboard.state.X == relax_K) && (keyboard.state.Z == relax_K))
-	{
-		status.autobuff_cmd = auto_buff_off;
-	}
+//	if ((keyboard.state.X == up_K) || (keyboard.state.Z == up_K))
+//	{
+//		status.chas_cmd = chas_reset;
+//		status.autobuff_cmd = auto_buff_off;
+//	}
+//	if ((keyboard.state.X == relax_K) && (keyboard.state.Z == relax_K))
+//	{
+//		status.autobuff_cmd = auto_buff_off;
+//	}
+	
 	/*  ZX:反符  */
 //	if ((keyboard.state.X != relax_K) && (keyboard.state.Z != relax_K))
 //	{

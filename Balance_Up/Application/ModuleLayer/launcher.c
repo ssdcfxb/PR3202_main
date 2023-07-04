@@ -595,7 +595,7 @@ void Launcher_GetRcState(void)
   */
 void Launcher_GetKeyState(void)
 {
-	static uint16_t buff_cnt = 400;
+	static uint16_t buff_cnt = 400, auto_step = 0;
 	
 	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
@@ -608,11 +608,20 @@ void Launcher_GetKeyState(void)
 	}
 	
 	/*  键盘自动打弹  */
-//	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
-//			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1))
-//	{
-//		status.lch_cmd.shoot_cmd = keep_shoot;
-//	}
+	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
+			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1))
+	{
+		if (!auto_step)
+		{
+			auto_step = 1;
+			status.lch_cmd.shoot_cmd = single_shoot;
+		}
+		status.lch_cmd.shoot_cmd = keep_shoot;
+	}
+	else
+	{
+		auto_step = 0;
+	}
 	
 	/*  键盘自动打符  */
 	if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == small_buff_on) &&\
@@ -652,24 +661,24 @@ void Launcher_GetKeyState(void)
 	}
 	if (status.lch_cmd.shoot_cmd == keep_shoot)
 	{
-		if (status.lch_state.shoot_state != keep_shoot)
+		if ((status.lch_state.shoot_state != keep_shoot) && (status.lch_state.shoot_state != single_shoot))
 		{
 			status.lch_state.shoot_state = keep_shoot;
 			launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
 		}
 		/*  自动打弹  */
-		if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 0))
-		{
-			status.lch_state.shoot_state = shoot_reset;
-			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
-		}
+//		if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 0))
+//		{
+//			status.lch_state.shoot_state = shoot_reset;
+//			launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
+//		}
 	}
 	if (status.lch_cmd.shoot_cmd == swift_shoot)
 	{
 		/*  判断裁判系统数据是否更新  */
 		if (launcher.work_info->swift_enable == 1)
 		{
-			if (status.lch_state.shoot_state != swift_shoot)
+			if ((status.lch_state.shoot_state != swift_shoot) && (status.lch_state.shoot_state != single_shoot))
 			{
 				status.lch_state.shoot_state = swift_shoot;
 				launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;

@@ -63,6 +63,7 @@ imu_sensor_t imu_sensor = {
 /* Private functions ---------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 float imu_read[3];
+uint8_t init_cnt = 200;
 void imu_init(struct imu_struct *self)
 {
 	uint32_t tickstart = HAL_GetTick();
@@ -95,7 +96,7 @@ void imu_init(struct imu_struct *self)
 
 	while(self->work_state.init_code)
 	{
-		if (++self->work_state.err_cnt == 5)
+		if (++self->work_state.err_cnt == init_cnt)
 		{
 			__set_FAULTMASK(1); 
 			NVIC_SystemReset();

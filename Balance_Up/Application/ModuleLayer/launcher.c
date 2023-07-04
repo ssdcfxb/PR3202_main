@@ -615,7 +615,7 @@ void Launcher_GetKeyState(void)
 	
 	/*  ¼üÅÌ×Ô¶¯´òµ¯  */
 	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
-			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1))
+			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on))
 	{
 		if (!auto_step)
 		{

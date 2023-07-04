@@ -669,7 +669,8 @@ void Key_RxInfoCheck(void)
 	/*  mouse_btn_r:×Ô¶¯´òµ¯  */
 	if (keyboard.state.mouse_btn_r == down_K)
 	{
-//		status.auto_cmd = auto_shoot_on;
+		status.auto_cmd = auto_shoot_on;
+		status.lch_cmd.fric_cmd = fric_on;
 	}
 	if (keyboard.state.mouse_btn_r == relax_K)
 	{

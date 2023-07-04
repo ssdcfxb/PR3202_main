@@ -514,17 +514,23 @@ void Launcher_GetRcState(void)
 						status.lch_state.shoot_state = keep_shoot;
 						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
 					}
-					/*  自瞄自动打弹  */
-//					if (vision_sensor.info->is_hit_enable == 0)
-//					{
-//						status.lch_state.shoot_state = shoot_reset;
-//						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
-//					}
-					/* 旧代码 */
-//					if (launcher.info->last_s2 != rc_sensor.info->s2)
-//					{
-//						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
-//					}
+					/*  遥控器自动打弹  */
+					static uint16_t auto_step = 0;
+					if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
+							(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1))
+					{
+						if (!auto_step)
+						{
+							auto_step = 1;
+							status.lch_cmd.shoot_cmd = single_shoot;
+						}
+						status.lch_cmd.shoot_cmd = keep_shoot;
+					}
+					else
+					{
+						auto_step = 0;
+					}
+
 				}
 				else if (rc_sensor.info->s2 == RC_SW_DOWN)
 				{

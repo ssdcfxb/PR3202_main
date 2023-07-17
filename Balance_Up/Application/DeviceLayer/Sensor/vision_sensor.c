@@ -55,6 +55,8 @@ void vision_init(vision_sensor_t *vis_sen)
 	rx_info->is_find_target = 0; // datau8_2
 	rx_info->is_find_buff = 0;	 // datau8_3
 	rx_info->is_hit_enable = 0;  // datau8_4
+	rx_info->is_spin = 0; 			 // datau8_5
+	rx_info->yaw_threshold = 0.0f;// dataf_3
 }
 
 void vision_heart_beat(vision_sensor_t *vis_sen)

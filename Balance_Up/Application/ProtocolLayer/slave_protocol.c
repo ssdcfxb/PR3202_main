@@ -15,6 +15,7 @@ extern void judge_update(judge_t *self, slave_info_t *info);
 uint8_t slave_txBuf[30];
 /* Exported variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart3;
+
 extern slv_tx_info_t slave_tx_info;
 extern slv_rx_info_t slave_rx_info;
 
@@ -37,7 +38,7 @@ bool slave_send_data(slave_t *slef)
                                    | slave_txBuf[sizeof(slv_tx_info_t)-1]);
 	
 //	memset(&slave_tx_info.data_length, 0, (sizeof(slv_tx_info_t) - 1));
-	if(HAL_UART_Transmit_DMA(&huart3,slave_txBuf,sizeof(slv_tx_info_t)) == HAL_OK)
+	if(HAL_UART_Transmit_DMA(&huart3, slave_txBuf, sizeof(slv_tx_info_t)) == HAL_OK)
 	{
 			return true;
 	}
@@ -51,8 +52,6 @@ void slave_receive_data(slave_t *slef, uint8_t *rxBuf)
 	slv_rx_info_t *rx_info = slef->info->rx_info;
 	slave_info_t *info = slef->info;
 	
-	info->offline_cnt = 0;
-	
 	slef->info->rx_flag = 0;
 	if(rxBuf[0] == 0xA5)
 	{
@@ -62,6 +61,7 @@ void slave_receive_data(slave_t *slef, uint8_t *rxBuf)
 			{
 				memcpy(rx_info, rxBuf, sizeof(slv_rx_info_t));
 				slef->info->rx_flag = 1;
+				info->offline_cnt = 0;
 			}
 		}
 	}

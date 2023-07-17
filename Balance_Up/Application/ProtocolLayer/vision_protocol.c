@@ -86,6 +86,7 @@ void vision_check(vision_sensor_t *vis_sen)
 		memcpy(&info->is_find_buff, &rx_info->is_find_buff, 1);
 		memcpy(&info->is_hit_enable, &rx_info->is_hit_enable, 1);
 		memcpy(&info->is_spin, &rx_info->is_spin, 1);
+		memcpy(&info->yaw_threshold, (void*)&rx_info->yaw_threshold, 4);
 	}
 }
 

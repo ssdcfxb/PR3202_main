@@ -41,6 +41,7 @@ RM_motor_t RM_motor[MOTOR_LIST] =
 		
 		.init = motor_class_init,
 	},
+#if defined (CAR)	&& (CAR == 0)
 	[GIM_P] = {
 	
 		.id.drive_type = M_CAN2,
@@ -57,6 +58,25 @@ RM_motor_t RM_motor[MOTOR_LIST] =
 		
 		.init = motor_class_init,
 	},
+#elif defined (CAR) && (CAR == 1)
+	
+	[GIM_P] = {
+	
+		.id.drive_type = M_CAN2,
+		.id.motor_type = GM6020,
+		.id.rx_id = 0x206,
+		
+		.init = motor_class_init,
+	},
+	[GIM_Y] = {
+	
+		.id.drive_type = M_CAN2,
+		.id.motor_type = GM6020,
+		.id.rx_id = 0x205,
+		
+		.init = motor_class_init,
+	},
+#endif
 };
 
 
@@ -74,10 +94,10 @@ float fric_r_speed_pid_param[7] = {15.f, 0.5f, 0.5f, 0.f, 6000.f, 6000.f, 12000.
 float fric_l_speed_pid_param[7] = {15.f, 0.5f, 0.5f, 0.f, 6000.f, 6000.f, 12000.f};
 float dial_position_in_pid_param[7] = {17.f, 1.2f, 0.f, 0.f, 6000.f, 6000.f, 12000.f};
 float dial_position_pid_param[7] = {0.24414f, 0.f, 0.f, 0.f, 0.f, 0.f, 10000.f};
-float gim_p_position_in_pid_param[7] = {80.f, 0.04f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
-float gim_p_position_pid_param[7] = {40.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
-float gim_y_position_in_pid_param[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};
-float gim_y_position_pid_param[7] = {20.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
+float gim_p_position_in_pid_param[7] = {300.f, 1.5f, 0.f, 0.f, 10000.f, 15000.f, 29000.f}; //ÐÂÐÂ³µkp 200
+float gim_p_position_pid_param[7] = {30.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 30000.f};
+float gim_y_position_in_pid_param[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 29000.f};
+float gim_y_position_pid_param[7] = {21.f, 0.f, 30.f, 0.f, 10000.f, 10000.f, 30000.f};
 
 //float yaw_gyro_position[7] = {20.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
 //float yaw_gyro_position_in[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};

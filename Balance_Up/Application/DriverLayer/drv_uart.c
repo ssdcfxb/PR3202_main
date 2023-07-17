@@ -14,6 +14,7 @@
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart4;
 extern UART_HandleTypeDef huart6;
 
 /* Private macro -------------------------------------------------------------*/
@@ -22,12 +23,14 @@ extern UART_HandleTypeDef huart6;
 
 #define USART1_RX_BUF_LEN     100
 #define USART3_RX_BUF_LEN     200
+#define USART4_RX_BUF_LEN     200
 #define USART6_RX_BUF_LEN			200
 
 /* Private function prototypes -----------------------------------------------*/
 __WEAK void USART1_rxDataHandler(uint8_t *rxBuf);
 //__WEAK void USART2_rxDataHandler(uint8_t *rxBuf);
 __WEAK void USART3_rxDataHandler(uint8_t *rxBuf);
+__WEAK void USART4_rxDataHandler(uint8_t *rxBuf);
 __WEAK void USART6_rxDataHandler(uint8_t *rxBuf);
 
 static void dma_m0_rxcplt_callback(DMA_HandleTypeDef *hdma);
@@ -44,6 +47,7 @@ static HAL_StatusTypeDef DMAEx_MultiBufferStart_NoIT(DMA_HandleTypeDef *hdma, \
 uint8_t usart1_dma_rxbuf[USART1_RX_BUF_LEN];
 uint8_t usart2_dma_rxbuf[2][USART2_RX_BUF_LEN];
 uint8_t usart3_dma_rxbuf[USART3_RX_BUF_LEN];
+uint8_t usart4_dma_rxbuf[USART4_RX_BUF_LEN];
 uint8_t usart6_dma_rxbuf[USART6_RX_BUF_LEN];
 
 /* Exported variables --------------------------------------------------------*/
@@ -112,6 +116,16 @@ static void uart_rx_idle_callback(UART_HandleTypeDef* huart)
 		/* handle dbus data dbus_buf from DMA */
 		USART3_rxDataHandler(usart3_dma_rxbuf);
 		memset(usart3_dma_rxbuf, 0, USART3_RX_BUF_LEN);
+		/* restart dma transmission */	  
+		__HAL_DMA_ENABLE(huart->hdmarx);		
+	}
+  else if (huart == &huart4)
+	{
+		/* clear DMA transfer complete flag */
+		__HAL_DMA_DISABLE(huart->hdmarx);
+		/* handle dbus data dbus_buf from DMA */
+		USART4_rxDataHandler(usart4_dma_rxbuf);
+		memset(usart4_dma_rxbuf, 0, USART4_RX_BUF_LEN);
 		/* restart dma transmission */	  
 		__HAL_DMA_ENABLE(huart->hdmarx);		
 	}
@@ -345,6 +359,23 @@ void USART3_Init(void)
 }
 
 /**
+ *	@brief	USART4 Initialization
+ */
+void USART4_Init(void)
+{
+	__HAL_UART_CLEAR_IDLEFLAG(&huart4);
+	__HAL_UART_ENABLE_IT(&huart4, UART_IT_IDLE);
+	
+	// Enable the DMA transfer for the receiver request
+	SET_BIT(huart4.Instance->CR3, USART_CR3_DMAR);	
+	
+	DMA_Start(huart4.hdmarx, \
+			  (uint32_t)&huart4.Instance->DR, \
+			  (uint32_t)usart4_dma_rxbuf, \
+			  USART4_RX_BUF_LEN);
+}
+
+/**
  *	@brief	USART6 Initialization
  */
 void USART6_Init(void)
@@ -377,14 +408,21 @@ __WEAK void USART2_rxDataHandler(uint8_t *rxBuf)
 }
 
 /**
- *	@brief	[__WEAK] 需要在Potocol Layer中实现具体的 USART2 处理协议
+ *	@brief	[__WEAK] 需要在Potocol Layer中实现具体的 USART3 处理协议
  */
 __WEAK void USART3_rxDataHandler(uint8_t *rxBuf)
 {	
 }
 
 /**
- *	@brief	[__WEAK] 需要在Potocol Layer中实现具体的 USART5 处理协议
+ *	@brief	[__WEAK] 需要在Potocol Layer中实现具体的 USART4 处理协议
+ */
+__WEAK void USART4_rxDataHandler(uint8_t *rxBuf)
+{	
+}
+
+/**
+ *	@brief	[__WEAK] 需要在Potocol Layer中实现具体的 USART6 处理协议
  */
 __WEAK void USART6_rxDataHandler(uint8_t *rxBuf)
 {	

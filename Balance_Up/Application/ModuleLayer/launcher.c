@@ -508,27 +508,33 @@ void Launcher_GetRcState(void)
 				else if (rc_sensor.info->s2 == RC_SW_UP)
 				{
 					/* 遥控器连发 */
-					status.lch_cmd.shoot_cmd = keep_shoot;
-					if (status.lch_state.shoot_state != keep_shoot)
-					{
-						status.lch_state.shoot_state = keep_shoot;
-						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
-					}
+//					status.lch_cmd.shoot_cmd = keep_shoot;
+//					if (status.lch_state.shoot_state != keep_shoot)
+//					{
+//						status.lch_state.shoot_state = keep_shoot;
+//						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
+//					}
 					/*  遥控器自动打弹  */
 					static uint16_t auto_step = 0;
-					if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
-							(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1))
+					float	threshold;
+					threshold = abs(vision_sensor.info->measure_yaw_angle - vision_sensor.info->target_pitch_angle);
+					if ((vision_sensor.work_state == DEV_ONLINE) && (vision_sensor.info->is_spin == 1) && (threshold < vision_sensor.info->yaw_threshold) &&\
+							(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on))
 					{
 						if (!auto_step)
 						{
 							auto_step = 1;
 							status.lch_cmd.shoot_cmd = single_shoot;
+							launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
 						}
 						status.lch_cmd.shoot_cmd = keep_shoot;
+						launcher.work_info->launcher_commond.Dial_cmd = Keep_Shoot;
 					}
 					else
 					{
 						auto_step = 0;
+						status.lch_cmd.shoot_cmd = shoot_reset;
+						launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 					}
 
 				}
@@ -602,6 +608,8 @@ void Launcher_GetRcState(void)
 void Launcher_GetKeyState(void)
 {
 	static uint16_t buff_cnt = 400, auto_step = 0;
+	float	threshold = 0.f;
+	threshold = abs(vision_sensor.info->measure_yaw_angle - vision_sensor.info->target_pitch_angle);
 	
 	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
@@ -614,8 +622,8 @@ void Launcher_GetKeyState(void)
 	}
 	
 	/*  键盘自动打弹  */
-	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) &&\
-			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on))
+	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) && (vision_sensor.info->is_spin == 1) &&\
+			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on) && (threshold < vision_sensor.info->yaw_threshold))
 	{
 		if (!auto_step)
 		{

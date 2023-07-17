@@ -70,18 +70,18 @@ gimbal_info_t 	gim_info = {
 gimbal_conf_t   gim_conf = {
 	.restart_yaw_imu_angle = 0.0f,
 	.restart_pitch_imu_angle = 0.0f,
-	.MID_VALUE = 5110,//  前 5110 后 1014 
-	.restart_yaw_motor_angle = 5110, // 双枪 2100  麦轮 4777
-	.restart_pitch_motor_angle = 7270, // 双枪 6600  麦轮 6900
+	.MID_VALUE = 6780,//  前 5110 后 1014 //新 5143 1047  //新新 6780 2684
+	.restart_yaw_motor_angle = 6780,
+	.restart_pitch_motor_angle = 3178, //新 8013 旧7270 //新新 3178
 	.rc_pitch_motor_offset = 110,
 	.rc_yaw_imu_offset = 3300.0f,//3300
 	.rc_pitch_imu_offset = 3300.0f,
 	.key_yaw_imu_offset = -800.0f,//330
 	.key_pitch_imu_offset = 1000.0f,
-	.max_pitch_imu_angle = 23.0f,
-	.min_pitch_imu_angle = -40.0f,
-	.max_pitch_motor_angle = 2829, // 双枪、麦轮 7200  mid 7250
-	.min_pitch_motor_angle = 1430, // 双枪、麦轮 6100
+	.max_pitch_imu_angle = 20.0f, // 20 23
+	.min_pitch_imu_angle = -45.0f, // -55 -40
+	.max_pitch_motor_angle = 4204, //新 901  旧 2829 新新 4204
+	.min_pitch_motor_angle = 2684, //新 7553 旧 1430 新新 2684
 };
 
 /* Exported variables --------------------------------------------------------*/

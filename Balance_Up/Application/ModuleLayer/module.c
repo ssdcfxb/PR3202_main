@@ -676,11 +676,15 @@ void Key_RxInfoCheck(void)
 	{
 		status.auto_cmd = auto_shoot_off;
 	}
-	if (keyboard.state.mouse_btn_l != relax_K)
+	if ((keyboard.state.mouse_btn_l != relax_K) || (keyboard.state.R != relax_K))
 	{
 		status.auto_cmd = auto_shoot_off;
-		status.autobuff_cmd = auto_buff_off;
 	}
+	if (keyboard.state.mouse_btn_l != relax_K)
+	{
+		status.autobuff_cmd = auto_buff_off;
+	}	
+	
 	
 	/*  mouse_btn_r:×ÔÃé  */
 	if ((keyboard.state.mouse_btn_r == short_press_K) || (keyboard.state.mouse_btn_r == long_press_K))

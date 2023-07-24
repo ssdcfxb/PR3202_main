@@ -114,6 +114,10 @@ typedef struct
 	float  target_dial_angle;
 	float  target_heat_angle;
 	
+	uint8_t  vision_shoot_cnt;
+	uint8_t  last_vision_shoot_cnt;
+	uint8_t  shoot_cnt;
+	
 	uint8_t  last_s1;
 	uint8_t  init_s2;
 	uint8_t  last_s2;

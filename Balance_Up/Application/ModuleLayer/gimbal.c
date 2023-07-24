@@ -70,18 +70,28 @@ gimbal_info_t 	gim_info = {
 gimbal_conf_t   gim_conf = {
 	.restart_yaw_imu_angle = 0.0f,
 	.restart_pitch_imu_angle = 0.0f,
-	.MID_VALUE = 6780,//  前 5110 后 1014 //新 5143 1047  //新新 6780 2684
-	.restart_yaw_motor_angle = 6780,
-	.restart_pitch_motor_angle = 3178, //新 8013 旧7270 //新新 3178
 	.rc_pitch_motor_offset = 110,
 	.rc_yaw_imu_offset = 3300.0f,//3300
 	.rc_pitch_imu_offset = 3300.0f,
 	.key_yaw_imu_offset = -800.0f,//330
 	.key_pitch_imu_offset = 1000.0f,
-	.max_pitch_imu_angle = 20.0f, // 20 23
-	.min_pitch_imu_angle = -45.0f, // -55 -40
-	.max_pitch_motor_angle = 4204, //新 901  旧 2829 新新 4204
-	.min_pitch_motor_angle = 2684, //新 7553 旧 1430 新新 2684
+	.max_pitch_imu_angle = 23.0f, // 20 23
+	.min_pitch_imu_angle = -41.0f, // -55 -40
+#if defined (CAR) && (CAR == 1)
+	// 新
+	.MID_VALUE = 5143,//  前 5110 后 1014 //新 5143 1047  //新新 6780 2684
+	.restart_yaw_motor_angle = 5143,
+	.restart_pitch_motor_angle = 8013, //新 8013 旧7270 //新新 3178
+	.max_pitch_motor_angle = 880, //新 880  旧 2829 新新 4204
+	.min_pitch_motor_angle = 7546, //新 7553 旧 1430 新新 2684
+#elif defined (CAR) && (CAR == 2)
+	// 新新
+	.MID_VALUE = 6780,//  前 5110 后 1014 //新 5143 1047  //新新 6780 2684
+	.restart_yaw_motor_angle = 6780,
+	.restart_pitch_motor_angle = 3178, //新 8013 旧7270 //新新 3178
+	.max_pitch_motor_angle = 4217, //新 880  旧 2829 新新 4204
+	.min_pitch_motor_angle = 2688, //新 7553 旧 1430 新新 2684
+#endif
 };
 
 /* Exported variables --------------------------------------------------------*/
@@ -213,11 +223,11 @@ void Gimbal_GetBaseInfo(void)
 	err_motor_max = gimbal.info->measure_pitch_motor_angle - gimbal.conf->min_pitch_motor_angle;
 	err_motor_min = gimbal.info->measure_pitch_motor_angle - gimbal.conf->max_pitch_motor_angle;
 	if (abs(err_motor_max) > HALF_ECD_RANGE)
-		err_motor_max -= one(err_motor_max) * ECD_RANGE;
+		err_motor_max -= (one(err_motor_max) * ECD_RANGE);
 	if (abs(err_motor_min) > HALF_ECD_RANGE)
-		err_motor_min -= one(err_motor_min) * ECD_RANGE;
-	gimbal.conf->max_pitch_imu_angle = gimbal.info->measure_pitch_imu_angle + ECD_TO_ANGLE * err_motor_max;
-	gimbal.conf->min_pitch_imu_angle = gimbal.info->measure_pitch_imu_angle + ECD_TO_ANGLE * err_motor_min;
+		err_motor_min -= (one(err_motor_min) * ECD_RANGE);
+	gimbal.conf->max_pitch_imu_angle = gimbal.info->measure_pitch_imu_angle + ECD_TO_ANGLE * (float)err_motor_max;
+	gimbal.conf->min_pitch_imu_angle = gimbal.info->measure_pitch_imu_angle + ECD_TO_ANGLE * (float)err_motor_min;
 	
 	if (gimbal.conf->max_pitch_imu_angle > 90.f)
 		gimbal.conf->max_pitch_imu_angle = 90.f;
@@ -586,11 +596,15 @@ void Gimbal_Yaw_Angle_PidCalc(void)
 	}
 }
 
-
+#if defined (CAR) && (CAR == 2)
+float	k1 = 5.f, k2 = 3.f, k3 = 2.73f, k4 = 15.f;
+float kkp, kpset;
+float err, logerr;
+#endif
 void Gimbal_Pitch_Angle_PidCalc(void)
 {
 //	float forward_back = 0.f;
-//	forward_back = - 47.f * gimbal.info->target_pitch_imu_angle - 6200.f;//前馈
+//	forward_back = +181.f * gimbal.info->target_pitch_imu_angle - 5486.f;//前馈
 	
 	if (gimbal.info->gimbal_mode == gim_machine)
 	{
@@ -604,21 +618,32 @@ void Gimbal_Pitch_Angle_PidCalc(void)
 	}
 	else if ((gimbal.info->gimbal_mode == gim_gyro) || (gimbal.info->gimbal_mode == gim_gyro2) || (gimbal.info->gimbal_mode == gim_vision))
 	{
+#if defined (CAR) && (CAR == 2)
+		/* 变kp */
+		err = k2 * abs(gimbal.info->target_pitch_imu_angle - gimbal.info->measure_pitch_imu_angle) + k3;
+		arm_vlog_f32(&err, &logerr, 1);
+		kkp = k1 * logerr;
+		kpset = kkp;
+		if (kkp < k4)
+			kkp = k4;
+		RM_motor[GIM_P].pid.position.set.kp = kkp;
+#endif
+		
 		// pitch轴陀螺仪增量与电机增量方向不同
-		RM_motor[GIM_P].base_info.motor_out = -RM_motor[GIM_P].ctr_pid2(&RM_motor[GIM_P].pid.position, 
-																																	&RM_motor[GIM_P].pid.position_in,
-																																	gimbal.info->measure_pitch_imu_angle,
-																																	gimbal.info->measure_pitch_imu_speed,
-																																	gimbal.info->target_pitch_imu_angle,
+		RM_motor[GIM_P].base_info.motor_out = -RM_motor[GIM_P].ctr_pid2(&RM_motor[GIM_P].pid.position, \
+																																	&RM_motor[GIM_P].pid.position_in, \
+																																	gimbal.info->measure_pitch_imu_angle, \
+																																	gimbal.info->measure_pitch_imu_speed, \
+																																	gimbal.info->target_pitch_imu_angle, \
 																																	0);
 		gim_out[RM_motor[GIM_P].id.buff_p] = RM_motor[GIM_P].base_info.motor_out;// + forward_back;
 	}
 	
-//	
-//	//输出限幅
-//	if (abs(gim_out[RM_motor[GIM_P].id.buff_p]) > 25000)
+	
+	//输出限幅
+//	if (abs(gim_out[RM_motor[GIM_P].id.buff_p]) > 29000)
 //	{
-//		gim_out[RM_motor[GIM_P].id.buff_p] = one(gim_out[RM_motor[GIM_P].id.buff_p]) * 25000;
+//		gim_out[RM_motor[GIM_P].id.buff_p] = one(gim_out[RM_motor[GIM_P].id.buff_p]) * 29000;
 //	}
 //	
 }

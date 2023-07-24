@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -67,6 +67,12 @@ void Error_Handler(void);
 #define LED3_GPIO_Port GPIOC
 #define BMI_CS_Pin GPIO_PIN_12
 #define BMI_CS_GPIO_Port GPIOB
+#define RBG_B_Pin GPIO_PIN_3
+#define RBG_B_GPIO_Port GPIOD
+#define RBG_R_Pin GPIO_PIN_4
+#define RBG_R_GPIO_Port GPIOD
+#define RBG_G_Pin GPIO_PIN_5
+#define RBG_G_GPIO_Port GPIOD
 #define EX_BMI_CS_Pin GPIO_PIN_8
 #define EX_BMI_CS_GPIO_Port GPIOB
 

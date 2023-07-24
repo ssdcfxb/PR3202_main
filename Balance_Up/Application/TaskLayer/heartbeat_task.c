@@ -1,6 +1,6 @@
 #include "heartbeat_task.h"
 
-uint16_t fps = 7;
+uint16_t fps = 3;
 uint32_t err_code = 0;
 //uint8_t sw = 0;
 float imu_temp[3];

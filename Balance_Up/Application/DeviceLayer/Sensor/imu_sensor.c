@@ -63,7 +63,7 @@ imu_sensor_t imu_sensor = {
 /* Private functions ---------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 float imu_read[3];
-uint8_t init_cnt = 200;
+uint8_t init_cnt = 20;
 void imu_init(struct imu_struct *self)
 {
 	uint32_t tickstart = HAL_GetTick();

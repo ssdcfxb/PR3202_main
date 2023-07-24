@@ -58,7 +58,7 @@ RM_motor_t RM_motor[MOTOR_LIST] =
 		
 		.init = motor_class_init,
 	},
-#elif defined (CAR) && (CAR == 1)
+#elif defined (CAR) && ((CAR == 1) || (CAR == 2))
 	
 	[GIM_P] = {
 	
@@ -94,10 +94,16 @@ float fric_r_speed_pid_param[7] = {15.f, 0.5f, 0.5f, 0.f, 6000.f, 6000.f, 12000.
 float fric_l_speed_pid_param[7] = {15.f, 0.5f, 0.5f, 0.f, 6000.f, 6000.f, 12000.f};
 float dial_position_in_pid_param[7] = {17.f, 1.2f, 0.f, 0.f, 6000.f, 6000.f, 12000.f};
 float dial_position_pid_param[7] = {0.24414f, 0.f, 0.f, 0.f, 0.f, 0.f, 10000.f};
-float gim_p_position_in_pid_param[7] = {300.f, 1.5f, 0.f, 0.f, 10000.f, 15000.f, 29000.f}; //ÐÂÐÂ³µkp 200
-float gim_p_position_pid_param[7] = {30.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 30000.f};
 float gim_y_position_in_pid_param[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 29000.f};
 float gim_y_position_pid_param[7] = {21.f, 0.f, 30.f, 0.f, 10000.f, 10000.f, 30000.f};
+
+#if defined (CAR)	&& (CAR == 1)
+float gim_p_position_in_pid_param[7] = {200.f, 2.f, 0.f, 0.f, 9000.f, 18000.f, 29000.f};
+float gim_p_position_pid_param[7] = {15.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 30000.f};
+#elif defined (CAR) && (CAR == 2)
+float gim_p_position_in_pid_param[7] = {200.f, 2.f, 0.f, 0.f, 9000.f, 18000.f, 29000.f};
+float gim_p_position_pid_param[7] = {15.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 30000.f};
+#endif
 
 //float yaw_gyro_position[7] = {20.f, 0.f, 0.f, 0.f, 10000.f, 10000.f, 25000.f};
 //float yaw_gyro_position_in[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 25000.f};

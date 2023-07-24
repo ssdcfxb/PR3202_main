@@ -38,6 +38,9 @@ typedef __packed struct
 	uint8_t				blood_6;
 	uint8_t				blood_7;
 	uint8_t				blood_8;
+	uint8_t				size_3;
+	uint8_t				size_4;
+	uint8_t				size_5;
  	uint8_t  			is_change_target; // datau8_4
 	uint16_t 			CRC16;
 }vision_tx_info_t;
@@ -54,7 +57,6 @@ typedef __packed struct
 	uint8_t  			is_find_buff; 	// datau8_3
 	uint8_t  			is_hit_enable;  // datau8_4
 	uint8_t  			is_spin;  			// datau8_5
-	float					yaw_threshold;	// dataf_3
 	uint16_t 			CRC16;
 }vision_rx_info_t;
 

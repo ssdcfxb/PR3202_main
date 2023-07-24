@@ -69,11 +69,11 @@ void imu_update(imu_sensor_t *imu_sen)
 			i = 0;
 			imu_sen->work_state.err_code = IMU_NONE_ERR;
 			
-			if (abs(imu_info->offset_info.gx_offset) > 5.f)
+			if (abs(imu_info->offset_info.gx_offset) > 8.f)
 				imu_info->offset_info.gx_offset = 0;
-			if (abs(imu_info->offset_info.gy_offset) > 5.f)
+			if (abs(imu_info->offset_info.gy_offset) > 8.f)
 				imu_info->offset_info.gy_offset = 0;
-			if (abs(imu_info->offset_info.gz_offset) > 5.f)
+			if (abs(imu_info->offset_info.gz_offset) > 8.f)
 				imu_info->offset_info.gz_offset = 0;
 			imu_sen->work_state.cali_end = 1;
 		}

@@ -72,7 +72,42 @@ void slave_receive_data(slave_t *slef, uint8_t *rxBuf)
 		memcpy(&info->shooter_speed_limit, (const void*)&rx_info->shooter_speed_limit, 2);
 		memcpy(&info->shooter_cooling_heat, (const void*)&rx_info->shooter_cooling_heat, 2);
 		memcpy(&info->bullet_speed, (void*)&rx_info->bullet_speed, 4);
-		memcpy(&info->my_color, (void*)&rx_info->my_color, 1);
+		memcpy(&info->car_info, (void*)&rx_info->car_info, 1);
+		memcpy(&info->blood_1, (void*)&rx_info->blood_1, 1);
+		memcpy(&info->blood_2, (void*)&rx_info->blood_2, 1);
+		memcpy(&info->blood_3, (void*)&rx_info->blood_3, 1);
+		memcpy(&info->blood_4, (void*)&rx_info->blood_4, 1);
+		memcpy(&info->blood_5, (void*)&rx_info->blood_5, 1);
+		memcpy(&info->blood_6, (void*)&rx_info->blood_6, 1);
+		memcpy(&info->blood_7, (void*)&rx_info->blood_7, 1);
+		memcpy(&info->blood_8, (void*)&rx_info->blood_8, 1);
+		
+		switch(info->car_info.bit.balance_info)
+		{
+			case 3:
+				info->size_3 = 1;
+				break;
+			case 4:
+				info->size_4 = 1;
+				break;
+			case 5:
+				info->size_5 = 1;
+				break;
+			case 7:
+				info->size_3 = 1;
+				info->size_4 = 1;
+				break;
+			case 8:
+				info->size_3 = 1;
+				info->size_5 = 1;
+				break;
+			case 9:
+				info->size_4 = 1;
+				info->size_5 = 1;
+				break;
+			default:
+				break;
+		}
 		
 		judge_update(&judge, info);
 	}

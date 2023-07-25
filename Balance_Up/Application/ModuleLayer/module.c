@@ -209,6 +209,19 @@ void Module_StateCheck(void)
 		}
 	}
 	
+	/* ÑªÁ¿¼ì²â */
+	if ((slave.work_state == DEV_OFFLINE) && (RM_motor[DIAL].state.work_state == M_OFFLINE) && \
+			(RM_motor[GIM_P].state.work_state == M_OFFLINE) && (RM_motor[GIM_Y].state.work_state == M_OFFLINE) && \
+			(RM_motor[FRIC_L].state.work_state == M_OFFLINE) && (RM_motor[FRIC_R].state.work_state == M_OFFLINE))
+	{
+		module.state = MODULE_STATE_KILLED;
+	}
+	else
+	{
+		module.state = MODULE_STATE_RCLOST;
+		RC_ResetData(&rc_sensor);
+	}
+	
 	/*  ÍÓÂÝÒÇ×´Ì¬¼ì²â  */
 	if ((imu_sensor.work_state.err_code != IMU_NONE_ERR) && \
 			(imu_sensor.work_state.err_code != IMU_DATA_CALI))
@@ -399,7 +412,18 @@ void Vision_TxInfoUpdate(void)
 	vision_sensor.info->tx_info->pitch_angle = vision_sensor.info->measure_pitch_angle;
 	vision_sensor.info->tx_info->yaw_angle = vision_sensor.info->measure_yaw_angle;
 	vision_sensor.info->tx_info->shoot_speed = vision_sensor.info->measure_shoot_speed;
-	vision_sensor.info->tx_info->my_color = slave.info->my_color;
+	vision_sensor.info->tx_info->my_color = slave.info->car_info.bit.my_color;
+	vision_sensor.info->tx_info->blood_1 = slave.info->blood_1;
+	vision_sensor.info->tx_info->blood_2 = slave.info->blood_2;
+	vision_sensor.info->tx_info->blood_3 = slave.info->blood_3;
+	vision_sensor.info->tx_info->blood_4 = slave.info->blood_4;
+	vision_sensor.info->tx_info->blood_5 = slave.info->blood_5;
+	vision_sensor.info->tx_info->blood_6 = slave.info->blood_6;
+	vision_sensor.info->tx_info->blood_7 = slave.info->blood_7;
+	vision_sensor.info->tx_info->blood_8 = slave.info->blood_8;
+	vision_sensor.info->tx_info->size_3 = slave.info->size_3;
+	vision_sensor.info->tx_info->size_4 = slave.info->size_4;
+	vision_sensor.info->tx_info->size_5 = slave.info->size_5;
 	
 	vision_sensor.info->tx_info->mode = AIM_ON;
 	if (status.buff_cmd == small_buff_on)

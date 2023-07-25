@@ -20,6 +20,7 @@ typedef enum {
 	MODULE_STATE_RCINIT,	// 遥控初始化
 	MODULE_STATE_IMUTMP,	// 陀螺仪校准临界状态
 	MODULE_STATE_IMUERR,	// 陀螺仪错误
+	MODULE_STATE_KILLED,	// 机构断电
 	MODULE_STATE_NORMAL,	// 组件正常
 	MODULE_STATE_WRONG,	  // 组件错误
 } module_state_t;

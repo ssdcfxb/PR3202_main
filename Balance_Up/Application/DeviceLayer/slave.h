@@ -34,7 +34,26 @@ typedef __packed struct slv_rx_info_struct {
 	uint16_t shooter_speed_limit;
 	uint16_t shooter_cooling_heat;
 	float    bullet_speed;
-	uint8_t  my_color; //ºì:0 À¶:1
+	
+	__packed union
+	{
+		uint8_t  info;
+		__packed struct 
+		{
+			uint8_t  my_color : 1; //ºì:0 À¶:1
+			uint8_t  balance_info : 7; // µÐ·½Æ½ºâ²½±àºÅºÍ
+		} bit;
+	} car_info;
+	
+	uint8_t	 blood_1;
+	uint8_t	 blood_2;
+	uint8_t	 blood_3;
+	uint8_t	 blood_4;
+	uint8_t	 blood_5;
+	uint8_t	 blood_6;
+	uint8_t	 blood_7;
+	uint8_t	 blood_8;
+	
 	uint16_t CRC16;
 
 } slv_rx_info_t;
@@ -48,9 +67,30 @@ typedef struct slave_info_struct {
 	uint16_t shooter_speed_limit;
 	uint16_t shooter_cooling_heat;
 	float    bullet_speed;
-	uint8_t  my_color; //ºì:0 À¶:1
 	
-	uint8_t  			rx_flag;
+	union
+	{
+		uint8_t  info;
+		struct
+		{
+			uint8_t  my_color : 1; //ºì:0 À¶:1
+			uint8_t  balance_info : 7; // µÐ·½Æ½ºâ²½±àºÅºÍ
+		} bit;
+	} car_info;
+	
+	uint8_t	 blood_1;
+	uint8_t	 blood_2;
+	uint8_t	 blood_3;
+	uint8_t	 blood_4;
+	uint8_t	 blood_5;
+	uint8_t	 blood_6;
+	uint8_t	 blood_7;
+	uint8_t	 blood_8;
+	uint8_t	 size_3;
+	uint8_t	 size_4;
+	uint8_t	 size_5;
+	
+	uint8_t  rx_flag;
 	
 	int16_t	 offline_cnt;
 	int16_t	 offline_max_cnt;

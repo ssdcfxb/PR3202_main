@@ -216,11 +216,6 @@ void Module_StateCheck(void)
 	{
 		module.state = MODULE_STATE_KILLED;
 	}
-	else
-	{
-		module.state = MODULE_STATE_RCLOST;
-		RC_ResetData(&rc_sensor);
-	}
 	
 	/*  ÍÓÂÝÒÇ×´Ì¬¼ì²â  */
 	if ((imu_sensor.work_state.err_code != IMU_NONE_ERR) && \

@@ -90,8 +90,8 @@ RM_motor_t RM_motor[MOTOR_LIST] =
 	float   iout_max;
 	float 	out_max;
 */
-float fric_r_speed_pid_param[7] = {15.f, 0.5f, 0.5f, 0.f, 6000.f, 6000.f, 12000.f};
-float fric_l_speed_pid_param[7] = {15.f, 0.5f, 0.5f, 0.f, 6000.f, 6000.f, 12000.f};
+float fric_r_speed_pid_param[7] = {20.f, 0.01f, 0.f, 0.f, 6000.f, 200.f, 12000.f};
+float fric_l_speed_pid_param[7] = {20.f, 0.01f, 0.f, 0.f, 6000.f, 200.f, 12000.f};
 float dial_position_in_pid_param[7] = {17.f, 1.2f, 0.f, 0.f, 6000.f, 6000.f, 12000.f};
 float dial_position_pid_param[7] = {0.24414f, 0.f, 0.f, 0.f, 0.f, 0.f, 10000.f};
 float gim_y_position_in_pid_param[7] = {200.f, 2.f, 0.f, 0.f, 10000.f, 15000.f, 29000.f};

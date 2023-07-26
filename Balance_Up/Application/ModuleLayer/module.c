@@ -225,6 +225,8 @@ void Module_StateCheck(void)
 	}
 }
 
+/* 底盘开关标志位 */
+uint8_t chas_on = 1;
 void Slave_TxInfoUpdate(void)
 {
 	int16_t front, right;
@@ -254,7 +256,7 @@ void Slave_TxInfoUpdate(void)
 	
 	/*  1:遥控器状态标志位  */
 	slave.info->tx_info->status &= 0xFFFE;
-	if (module.state == MODULE_STATE_NORMAL)
+	if ((module.state == MODULE_STATE_NORMAL) && (chas_on == 1))
 		slave.info->tx_info->status |= 0x0001;
 	
 	/*  2:弹仓状态标志位  */
@@ -436,17 +438,32 @@ void Vision_TxInfoUpdate(void)
 void Rc_RxInfoCheck(void)
 {
 	/*  遥控器清空热量  */
+//	if (module.mode == MODULE_MODE_GYRO)
+//	{
+//		status.lch_cmd.shoot_cmd = shoot_reset;
+//		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
+//		{
+//			if (status.lch_state.magz_state == magz_close)
+//			{
+//				status.lch_cmd.shoot_cmd = swift_shoot;
+//			}
+//		}
+//	}
+	
+	/* 遥控器关底盘 */
 	if (module.mode == MODULE_MODE_GYRO)
 	{
-		status.lch_cmd.shoot_cmd = shoot_reset;
 		if ((rc_sensor.info->thumbwheel.status == RC_TB_MID) && (status.tw_last_state == RC_TB_UP))
 		{
-			if (status.lch_state.magz_state == magz_close)
+			if (chas_on == 1)
 			{
-				status.lch_cmd.shoot_cmd = swift_shoot;
+				chas_on = 0;
 			}
+			else
+				chas_on = 1;
 		}
 	}
+	
 	/*  遥控器加速  */
 	status.speed_cmd = rapid_off;
 	if (module.mode == MODULE_MODE_GYRO2)

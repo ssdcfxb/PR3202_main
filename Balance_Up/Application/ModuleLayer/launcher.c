@@ -42,6 +42,7 @@ void Launcher_Stop(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 int16_t    launcher_out[3];
+uint8_t shoot_cnt_limit = 3;
 
 // 发射机构设备
 launcher_dev_t		launcher_dev = {
@@ -75,7 +76,7 @@ launcher_conf_t   launcher_conf = {
 	.dial_speed = -4000.0f,
 	.dial_swiftspeed = -6750.0f,
 	.dial_torque_limit = 2000.0f,
-	.lock_angle_check = 1.5f,
+	.lock_angle_check = 0.5f,
 	.Back_Angle = 45.0f,
 	.Load_Angle = -45.0f,
 //	.wait_time = 1000,  //发射间隔时间，单位ms
@@ -164,7 +165,6 @@ void Launcher_GetInfo(void)
   * @param  
   * @retval 
   */
-uint8_t shoot_cnt_limit = 5;
 void Launcher_GetBaseInfo(void)
 {
 	launcher.info->measure_left_speed = RM_motor[FRIC_L].rx_info.speed;
@@ -218,8 +218,8 @@ void Judge_GetSpeedInfo(void)
 	
 	if (judge.work_state == DEV_OFFLINE)
 	{
-		launcher.conf->fric_speed = launcher.conf->Fric_30;
-		launcher.conf->fric_mode = 30;
+		launcher.conf->fric_speed = launcher.conf->Fric_15;
+		launcher.conf->fric_mode = 15;
 	}
 	else
 	{
@@ -273,11 +273,11 @@ void Judge_AdaptFricSpeed(void)
 	{
 		if ((launcher.info->measure_launcher_speed != last_measure_speed) && (launcher.info->measure_launcher_speed > 0.f))
 		{
-			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.f)) //0.45f
+			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.15f)) //0.45f
 			{
 				low_cnt = 0;
 				cnt = 0;
-				speed_adapt = -20;
+				speed_adapt = -15;
 			}
 			else if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 1.05f))
 			{
@@ -1002,6 +1002,28 @@ void Fric_Ctrl(void)
 	{
 		launcher.info->target_left_speed = -launcher.conf->fric_speed;
 		launcher.info->target_right_speed = launcher.conf->fric_speed;
+	
+		if ((abs(launcher.info->target_left_speed - launcher.info->measure_left_speed) < 30) \
+			&& (abs(launcher.info->target_right_speed - launcher.info->measure_right_speed) < 30))
+		{
+			RM_motor[FRIC_L].pid.speed.set.kp = 15.f;
+			RM_motor[FRIC_L].pid.speed.set.ki = 0.5f;
+			RM_motor[FRIC_L].pid.speed.set.kd = 0.5f;
+			
+			RM_motor[FRIC_R].pid.speed.set.kp = 15.f;
+			RM_motor[FRIC_R].pid.speed.set.ki = 0.5f;
+			RM_motor[FRIC_R].pid.speed.set.kd = 0.5f;
+		}
+		else
+		{
+			RM_motor[FRIC_L].pid.speed.set.kp = 20.f;
+			RM_motor[FRIC_L].pid.speed.set.ki = 0.f;
+			RM_motor[FRIC_L].pid.speed.set.kd = 20.f;
+			
+			RM_motor[FRIC_R].pid.speed.set.kp = 20.f;
+			RM_motor[FRIC_R].pid.speed.set.ki = 0.f;
+			RM_motor[FRIC_R].pid.speed.set.kd = 20.f;
+		}
 	
 		launcher_out[RM_motor[FRIC_L].id.buff_p] = RM_motor[FRIC_L].ctr_speed(&RM_motor[FRIC_L], 
 		                                        launcher.info->target_left_speed);

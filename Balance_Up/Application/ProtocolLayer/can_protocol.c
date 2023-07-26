@@ -2,7 +2,7 @@
 
 int16_t can1_send_buf[8], can2_send_buf[8];
 
-#if defined (CAR) && (CAR == 1)
+#if defined (CAR) && ((CAR == 1) || (CAR == 2))
 //	ÐÂ³µ
 void CAN_SendAll(void)
 {

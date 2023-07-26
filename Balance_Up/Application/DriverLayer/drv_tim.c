@@ -14,8 +14,8 @@ extern TIM_HandleTypeDef htim4;
 //uint16_t val_open = 70;
 //uint16_t val_clse = 106;
 #if defined (CAR) && (CAR == 1)
-uint16_t val_open = 50;
-uint16_t val_clse = 120;
+uint16_t val_open = 120;
+uint16_t val_clse = 50;
 #elif defined (CAR) && (CAR == 2)
 uint16_t val_open = 120;
 uint16_t val_clse = 50;

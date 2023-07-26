@@ -219,6 +219,14 @@ void Gimbal_GetBaseInfo(void)
 	gimbal.info->measure_roll_imu_speed = imu_sensor.info->base_info.ave_rate_roll;
 	gimbal.info->measure_roll_imu_angle = imu_sensor.info->base_info.roll;
 	
+	/* 机械角度测试弹道 */
+//	gimbal.info->measure_yaw_imu_angle = (RM_motor[GIM_Y].rx_info.angle - gim_conf.MID_VALUE) * ECD_TO_ANGLE;
+//	gimbal.info->measure_pitch_imu_angle = (gim_conf.restart_pitch_motor_angle - RM_motor[GIM_P].rx_info.angle) * ECD_TO_ANGLE;//imu_sensor.info->base_info.pitch;
+//	if (RM_motor[GIM_P].rx_info.angle < HALF_ECD_RANGE)
+//	{
+//		gimbal.info->measure_pitch_imu_angle = (gim_conf.restart_pitch_motor_angle - (RM_motor[GIM_P].rx_info.angle + ECD_RANGE)) * ECD_TO_ANGLE;
+//	}
+	
 	// pitch轴电机imu动态限位
 	err_motor_max = gimbal.info->measure_pitch_motor_angle - gimbal.conf->min_pitch_motor_angle;
 	err_motor_min = gimbal.info->measure_pitch_motor_angle - gimbal.conf->max_pitch_motor_angle;

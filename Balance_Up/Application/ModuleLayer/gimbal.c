@@ -604,11 +604,9 @@ void Gimbal_Yaw_Angle_PidCalc(void)
 	}
 }
 
-#if defined (CAR) && (CAR == 2)
 float	k1 = 5.f, k2 = 3.f, k3 = 2.73f, k4 = 15.f;
 float kkp, kpset;
 float err, logerr;
-#endif
 void Gimbal_Pitch_Angle_PidCalc(void)
 {
 //	float forward_back = 0.f;

@@ -77,6 +77,7 @@ void module_info_update(module_t *mod)
 		symbal.gim_sym.reset_start = 1;
 		symbal.gim_sym.reset_ok = 0;
 		symbal.slave_reset = 0;
+		status.chas_cmd = chas_reset;
 		status.gim_mode = gyro;
 		status.lch_cmd.fric_cmd = fric_reset;
 		status.lch_cmd.shoot_cmd = shoot_reset;
@@ -188,7 +189,7 @@ void Module_StateCheck(void)
 		if(rc_sensor.errno == NONE_ERR) 
 		{
 			/* 失联恢复 */
-			if(module.state == MODULE_STATE_RCLOST) 
+			if(module.state == MODULE_STATE_RCLOST)
 			{
 				// 可在此处同步云台复位标志位					
 				// 系统参数复位
@@ -197,7 +198,7 @@ void Module_StateCheck(void)
 				module.mode = MODULE_MODE_RESET;
 			}
 			
-			if(module.state == MODULE_STATE_RCINIT)
+			if((module.state == MODULE_STATE_RCINIT) || (module.state == MODULE_STATE_KILLED))
 			{
 				if (RC_IsChannelReset())
 				{
@@ -294,10 +295,10 @@ void Slave_TxInfoUpdate(void)
 	else if (status.chas_cmd == chas_reset)
 		status.chas_state = chas_reset;
 		/*  移动时临时关闭  */
-	if ((status.chas_state == gyro_on) && (slave.info->tx_info->rc_ch_ws_val != 0))
-	{
-		status.chas_state = chas_reset;
-	}
+//	if ((status.chas_state == gyro_on) && (slave.info->tx_info->rc_ch_ws_val != 0))
+//	{
+//		status.chas_state = chas_reset;
+//	}
 	slave.info->tx_info->status &= 0xFFFB;
 	if (status.chas_state == gyro_on)
 		slave.info->tx_info->status |= 0x0004;
@@ -353,7 +354,7 @@ void Slave_TxInfoUpdate(void)
 	else if (status.chas_cmd == chas_reset)
 		status.chas_state = chas_reset;
 		/*  移动时临时关闭  */
-	if ((status.chas_state == lean_on) && (slave.info->tx_info->rc_ch_ws_val != 0))
+	if ((status.chas_state == lean_on) && (slave.info->tx_info->rc_ch_ws_val != 0) && (module.remote_mode == KEY))
 	{
 		status.chas_state = chas_reset;
 	}

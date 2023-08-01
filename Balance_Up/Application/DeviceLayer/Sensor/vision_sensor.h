@@ -57,6 +57,7 @@ typedef __packed struct
 	uint8_t  			is_find_buff; 	// datau8_3
 	uint8_t  			is_hit_enable;  // datau8_4
 	uint8_t  			is_spin;  			// datau8_5
+	uint8_t				shoot_type;			// datau8_6 0连发 1单发
 	uint16_t 			CRC16;
 }vision_rx_info_t;
 
@@ -79,7 +80,7 @@ typedef struct
 	uint8_t  is_find_buff;
 	uint8_t  is_hit_enable;
 	uint8_t  is_spin;
-	float		 yaw_threshold;
+	uint8_t	 shoot_type;			// datau8_6 0连发 1单发
 	
 	uint8_t  rx_flag;
 	int16_t	 offline_cnt;

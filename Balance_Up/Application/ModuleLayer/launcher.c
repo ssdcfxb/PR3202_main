@@ -273,47 +273,95 @@ void Judge_AdaptFricSpeed(void)
 	{
 		if ((launcher.info->measure_launcher_speed != last_measure_speed) && (launcher.info->measure_launcher_speed > 0.f))
 		{
-			if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.15f)) //0.45f
+			if (launcher.conf->fric_mode == 15)
 			{
-				low_cnt = 0;
-				cnt = 0;
-				speed_adapt = -15;
-			}
-			else if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 1.05f))
-			{
-				low_cnt = 0;
-				cnt++;
-				if (cnt >= 2)
-				{
-					cnt = 0;
-					speed_adapt = -1;
-				}
-			}
-			else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 2.05f))
-			{
-				low_cnt++;
-//				cnt = 0;
-				if (low_cnt >= 3)
+				if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.05f)) //0.45f
 				{
 					low_cnt = 0;
-					speed_adapt = 15;
-				}
-			}
-			else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.45f))
-			{
-				low_cnt = 0;
-				cnt--;
-				if (cnt <= -2)
-				{
 					cnt = 0;
-					speed_adapt = 1;
+					speed_adapt = -15;
+				}
+				else if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.75f))
+				{
+					low_cnt = 0;
+					cnt++;
+					if (cnt >= 2)
+					{
+						cnt = 0;
+						speed_adapt = -1;
+					}
+				}
+				else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.95f))
+				{
+					low_cnt++;
+//					cnt = 0;
+					if (low_cnt >= 3)
+					{
+						low_cnt = 0;
+						speed_adapt = 15;
+					}
+				}
+				else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.55f))
+				{
+					low_cnt = 0;
+					cnt--;
+					if (cnt <= -2)
+					{
+						cnt = 0;
+						speed_adapt = 1;
+					}
+				}
+				else
+				{
+					low_cnt = 0;
+					cnt = 0;
+					speed_adapt = 0;
 				}
 			}
 			else
 			{
-				low_cnt = 0;
-				cnt = 0;
-				speed_adapt = 0;
+				if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 0.15f)) //0.45f
+				{
+					low_cnt = 0;
+					cnt = 0;
+					speed_adapt = -15;
+				}
+				else if (launcher.info->measure_launcher_speed > (launcher.info->limit_speed - 1.05f))
+				{
+					low_cnt = 0;
+					cnt++;
+					if (cnt >= 2)
+					{
+						cnt = 0;
+						speed_adapt = -1;
+					}
+				}
+				else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 2.05f))
+				{
+					low_cnt++;
+//					cnt = 0;
+					if (low_cnt >= 3)
+					{
+						low_cnt = 0;
+						speed_adapt = 15;
+					}
+				}
+				else if (launcher.info->measure_launcher_speed < (launcher.info->limit_speed - 1.45f))
+				{
+					low_cnt = 0;
+					cnt--;
+					if (cnt <= -2)
+					{
+						cnt = 0;
+						speed_adapt = 1;
+					}
+				}
+				else
+				{
+					low_cnt = 0;
+					cnt = 0;
+					speed_adapt = 0;
+				}
 			}
 			launcher.conf->fric_speed = launcher.conf->fric_speed + speed_adapt * adapt_k;
 			
@@ -355,9 +403,10 @@ void Judge_AdaptFricSpeed(void)
   * @param  
   * @retval 
   */
+uint8_t heat_low = 0, heat_high = 0;
 void Judge_AdaptDialSpeed(void)
 {
-	static uint8_t heat_low = 0, heat_high = 0, judge_cnt = 0;
+	static uint8_t judge_cnt = 0;
 	static uint16_t last_measure_heat = 0;
 	
 	last_measure_heat = launcher.info->measure_launcher_heat;
@@ -460,6 +509,7 @@ void Launcher_GetCtrlInfo(void)
   * @param  
   * @retval 
   */
+									int16_t shoot_cnt;
 void Launcher_GetRcState(void)
 {
 	/**    读取遥控器上电时刻信息    **/
@@ -556,6 +606,52 @@ void Launcher_GetRcState(void)
 //							status.lch_cmd.shoot_cmd = shoot_reset;
 //							launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 //						}
+#if	defined (CAR) && (CAR == 1)
+						/*  遥控器变频自动打弹  */
+						if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && \
+							(vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on) && (vision_sensor.info->shoot_type == 0))
+						{
+							/*  判断裁判系统数据是否更新  */
+							if (launcher.work_info->swift_enable == 1)
+							{
+								if (status.lch_state.shoot_state != swift_shoot)
+								{
+									status.lch_state.shoot_state = swift_shoot;
+									launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+									launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+									if (launcher.info->shoot_cnt >= (launcher.info->remain_heat/10 - 1))
+									{
+										
+										shoot_cnt = launcher.info->remain_heat/10 - 1;
+										if (shoot_cnt < 0)
+											shoot_cnt = 0;
+										launcher.info->target_heat_angle = launcher.info->measure_dial_angle + shoot_cnt * launcher.conf->Load_Angle;
+										launcher.info->shoot_cnt -= shoot_cnt;
+									}
+									else
+									{
+										launcher.info->target_heat_angle = launcher.info->measure_dial_angle + launcher.info->shoot_cnt * launcher.conf->Load_Angle;
+										launcher.info->shoot_cnt = 0;
+									}
+								}
+							}
+						}
+						/* 遥控器单发自动打弹 */
+						else if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+							&& (status.lch_state.fric_state == fric_on) && (heat_high == 0) && (vision_sensor.info->shoot_type == 1))
+						{
+							if (launcher.info->shoot_cnt > 0)
+							{
+								if (status.lch_state.shoot_state != single_shoot)
+								{
+									status.lch_state.shoot_state = single_shoot;
+									launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
+									launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
+									launcher.info->shoot_cnt--;
+								}
+							}
+						}
+#elif defined (CAR) && (CAR == 2)
 						/*  遥控器变频自动打弹  */
 						if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on))
 						{
@@ -584,6 +680,22 @@ void Launcher_GetRcState(void)
 								}
 							}
 						}
+#endif
+						/* 遥控器单发自动打弹 */
+//						if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+//							&& (status.lch_state.fric_state == fric_on) && (heat_high == 0))
+//						{
+//							if (launcher.info->shoot_cnt > 0)
+//							{
+//								if (status.lch_state.shoot_state != single_shoot)
+//								{
+//									status.lch_state.shoot_state = single_shoot;
+//									launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
+//									launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
+//									launcher.info->shoot_cnt--;
+//								}
+//							}
+//						}
 					}
 
 				}
@@ -656,9 +768,8 @@ void Launcher_GetRcState(void)
   */
 void Launcher_GetKeyState(void)
 {
-	static uint16_t buff_cnt = 400, auto_step = 0;
-	float	threshold = 0.f;
-	threshold = abs(vision_sensor.info->measure_yaw_angle - vision_sensor.info->target_pitch_angle);
+	static uint16_t buff_cnt = 0;
+	
 	
 	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
@@ -669,29 +780,88 @@ void Launcher_GetKeyState(void)
 		if (launcher.info->last_s2 != rc_sensor.info->s2)
 			vision_sensor.info->tx_info->is_change_target ++;
 	}
-	
+#if	defined (CAR) && (CAR == 1)
 	/*  键盘自动打弹  */
-	if ((status.auto_cmd == auto_shoot_on) && (vision_sensor.work_state == DEV_ONLINE) && (vision_sensor.info->is_spin == 1) &&\
-			(status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on) && (threshold < vision_sensor.info->yaw_threshold))
+	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (vision_sensor.info->shoot_type == 0))
 	{
-		if (!auto_step)
+		/*  判断裁判系统数据是否更新  */
+		if (launcher.work_info->swift_enable == 1)
 		{
-			auto_step = 1;
-			status.lch_cmd.shoot_cmd = single_shoot;
+			if (status.lch_state.shoot_state != swift_shoot)
+			{
+				status.lch_state.shoot_state = swift_shoot;
+				launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+				launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+				if (launcher.info->shoot_cnt >= (launcher.info->remain_heat/10 - 1))
+				{
+					int16_t shoot_cnt;
+					shoot_cnt = launcher.info->remain_heat/10 - 1;
+					if (shoot_cnt < 0)
+						shoot_cnt = 0;
+					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + shoot_cnt * launcher.conf->Load_Angle;
+					launcher.info->shoot_cnt -= shoot_cnt;
+				}
+				else
+				{
+					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + launcher.info->shoot_cnt * launcher.conf->Load_Angle;
+					launcher.info->shoot_cnt = 0;
+				}
+			}
 		}
-		status.lch_cmd.shoot_cmd = keep_shoot;
 	}
-	else
+	else if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (heat_high == 0) && (vision_sensor.info->shoot_type == 1))
 	{
-		auto_step = 0;
+		if (launcher.info->shoot_cnt > 0)
+		{
+			if (status.lch_state.shoot_state != single_shoot)
+			{
+				status.lch_state.shoot_state = single_shoot;
+				launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
+				launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
+				launcher.info->shoot_cnt--;
+			}
+		}
 	}
+#elif defined (CAR) && (CAR == 2)
+	/*  键盘自动打弹  */
+	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on))
+	{
+		/*  判断裁判系统数据是否更新  */
+		if (launcher.work_info->swift_enable == 1)
+		{
+			if (status.lch_state.shoot_state != swift_shoot)
+			{
+				status.lch_state.shoot_state = swift_shoot;
+				launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+				launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+				if (launcher.info->shoot_cnt >= (launcher.info->remain_heat/10 - 1))
+				{
+					int16_t shoot_cnt;
+					shoot_cnt = launcher.info->remain_heat/10 - 1;
+					if (shoot_cnt < 0)
+						shoot_cnt = 0;
+					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + shoot_cnt * launcher.conf->Load_Angle;
+					launcher.info->shoot_cnt -= shoot_cnt;
+				}
+				else
+				{
+					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + launcher.info->shoot_cnt * launcher.conf->Load_Angle;
+					launcher.info->shoot_cnt = 0;
+				}
+			}
+		}
+	}
+#endif
 	
 	/*  键盘自动打符  */
 	if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == small_buff_on) &&\
 			(status.gim_mode == vision) && (vision_sensor.info->is_find_buff == 1) && (status.lch_state.fric_state == fric_on))
 	{
 		if (vision_sensor.info->is_hit_enable == 1)
-			if (++buff_cnt >= 400)
+			if (++buff_cnt >= 600)
 			{
 				buff_cnt = 0;
 				status.lch_cmd.shoot_cmd = single_shoot;
@@ -701,7 +871,7 @@ void Launcher_GetKeyState(void)
 			(status.gim_mode == vision) && (vision_sensor.info->is_find_buff == 1) && (status.lch_state.fric_state == fric_on))
 	{
 		if (vision_sensor.info->is_hit_enable == 1)
-			if (++buff_cnt >= 400)
+			if (++buff_cnt >= 1000)
 			{
 				buff_cnt = 0;
 				status.lch_cmd.shoot_cmd = single_shoot;
@@ -709,7 +879,7 @@ void Launcher_GetKeyState(void)
 	}
 	else
 	{
-		buff_cnt = 400;
+		buff_cnt = 0;
 	}
 	
 	/*  拨盘指令  */
@@ -1154,7 +1324,15 @@ void Launcher_Stop(void)
 	can2_send_buf[2] = launcher_out[2];
 	
 	/*  弹仓卸力  */
-	Magazine_Sleep();
-	status.lch_state.magz_state = magz_reset;
+	if (rc_sensor.work_state == DEV_OFFLINE)
+	{
+		Magazine_Sleep();
+		status.lch_state.magz_state = magz_reset;
+	}
+	else
+	{
+		Magazine_Close();
+		status.lch_state.magz_state = magz_close;
+	}
 	
 }

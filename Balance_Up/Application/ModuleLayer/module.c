@@ -610,7 +610,7 @@ void Key_RxInfoCheck(void)
 	if ((keyboard.state.X == down_K) || (keyboard.state.Z == down_K))
 	{
 		status.autobuff_cmd = auto_buff_on;
-		status.lch_cmd.fric_cmd = fric_on;
+//		status.lch_cmd.fric_cmd = fric_on;
 		status.lch_cmd.magz_cmd = magz_close;
 	}
 	
@@ -707,7 +707,9 @@ void Key_RxInfoCheck(void)
 	if (keyboard.state.mouse_btn_r == down_K)
 	{
 		status.auto_cmd = auto_shoot_on;
-		status.lch_cmd.fric_cmd = fric_on;
+		status.buff_cmd = buff_reset;
+		status.autobuff_cmd = auto_buff_off;
+//		status.lch_cmd.fric_cmd = fric_on;
 	}
 	if (keyboard.state.mouse_btn_r == relax_K)
 	{

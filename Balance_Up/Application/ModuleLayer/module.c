@@ -394,10 +394,18 @@ void Slave_TxInfoUpdate(void)
 	if (status.buff_cmd == big_buff_on)
 		slave.info->tx_info->status |= 0x2000;
 	
+	/*  14:自动射击标志位  */
+	slave.info->tx_info->status &= 0xBFFF;
+	if ((status.autobuff_cmd == auto_buff_on) || (status.auto_cmd == auto_shoot_on))
+		slave.info->tx_info->status |= 0x4000;
+	
 	/*  yaw轴电机角度数据  */
 	slave.info->tx_info->motor_angle = RM_motor[GIM_Y].rx_info.angle;
 	/*  yaw轴陀螺仪角度数据  */
 	slave.info->tx_info->imu_angle = imu_sensor.info->base_info.yaw;
+	
+	/*  装甲板信息  */
+	slave.info->tx_info->armor_info = vision_sensor.info->armor_id | (vision_sensor.info->armor_num << 4);
 	
 }
 
@@ -610,7 +618,7 @@ void Key_RxInfoCheck(void)
 	if ((keyboard.state.X == down_K) || (keyboard.state.Z == down_K))
 	{
 		status.autobuff_cmd = auto_buff_on;
-//		status.lch_cmd.fric_cmd = fric_on;
+		status.lch_cmd.fric_cmd = fric_on;
 		status.lch_cmd.magz_cmd = magz_close;
 	}
 	

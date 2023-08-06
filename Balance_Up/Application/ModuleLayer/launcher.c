@@ -606,7 +606,6 @@ void Launcher_GetRcState(void)
 //							status.lch_cmd.shoot_cmd = shoot_reset;
 //							launcher.work_info->launcher_commond.Dial_cmd = Shoot_Reset;
 //						}
-#if	defined (CAR) && (CAR == 1)
 						/*  遥控器变频自动打弹  */
 						if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && \
 							(vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on) && (vision_sensor.info->shoot_type == 0))
@@ -651,36 +650,6 @@ void Launcher_GetRcState(void)
 								}
 							}
 						}
-#elif defined (CAR) && (CAR == 2)
-						/*  遥控器变频自动打弹  */
-						if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) && (status.lch_state.fric_state == fric_on))
-						{
-							/*  判断裁判系统数据是否更新  */
-							if (launcher.work_info->swift_enable == 1)
-							{
-								if (status.lch_state.shoot_state != swift_shoot)
-								{
-									status.lch_state.shoot_state = swift_shoot;
-									launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
-									launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
-									if (launcher.info->shoot_cnt >= (launcher.info->remain_heat/10 - 1))
-									{
-										int16_t shoot_cnt;
-										shoot_cnt = launcher.info->remain_heat/10 - 1;
-										if (shoot_cnt < 0)
-											shoot_cnt = 0;
-										launcher.info->target_heat_angle = launcher.info->measure_dial_angle + shoot_cnt * launcher.conf->Load_Angle;
-										launcher.info->shoot_cnt -= shoot_cnt;
-									}
-									else
-									{
-										launcher.info->target_heat_angle = launcher.info->measure_dial_angle + launcher.info->shoot_cnt * launcher.conf->Load_Angle;
-										launcher.info->shoot_cnt = 0;
-									}
-								}
-							}
-						}
-#endif
 						/* 遥控器单发自动打弹 */
 //						if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
 //							&& (status.lch_state.fric_state == fric_on) && (heat_high == 0))
@@ -780,7 +749,7 @@ void Launcher_GetKeyState(void)
 		if (launcher.info->last_s2 != rc_sensor.info->s2)
 			vision_sensor.info->tx_info->is_change_target ++;
 	}
-#if	defined (CAR) && (CAR == 1)
+	
 	/*  键盘自动打弹  */
 	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
 		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (vision_sensor.info->shoot_type == 0))
@@ -824,37 +793,6 @@ void Launcher_GetKeyState(void)
 			}
 		}
 	}
-#elif defined (CAR) && (CAR == 2)
-	/*  键盘自动打弹  */
-	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
-		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on))
-	{
-		/*  判断裁判系统数据是否更新  */
-		if (launcher.work_info->swift_enable == 1)
-		{
-			if (status.lch_state.shoot_state != swift_shoot)
-			{
-				status.lch_state.shoot_state = swift_shoot;
-				launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
-				launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
-				if (launcher.info->shoot_cnt >= (launcher.info->remain_heat/10 - 1))
-				{
-					int16_t shoot_cnt;
-					shoot_cnt = launcher.info->remain_heat/10 - 1;
-					if (shoot_cnt < 0)
-						shoot_cnt = 0;
-					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + shoot_cnt * launcher.conf->Load_Angle;
-					launcher.info->shoot_cnt -= shoot_cnt;
-				}
-				else
-				{
-					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + launcher.info->shoot_cnt * launcher.conf->Load_Angle;
-					launcher.info->shoot_cnt = 0;
-				}
-			}
-		}
-	}
-#endif
 	
 	/*  键盘自动打符  */
 	if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == small_buff_on) &&\

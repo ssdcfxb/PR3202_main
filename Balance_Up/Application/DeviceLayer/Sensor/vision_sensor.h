@@ -58,6 +58,8 @@ typedef __packed struct
 	uint8_t  			is_hit_enable;  // datau8_4
 	uint8_t  			is_spin;  			// datau8_5
 	uint8_t				shoot_type;			// datau8_6 0连发 1单发
+	uint8_t				armor_num;			// datau8_7
+	uint8_t				armor_id;				// datau8_8
 	uint16_t 			CRC16;
 }vision_rx_info_t;
 
@@ -81,6 +83,8 @@ typedef struct
 	uint8_t  is_hit_enable;
 	uint8_t  is_spin;
 	uint8_t	 shoot_type;			// datau8_6 0连发 1单发
+	uint8_t	 armor_num;
+	uint8_t	 armor_id;
 	
 	uint8_t  rx_flag;
 	int16_t	 offline_cnt;

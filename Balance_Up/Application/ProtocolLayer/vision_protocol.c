@@ -87,6 +87,8 @@ void vision_check(vision_sensor_t *vis_sen)
 		memcpy(&info->is_hit_enable, &rx_info->is_hit_enable, 1);
 		memcpy(&info->is_spin, &rx_info->is_spin, 1);
 		memcpy(&info->shoot_type, &rx_info->shoot_type, 1);
+		memcpy(&info->armor_num, &rx_info->armor_num, 1);
+		memcpy(&info->armor_id, &rx_info->armor_id, 1);
 	}
 }
 

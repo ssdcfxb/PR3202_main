@@ -2223,7 +2223,7 @@ int8_t bmi2_write_config_file(struct bmi2_dev *dev)
         }
 
         /* Write the configuration file */
-					dev->delay_us(25, NULL);
+					dev->delay_us(200, NULL);
         rslt = write_config_file(dev);
         if (rslt == BMI2_OK)
         {

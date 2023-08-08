@@ -42,7 +42,7 @@ void Launcher_Stop(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 int16_t    launcher_out[3];
-uint8_t shoot_cnt_limit = 3;
+uint8_t shoot_cnt_limit = 2;
 
 // 发射机构设备
 launcher_dev_t		launcher_dev = {
@@ -739,7 +739,6 @@ void Launcher_GetKeyState(void)
 {
 	static uint16_t buff_cnt = 0;
 	
-	
 	launcher.work_info->launcher_commond.Fric_cmd = Fric_Reset;
 	launcher.work_info->launcher_commond.Magz_cmd = Magz_Reset;
 	
@@ -751,6 +750,22 @@ void Launcher_GetKeyState(void)
 	}
 	
 	/*  键盘自动打弹  */
+#if defined (CAR) && (CAR == 1)
+	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+		&& (status.lch_state.fric_state == fric_on) && (keyboard.state.mouse_btn_l != relax_K) && (heat_high == 0) && (vision_sensor.info->shoot_type == 1))
+	{
+		if (launcher.info->shoot_cnt > 0)
+		{
+			if (status.lch_state.shoot_state != single_shoot)
+			{
+				status.lch_state.shoot_state = single_shoot;
+				launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
+				launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
+				launcher.info->shoot_cnt--;
+			}
+		}
+	}
+#elif defined (CAR) && (CAR == 2)
 	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
 		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (vision_sensor.info->shoot_type == 0))
 	{
@@ -793,6 +808,7 @@ void Launcher_GetKeyState(void)
 			}
 		}
 	}
+#endif
 	
 	/*  键盘自动打符  */
 	if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == small_buff_on) &&\

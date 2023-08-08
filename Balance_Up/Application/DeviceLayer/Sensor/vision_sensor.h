@@ -42,6 +42,7 @@ typedef __packed struct
 	uint8_t				size_4;
 	uint8_t				size_5;
  	uint8_t  			is_change_target; // datau8_4
+	uint8_t				is_hit_outpose;		// datau8_5
 	uint16_t 			CRC16;
 }vision_tx_info_t;
 

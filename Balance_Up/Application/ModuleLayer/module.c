@@ -47,6 +47,7 @@ status_t status = {
 	.chas_state = chas_reset,
 	.gim_mode = gyro,
 	.heat_mode = heat_limit_on,
+	.outpose_mode = hit_outpose_off,
 	.speed_cmd = speed_reset,
 	.auto_cmd = auto_shoot_off,
 	.autobuff_cmd = auto_buff_off,
@@ -431,6 +432,12 @@ void Vision_TxInfoUpdate(void)
 	vision_sensor.info->tx_info->size_4 = slave.info->size_4;
 	vision_sensor.info->tx_info->size_5 = slave.info->size_5;
 	
+	vision_sensor.info->tx_info->is_hit_outpose = 0;
+	if (status.outpose_mode == hit_outpose_on)
+	{
+		vision_sensor.info->tx_info->is_hit_outpose = 1;
+	}
+	
 	vision_sensor.info->tx_info->mode = AIM_ON;
 	if (status.buff_cmd == small_buff_on)
 	{
@@ -538,6 +545,7 @@ void Key_RxInfoCheck(void)
 //	keyboard.lch_cmd.magz_cmd = lch_reset;
 	status.lch_cmd.shoot_cmd = shoot_reset;
 	status.heat_mode = heat_limit_on;
+	status.outpose_mode = hit_outpose_off;
 	status.gim_mode = gyro;
 	/*  Ctrl(同时):关打符 关弹仓 关侧身 关小陀螺  */
 	if (keyboard.state.Ctrl == down_K)
@@ -590,10 +598,11 @@ void Key_RxInfoCheck(void)
 	{
 		status.chas_cmd = gyro_on;
 	}
-	/*  G:热量解锁  */
+	/*  G:只打前哨  */
 	if ((keyboard.state.G == short_press_K) || (keyboard.state.G == long_press_K))
 	{
-		status.heat_mode = heat_limit_off;
+//		status.heat_mode = heat_limit_off;
+		status.outpose_mode = hit_outpose_on;
 	}
 	/*  X:小符  */
 	if (keyboard.state.X == down_K)

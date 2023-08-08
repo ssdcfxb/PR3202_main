@@ -63,6 +63,13 @@ typedef enum
 	heat_limit_off,    // 关闭热量限制
 } heat_cmd_e;
 
+/*  攻击前哨站状态  */
+typedef enum
+{
+	hit_outpose_on,     // 开启攻击前哨站
+	hit_outpose_off,    // 关闭攻击前哨站
+} outpose_cmd_e;
+
 /*  键盘自动打弹状态  */
 typedef enum
 {
@@ -102,6 +109,7 @@ typedef struct {
 	lch_cmd_t					lch_cmd;
 	gim_mode_e				gim_mode;
 	heat_cmd_e				heat_mode;
+	outpose_cmd_e			outpose_mode;
 	speed_cmd_e				speed_cmd;
 	auto_cmd_e				auto_cmd;
 	autobuff_cmd_e		autobuff_cmd;

@@ -749,8 +749,7 @@ void Launcher_GetKeyState(void)
 			vision_sensor.info->tx_info->is_change_target ++;
 	}
 	
-	/*  键盘自动打弹  */
-#if defined (CAR) && (CAR == 1)
+	/*  只自瞄不打弹  */
 	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
 		&& (status.lch_state.fric_state == fric_on) && (keyboard.state.mouse_btn_l != relax_K) && (heat_high == 0) && (vision_sensor.info->shoot_type == 1))
 	{
@@ -765,50 +764,49 @@ void Launcher_GetKeyState(void)
 			}
 		}
 	}
-#elif defined (CAR) && (CAR == 2)
-	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
-		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (vision_sensor.info->shoot_type == 0))
-	{
-		/*  判断裁判系统数据是否更新  */
-		if (launcher.work_info->swift_enable == 1)
-		{
-			if (status.lch_state.shoot_state != swift_shoot)
-			{
-				status.lch_state.shoot_state = swift_shoot;
-				launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
-				launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
-				if (launcher.info->shoot_cnt >= (launcher.info->remain_heat/10 - 1))
-				{
-					int16_t shoot_cnt;
-					shoot_cnt = launcher.info->remain_heat/10 - 1;
-					if (shoot_cnt < 0)
-						shoot_cnt = 0;
-					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + shoot_cnt * launcher.conf->Load_Angle;
-					launcher.info->shoot_cnt -= shoot_cnt;
-				}
-				else
-				{
-					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + launcher.info->shoot_cnt * launcher.conf->Load_Angle;
-					launcher.info->shoot_cnt = 0;
-				}
-			}
-		}
-	}
-	else if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
-		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (heat_high == 0) && (vision_sensor.info->shoot_type == 1))
-	{
-		if (launcher.info->shoot_cnt > 0)
-		{
-			if (status.lch_state.shoot_state != single_shoot)
-			{
-				status.lch_state.shoot_state = single_shoot;
-				launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
-				launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
-				launcher.info->shoot_cnt--;
-			}
-		}
-	}
-#endif
+	/*  键盘自动打弹  */
+//	if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+//		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (vision_sensor.info->shoot_type == 0))
+//	{
+//		/*  判断裁判系统数据是否更新  */
+//		if (launcher.work_info->swift_enable == 1)
+//		{
+//			if (status.lch_state.shoot_state != swift_shoot)
+//			{
+//				status.lch_state.shoot_state = swift_shoot;
+//				launcher.work_info->launcher_commond.Dial_cmd = Swift_Shoot;
+//				launcher.info->target_dial_speed = launcher.conf->dial_swiftspeed;
+//				if (launcher.info->shoot_cnt >= (launcher.info->remain_heat/10 - 1))
+//				{
+//					int16_t shoot_cnt;
+//					shoot_cnt = launcher.info->remain_heat/10 - 1;
+//					if (shoot_cnt < 0)
+//						shoot_cnt = 0;
+//					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + shoot_cnt * launcher.conf->Load_Angle;
+//					launcher.info->shoot_cnt -= shoot_cnt;
+//				}
+//				else
+//				{
+//					launcher.info->target_heat_angle = launcher.info->measure_dial_angle + launcher.info->shoot_cnt * launcher.conf->Load_Angle;
+//					launcher.info->shoot_cnt = 0;
+//				}
+//			}
+//		}
+//	}
+//	else if ((vision_sensor.work_state == DEV_ONLINE) && (status.gim_mode == vision) && (vision_sensor.info->is_hit_enable == 1) \
+//		&& (status.lch_state.fric_state == fric_on) && (status.auto_cmd == auto_shoot_on) && (heat_high == 0) && (vision_sensor.info->shoot_type == 1))
+//	{
+//		if (launcher.info->shoot_cnt > 0)
+//		{
+//			if (status.lch_state.shoot_state != single_shoot)
+//			{
+//				status.lch_state.shoot_state = single_shoot;
+//				launcher.work_info->launcher_commond.Dial_cmd = Single_Shoot;
+//				launcher.info->target_dial_angle = launcher.conf->Load_Angle + launcher.info->measure_dial_angle;
+//				launcher.info->shoot_cnt--;
+//			}
+//		}
+//	}
 	
 	/*  键盘自动打符  */
 	if ((status.autobuff_cmd == auto_buff_on) && (vision_sensor.work_state == DEV_ONLINE) && (status.buff_cmd == small_buff_on) &&\
